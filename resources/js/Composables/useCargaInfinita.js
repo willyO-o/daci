@@ -1,4 +1,4 @@
-import { onBeforeUnmount, ref, shallowRef } from 'vue';
+import { nextTick, onBeforeUnmount, ref, shallowRef } from 'vue';
 import { esCancelacion, http } from '@/Utils/http';
 
 /**
@@ -27,16 +27,31 @@ export function useCargaInfinita(url, parametros, { tamano = 6 } = {}) {
 
     const hayMas = () => pagina.value < ultimaPagina.value;
 
+    let centinelaObservado = null;
+
+    // El observador sólo avisa cuando el centinela ENTRA en pantalla: si tras cargar una página sigue visible (pocas
+    // tarjetas para el alto de la caja) no volvería a avisar y la lista quedaría a medias. Volver a observarlo hace
+    // que informe su estado actual y, si sigue visible, se pide la página siguiente.
+    const revisarCentinela = () => {
+        if (observador.value && centinelaObservado) {
+            nextTick(() => {
+                observador.value?.unobserve(centinelaObservado);
+                observador.value?.observe(centinelaObservado);
+            });
+        }
+    };
+
     const pedir = async (numero) => {
         controlador?.abort();
-        controlador = new AbortController();
+        const propio = new AbortController();
+        controlador = propio;
         cargando.value = true;
         error.value = null;
 
         try {
             const { data } = await http.get(url(), {
                 params: { ...parametros(), ...extra, page: numero, size: tamano },
-                signal: controlador.signal,
+                signal: propio.signal,
             });
             const nuevos = data.datos ?? [];
             elementos.value = numero === 1 ? nuevos : [...elementos.value, ...nuevos];
@@ -49,7 +64,13 @@ export function useCargaInfinita(url, parametros, { tamano = 6 } = {}) {
                 error.value = err;
             }
         } finally {
-            cargando.value = false;
+            // Una petición cancelada no apaga el «Cargando» de la que la reemplazó.
+            if (controlador === propio) {
+                cargando.value = false;
+                if (!error.value) {
+                    revisarCentinela();
+                }
+            }
         }
     };
 
@@ -73,6 +94,7 @@ export function useCargaInfinita(url, parametros, { tamano = 6 } = {}) {
     /** Carga la siguiente página cuando el centinela entra en el área visible del contenedor. */
     const observar = (centinela, contenedor = null) => {
         observador.value?.disconnect();
+        centinelaObservado = centinela;
         if (!centinela) {
             return;
         }

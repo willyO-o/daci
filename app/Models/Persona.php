@@ -193,23 +193,36 @@ class Persona extends Model implements AuditableContract
         }
     }
 
-    public function deleteRelationsData()
+    /**
+     * Borra de forma definitiva todo lo relacionado con la persona y devuelve las rutas de los archivos que quedaron
+     * sin registro, para borrarlos del disco DESPUÉS de confirmar la transacción.
+     *
+     * El orden respeta las claves foráneas RESTRICT de la base: el sistema anterior borraba primero
+     * `registro_criminal` y fallaba siempre que el registro tuviera fotos, fichas o vehículos vinculados.
+     * La tabla `documento` no se toca (rama de ciudadano): si tuviera filas, la base impide borrar la persona.
+     *
+     * @return list<string>
+     */
+    public function deleteRelationsData(): array
     {
+        $registros = DB::table('registro_criminal')->where('id_persona', $this->id)->pluck('id');
+        $mandamientos = DB::table('mandamiento')->where('id_persona', $this->id)->pluck('id');
 
-        $relaciones = [
-            // 'documento' => 'id_persona',
-            'mandamiento' => 'id_persona',
-            'registro_criminal' => 'id_persona',
-            'telefono' => 'persona_id',
-            'multimedia' => 'id_persona',
-            'vehiculo_caso' => 'persona_id',
-            'inspeccion_tecnica' => 'persona_id',
-        ];
+        $archivos = DB::table('fotos_registro')->whereIn('id_registro_criminal', $registros)->pluck('ruta_archivo')
+            ->merge(DB::table('multimedia')->where('id_persona', $this->id)->orWhereIn('id_mandamiento', $mandamientos)->pluck('ruta'))
+            ->filter()
+            ->values()
+            ->all();
 
-        foreach ($relaciones as $tabla => $campo) {
-            DB::table($tabla)
-                ->where($campo, $this->id)
-                ->delete();
-        }
+        DB::table('vehiculo_caso')->where('persona_id', $this->id)->orWhereIn('registro_criminal_id', $registros)->delete();
+        DB::table('inspeccion_tecnica')->where('persona_id', $this->id)->delete();
+        DB::table('fotos_registro')->whereIn('id_registro_criminal', $registros)->delete();
+        DB::table('ficha_registro')->whereIn('registro_criminal_id', $registros)->delete();
+        DB::table('registro_criminal')->whereIn('id', $registros)->delete();
+        DB::table('telefono')->where('persona_id', $this->id)->delete();
+        DB::table('multimedia')->where('id_persona', $this->id)->orWhereIn('id_mandamiento', $mandamientos)->delete();
+        DB::table('mandamiento')->whereIn('id', $mandamientos)->delete();
+
+        return $archivos;
     }
 }

@@ -131,6 +131,14 @@ const guardar = (accion) => {
     });
 };
 
+// Errores de campos que no muestran su mensaje al lado (largos máximos, fotos que no son imagen…).
+const CAMPOS_CON_MENSAJE = ['foto_frente', 'foto_perfil', 'fecha_registro', 'nombres', 'alias', 'edad_aproximada', 'genero', 'id_division'];
+const erroresSinCampo = computed(() =>
+    Object.entries(form.errors)
+        .filter(([campo]) => !CAMPOS_CON_MENSAJE.includes(campo))
+        .map(([, mensaje]) => mensaje),
+);
+
 const titulo = computed(() => (editando.value ? `Editar Registro Nro. ${props.registro.nro_registro}` : 'Nuevo Registro Criminal'));
 </script>
 
@@ -139,6 +147,12 @@ const titulo = computed(() => (editando.value ? `Editar Registro Nro. ${props.re
         <PageHeader :titulo="titulo" :migas="[{ etiqueta: 'Registros', ruta: 'registro-criminal.index' }, { etiqueta: editando ? 'Editar' : 'Nuevo' }]" />
 
         <form novalidate @submit.prevent="guardar('guardar')">
+            <div v-if="erroresSinCampo.length" class="alert alert-danger" role="alert">
+                <p class="fw-semibold mb-1">Revise los datos antes de guardar:</p>
+                <ul class="mb-0 ps-3">
+                    <li v-for="mensaje in erroresSinCampo" :key="mensaje">{{ mensaje }}</li>
+                </ul>
+            </div>
             <div class="row">
                 <div class="col-lg-6">
                     <div class="card">
@@ -192,24 +206,24 @@ const titulo = computed(() => (editando.value ? `Editar Registro Nro. ${props.re
                                 </div>
                                 <div class="col-md-8">
                                     <label class="form-label" for="ci">Nro. C.I.:</label>
-                                    <input id="ci" v-model="form.ci" v-mayuscula type="text" class="form-control" :disabled="editando || Boolean(form.id_persona)" placeholder="Ingrese número de C.I.">
+                                    <input id="ci" v-model="form.ci" maxlength="25" v-mayuscula type="text" class="form-control" :disabled="editando || Boolean(form.id_persona)" placeholder="Ingrese número de C.I.">
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label" for="complemento">Complemento</label>
-                                    <input id="complemento" v-model="form.complemento" v-mayuscula type="text" class="form-control" :disabled="editando || Boolean(form.id_persona)" placeholder="Ingrese complemento">
+                                    <input id="complemento" v-model="form.complemento" maxlength="40" v-mayuscula type="text" class="form-control" :disabled="editando || Boolean(form.id_persona)" placeholder="Ingrese complemento">
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label" for="nombres">Nombres <span class="text-danger">*</span></label>
-                                    <input id="nombres" v-model="form.nombres" v-mayuscula type="text" class="form-control" :class="{ 'is-invalid': form.errors.nombres }" :disabled="editando || Boolean(form.id_persona)" placeholder="Ingrese nombre(s)">
+                                    <input id="nombres" v-model="form.nombres" maxlength="150" v-mayuscula type="text" class="form-control" :class="{ 'is-invalid': form.errors.nombres }" :disabled="editando || Boolean(form.id_persona)" placeholder="Ingrese nombre(s)">
                                     <CampoError :mensaje="form.errors.nombres" />
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label" for="apellidos">Apellidos</label>
-                                    <input id="apellidos" v-model="form.apellidos" v-mayuscula type="text" class="form-control" :disabled="editando || Boolean(form.id_persona)" placeholder="Ingrese apellido(s)">
+                                    <input id="apellidos" v-model="form.apellidos" maxlength="150" v-mayuscula type="text" class="form-control" :disabled="editando || Boolean(form.id_persona)" placeholder="Ingrese apellido(s)">
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label" for="nombre_supuesto">Nombre Supuesto</label>
-                                    <input id="nombre_supuesto" v-model="form.nombre_supuesto" v-mayuscula type="text" class="form-control" placeholder="(opcional)">
+                                    <input id="nombre_supuesto" v-model="form.nombre_supuesto" maxlength="250" v-mayuscula type="text" class="form-control" placeholder="(opcional)">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="alias">Alias</label>
@@ -218,11 +232,11 @@ const titulo = computed(() => (editando.value ? `Editar Registro Nro. ${props.re
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="telefono">Teléfono</label>
-                                    <input id="telefono" v-model="form.telefono" type="text" class="form-control" placeholder="(opcional)">
+                                    <input id="telefono" v-model="form.telefono" maxlength="25" type="text" class="form-control" placeholder="(opcional)">
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label" for="cud">CUD</label>
-                                    <input id="cud" v-model="form.cud" v-mayuscula type="text" class="form-control" placeholder="(opcional)">
+                                    <input id="cud" v-model="form.cud" maxlength="255" v-mayuscula type="text" class="form-control" placeholder="(opcional)">
                                 </div>
                             </div>
                         </div>
@@ -246,7 +260,7 @@ const titulo = computed(() => (editando.value ? `Editar Registro Nro. ${props.re
                             <div class="row g-3">
                                 <div class="col-12">
                                     <label class="form-label" for="especialidad">Especialidad</label>
-                                    <input id="especialidad" v-model="form.especialidad" v-mayuscula type="text" class="form-control">
+                                    <input id="especialidad" v-model="form.especialidad" maxlength="250" v-mayuscula type="text" class="form-control">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="id_pais">Nacionalidad</label>
@@ -257,7 +271,7 @@ const titulo = computed(() => (editando.value ? `Editar Registro Nro. ${props.re
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="lugar_nacimiento">Lugar de Nacimiento</label>
-                                    <input id="lugar_nacimiento" v-model="form.lugar_nacimiento" v-mayuscula type="text" class="form-control" :disabled="editando || Boolean(form.id_persona)" placeholder="(opcional)">
+                                    <input id="lugar_nacimiento" v-model="form.lugar_nacimiento" maxlength="250" v-mayuscula type="text" class="form-control" :disabled="editando || Boolean(form.id_persona)" placeholder="(opcional)">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="fecha_nacimiento">Fecha de Nacimiento</label>
@@ -282,11 +296,11 @@ const titulo = computed(() => (editando.value ? `Editar Registro Nro. ${props.re
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="estatura">Estatura</label>
-                                    <input id="estatura" v-model="form.estatura" v-mayuscula type="text" class="form-control" placeholder="(opcional)">
+                                    <input id="estatura" v-model="form.estatura" maxlength="255" v-mayuscula type="text" class="form-control" placeholder="(opcional)">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="peso">Peso</label>
-                                    <input id="peso" v-model="form.peso" v-mayuscula type="text" class="form-control" placeholder="(opcional)">
+                                    <input id="peso" v-model="form.peso" maxlength="255" v-mayuscula type="text" class="form-control" placeholder="(opcional)">
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label" for="caracteristicas_particulares">Características particulares</label>
@@ -301,7 +315,7 @@ const titulo = computed(() => (editando.value ? `Editar Registro Nro. ${props.re
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="nombre_conyuge">Nombre del cónyuge</label>
-                                    <input id="nombre_conyuge" v-model="form.nombre_conyuge" v-mayuscula type="text" class="form-control" placeholder="(opcional)">
+                                    <input id="nombre_conyuge" v-model="form.nombre_conyuge" maxlength="250" v-mayuscula type="text" class="form-control" placeholder="(opcional)">
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label" for="hijos">Hijos</label>
@@ -328,7 +342,7 @@ const titulo = computed(() => (editando.value ? `Editar Registro Nro. ${props.re
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="ocupacion">Ocupación</label>
-                                    <input id="ocupacion" v-model="form.ocupacion" v-mayuscula type="text" class="form-control" :disabled="editando || Boolean(form.id_persona)" placeholder="(opcional)">
+                                    <input id="ocupacion" v-model="form.ocupacion" maxlength="150" v-mayuscula type="text" class="form-control" :disabled="editando || Boolean(form.id_persona)" placeholder="(opcional)">
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label" for="rasgos">Rasgos</label>

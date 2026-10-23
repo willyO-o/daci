@@ -62,14 +62,15 @@ const faltanLetras = computed(() => texto.value.trim().length < props.minimo);
 
 const buscar = async () => {
     controlador?.abort();
-    controlador = new AbortController();
+    const propio = new AbortController();
+    controlador = propio;
     buscando.value = true;
     fallo.value = false;
 
     try {
         const { data } = await http.get(props.url, {
             params: { [props.parametroTexto]: texto.value.trim(), ...props.parametros },
-            signal: controlador.signal,
+            signal: propio.signal,
         });
         const lista = Array.isArray(data) ? data : (data.datos ?? data.data ?? []);
         resultados.value = lista.map((item) => ({ ...props.mapear(item), original: item }));
@@ -80,7 +81,10 @@ const buscar = async () => {
             resultados.value = [];
         }
     } finally {
-        buscando.value = false;
+        // Una búsqueda cancelada no apaga el «Buscando…» de la que la reemplazó.
+        if (controlador === propio) {
+            buscando.value = false;
+        }
     }
 };
 
@@ -88,10 +92,14 @@ const alEscribir = () => {
     abierto.value = true;
     clearTimeout(temporizador);
     if (faltanLetras.value) {
+        controlador?.abort();
+        buscando.value = false;
         resultados.value = [];
 
         return;
     }
+    // Mientras corre la espera se muestra «Buscando…», no un «Sin resultados» que aún no es cierto.
+    buscando.value = true;
     temporizador = setTimeout(buscar, 250);
 };
 

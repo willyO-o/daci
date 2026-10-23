@@ -1,12 +1,14 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
-import BaseModal from '@/Components/Ui/BaseModal.vue';
+import { onBeforeUnmount, watch } from 'vue';
 import { urlArchivo } from '@/Utils/formato';
 
 /**
- * Visor de fotos a pantalla grande con anterior/siguiente (reemplaza a FsLightbox).
+ * Visor de fotos a pantalla completa: el mismo FsLightbox (3.4.0-2) que usaba el sistema anterior, con su
+ * apariencia (fondo oscuro, contador, flechas, zoom, pantalla completa y deslizar en el móvil).
  *
- *   <VisorImagenes v-model="visor" :rutas="['personas/a.jpg', 'personas/b.jpg']" />
+ *   <VisorImagenes v-model="visor" :rutas="['registro-criminal/a.webp', 'registro-criminal/b.webp']" />
+ *
+ * No dibuja nada: la librería agrega su propio contenedor al `body` al abrir y lo quita al cerrar.
  */
 const props = defineProps({
     modelValue: { type: Boolean, default: false },
@@ -17,38 +19,40 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
-const abierto = computed({
-    get: () => props.modelValue,
-    set: (valor) => emit('update:modelValue', valor),
-});
+let visor = null;
 
-const indice = ref(0);
+const abrir = async () => {
+    const fuentes = props.rutas.map(urlArchivo).filter(Boolean);
+    if (!fuentes.length) {
+        emit('update:modelValue', false);
+
+        return;
+    }
+
+    // Se carga sólo cuando hace falta; registra `window.FsLightbox` como en el sistema anterior.
+    await import('fslightbox');
+
+    // Una instancia nueva por apertura (como antes): así nunca muestra las fotos de la tarjeta anterior.
+    visor = new window.FsLightbox();
+    visor.props.sources = fuentes;
+    visor.props.onClose = () => {
+        visor = null;
+        emit('update:modelValue', false);
+    };
+    visor.open(Math.min(Math.max(props.inicial, 0), fuentes.length - 1));
+};
+
+const cerrar = () => visor?.close();
+
 watch(
     () => props.modelValue,
-    (valor) => valor && (indice.value = props.inicial),
+    (abierto) => (abierto ? abrir() : cerrar()),
+    { immediate: true },
 );
 
-const actual = computed(() => urlArchivo(props.rutas[indice.value]));
-const mover = (paso) => {
-    indice.value = (indice.value + paso + props.rutas.length) % props.rutas.length;
-};
+onBeforeUnmount(cerrar);
 </script>
 
 <template>
-    <BaseModal v-model="abierto" tamano="xl" centrado cuerpo-clase="p-0 bg-dark">
-        <template #titulo>
-            Fotografía <span class="text-muted fw-normal cifra">{{ indice + 1 }} de {{ rutas.length }}</span>
-        </template>
-        <div class="position-relative text-center" tabindex="0" @keydown.left="mover(-1)" @keydown.right="mover(1)">
-            <img :src="actual" alt="Fotografía ampliada" class="img-fluid" style="max-height: 75vh">
-            <template v-if="rutas.length > 1">
-                <button type="button" class="btn btn-light position-absolute top-50 start-0 translate-middle-y ms-2" aria-label="Anterior" @click="mover(-1)">
-                    <i class="ri-arrow-left-s-line" />
-                </button>
-                <button type="button" class="btn btn-light position-absolute top-50 end-0 translate-middle-y me-2" aria-label="Siguiente" @click="mover(1)">
-                    <i class="ri-arrow-right-s-line" />
-                </button>
-            </template>
-        </div>
-    </BaseModal>
+    <span class="d-none" aria-hidden="true" />
 </template>

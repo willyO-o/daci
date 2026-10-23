@@ -81,7 +81,8 @@ class AuditarConsultas extends Model
             return;
         }
 
-        $registro = self::where('identificador', $identificador)->first();
+        // Sólo la consulta del propio usuario: un identificador ajeno no altera la auditoría de otra persona.
+        $registro = self::where('identificador', $identificador)->where('user_id', auth()->id())->first();
         if ($registro) {
             // formato de objeto [{id: 1, fecha_acceso: '2024-06-01T12:00:00Z'}, {...}]
             $idsExistentes = $registro->ids_accedidos ?? [];

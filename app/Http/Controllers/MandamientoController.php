@@ -128,15 +128,16 @@ class MandamientoController extends Controller
         $request->validate(Mandamiento::$rules, $this->mensajes());
 
         $archivosGuardados = [];
+        $archivosReemplazados = [];
 
         try {
-            DB::transaction(function () use ($request, $mandamiento, &$archivosGuardados) {
+            DB::transaction(function () use ($request, $mandamiento, &$archivosGuardados, &$archivosReemplazados) {
                 if ($request->hasFile('imagen_mandamiento')) {
                     $anterior = Multimedia::where('id_mandamiento', $mandamiento->id)->where('tipo', 'mandamiento')->first();
                     $this->adjuntar($mandamiento, $request->file('imagen_mandamiento'), 'mandamiento', $archivosGuardados);
 
                     if ($anterior) {
-                        Storage::disk('public')->delete($anterior->ruta);
+                        $archivosReemplazados[] = $anterior->ruta;
                         $anterior->delete();
                     }
                 }
@@ -154,6 +155,9 @@ class MandamientoController extends Controller
             return response()->json(['error' => $mensaje, 'message' => $mensaje], 500);
         }
 
+        // El archivo reemplazado se borra del disco sólo cuando la base ya confirmó el cambio.
+        Storage::disk('public')->delete($archivosReemplazados);
+
         $datos = Mandamiento::getMandamientos([], $mandamiento->id)->first();
 
         return response()->json(['success' => 'Mandamiento actualizado correctamente.', 'datos' => $datos ? $this->tarjeta($datos) : null]);
@@ -161,10 +165,15 @@ class MandamientoController extends Controller
 
     public function destroy(Mandamiento $mandamiento): JsonResponse
     {
+        $archivos = $mandamiento->multimedia()->pluck('ruta')->all();
+
         DB::transaction(function () use ($mandamiento) {
             $mandamiento->multimedia()->delete();
             $mandamiento->forceDelete();
         });
+
+        // El sistema anterior borraba los registros pero dejaba los archivos en el disco.
+        Storage::disk('public')->delete($archivos);
 
         return response()->json(['success' => 'Mandamiento eliminado correctamente.']);
     }

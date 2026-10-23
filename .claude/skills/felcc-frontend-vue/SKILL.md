@@ -97,6 +97,9 @@ Catálogos cortos (países, divisiones, juzgados…) llegan como prop y van en u
 
 **Archivos** (reemplaza FilePond): `SubirArchivos v-model="form.fotos" :maximo :tamano-maximo-mb acepta`.
 
+**Fotos ampliadas** (FsLightbox, igual que antes): `VisorImagenes v-model="visor" :rutas="[...]"` — usa `fslightbox@3.4.0-2`
+(la misma versión del sistema anterior), cargado sólo al abrir.
+
 **Confirmaciones y mensajes** (reemplaza `confirmarEnvio`, `notification`, `processError`):
 `const { confirmar, exito, errorDeRespuesta } = useNotificacion();` →
 `if (await confirmar({ titulo: '¿Eliminar a Juan Pérez?', peligro: true })) router.delete(...)`.

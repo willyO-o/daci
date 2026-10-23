@@ -87,3 +87,11 @@ Leyenda: ✅ migrado igual · 🔧 migrado con corrección · ➖ no se migra (c
 | `backup:verify` | igual | ✅ |
 | — | `acceso:sincronizar` | nuevo |
 | — | `personas:eliminar-duplicados` | 🔧 reemplaza la URL |
+
+## Comportamientos de pantalla revisados (2026-10-22 23:15)
+
+| Anterior | DACI | Estado |
+|---|---|---|
+| Clic en la foto de una tarjeta (registro criminal, mandamientos, consultas) → FsLightbox 3.4.0-2 | `VisorImagenes` sobre la misma librería y versión | ✅ misma apariencia |
+| Eliminar completo una persona / eliminar un registro criminal | `personas.destroy` · `registro-criminal.destroy` | 🔧 ya no fallan por claves foráneas (D-017) |
+| Editar vehículo / IMEI | `vehiculos.update` · `imeis.update` | 🔧 conservan vínculos con personas / teléfonos eliminados (D-017) |

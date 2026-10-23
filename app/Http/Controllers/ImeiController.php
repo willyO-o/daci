@@ -52,7 +52,10 @@ class ImeiController extends Controller
 
         DB::transaction(function () use ($imei, $datos) {
             $imei->update(['imei' => $datos['imei'], 'caracteristicas' => $datos['caracteristicas'] ?? null]);
-            $imei->telefonos()->sync($datos['telefono_id'] ?? []);
+
+            // Los teléfonos eliminados no aparecen en el formulario: se conservan vinculados en lugar de perderse.
+            $eliminados = $imei->telefonos()->onlyTrashed()->pluck('telefono.id')->all();
+            $imei->telefonos()->sync([...($datos['telefono_id'] ?? []), ...$eliminados]);
         });
 
         return back()->with('success', 'IMEI actualizado correctamente.');

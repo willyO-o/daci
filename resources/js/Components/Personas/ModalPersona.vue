@@ -159,7 +159,7 @@ const eliminarFoto = async (foto) => {
                 </div>
                 <div class="col-md-4">
                     <label for="ci" class="form-label">Cédula de Identidad</label>
-                    <input id="ci" v-model="form.ci" v-mayuscula type="text" class="form-control" :class="{ 'is-invalid': form.errors.ci || ciDuplicado }" maxlength="20" placeholder="Ej: 1234567">
+                    <input id="ci" v-model="form.ci" v-mayuscula type="text" class="form-control" :class="{ 'is-invalid': form.errors.ci || ciDuplicado }" maxlength="25" placeholder="Ej: 1234567">
                     <CampoError :mensaje="form.errors.ci" />
                     <div v-if="ciDuplicado && !form.errors.ci" class="invalid-feedback d-block">
                         Ya existe una persona con este CI y complemento: {{ ciDuplicado.nombres }} {{ ciDuplicado.apellidos }}

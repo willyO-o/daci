@@ -35,7 +35,7 @@ class PersonaRequest extends FormRequest
         return [
             'nombres' => ['required', 'string', 'max:150'],
             'apellidos' => ['nullable', 'string', 'max:150'],
-            'ci' => ['nullable', 'string', 'max:25'],
+            'ci' => ['nullable', 'string', 'max:250'],
             'complemento' => ['nullable', 'string', 'max:40'],
             'telefono' => ['nullable', 'string', 'max:25'],
             'alias' => ['nullable', 'string', 'max:255'],
@@ -50,7 +50,7 @@ class PersonaRequest extends FormRequest
             'padre' => ['nullable', 'string', 'max:250'],
             'madre' => ['nullable', 'string', 'max:250'],
             'domicilio' => ['nullable', 'string', 'max:500'],
-            'datos_segip' => ['nullable', 'string', 'max:5000'],
+            'datos_segip' => ['nullable', 'string', 'max:65000'],
             'responsable' => ['nullable', 'string', 'max:200'],
             'url_documento' => ['nullable', 'url', 'max:500'],
             'estado_investigacion' => ['nullable', 'string', 'max:200'],

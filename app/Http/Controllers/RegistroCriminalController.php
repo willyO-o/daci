@@ -12,6 +12,7 @@ use App\Models\Pais;
 use App\Models\Persona;
 use App\Models\RegistroCriminal;
 use App\Models\Telefono;
+use App\Models\VehiculoCaso;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -142,30 +143,54 @@ class RegistroCriminalController extends Controller
             'id_division' => ['required', 'exists:division,id'],
             'alias' => ['nullable', 'string', 'max:20'],
             'edad_aproximada' => ['nullable', 'string', 'max:20'],
+            'nombre_supuesto' => ['nullable', 'string', 'max:250'],
+            'especialidad' => ['nullable', 'string', 'max:250'],
+            'nombre_conyuge' => ['nullable', 'string', 'max:250'],
+            'domicilio' => ['nullable', 'string', 'max:250'],
+            'telefono' => ['nullable', 'string', 'max:255'],
+            'estatura' => ['nullable', 'string', 'max:255'],
+            'peso' => ['nullable', 'string', 'max:255'],
+            'cud' => ['nullable', 'string', 'max:255'],
             'foto_frente' => ['nullable', 'image', 'max:10240'],
             'foto_perfil' => ['nullable', 'image', 'max:10240'],
         ]);
 
-        DB::transaction(function () use ($request, $registroCriminal) {
+        $reemplazadas = DB::transaction(function () use ($request, $registroCriminal) {
             $registroCriminal->update($request->only(self::CAMPOS));
 
             if (filled($request->input('telefono')) && $registroCriminal->persona) {
                 $this->vincularTelefono($registroCriminal->persona, trim($request->input('telefono')));
             }
 
-            $this->reemplazarFoto($registroCriminal, $request->file('foto_frente'), 'FRONTAL');
-            $this->reemplazarFoto($registroCriminal, $request->file('foto_perfil'), 'LATERAL');
+            return array_filter([
+                $this->reemplazarFoto($registroCriminal, $request->file('foto_frente'), 'FRONTAL'),
+                $this->reemplazarFoto($registroCriminal, $request->file('foto_perfil'), 'LATERAL'),
+            ]);
         });
+
+        // Las fotos anteriores se borran del disco sólo cuando la base ya confirmó el cambio.
+        Storage::disk('public')->delete($reemplazadas);
 
         return redirect()->route('registro-criminal.index')->with('success', 'Registro actualizado exitosamente.');
     }
 
+    /**
+     * Elimina el registro de forma definitiva, como el sistema anterior. Aquel fallaba (error 500) cuando el registro
+     * tenía una ficha impresa o un vehículo vinculado, por las claves foráneas: ahora las fichas se borran con él, el
+     * vínculo del vehículo con la persona se conserva sin el registro, y las fotos también se quitan del disco.
+     */
     public function destroy(RegistroCriminal $registroCriminal): JsonResponse
     {
+        $fotos = $registroCriminal->fotos()->pluck('ruta_archivo')->all();
+
         DB::transaction(function () use ($registroCriminal) {
+            VehiculoCaso::where('registro_criminal_id', $registroCriminal->id)->update(['registro_criminal_id' => null]);
+            FichaRegistro::withTrashed()->where('registro_criminal_id', $registroCriminal->id)->forceDelete();
             $registroCriminal->fotos()->delete();
             $registroCriminal->forceDelete();
         });
+
+        Storage::disk('public')->delete($fotos);
 
         return response()->json(['success' => 'Registro eliminado exitosamente.']);
     }
@@ -396,19 +421,20 @@ class RegistroCriminalController extends Controller
         ]);
     }
 
-    private function reemplazarFoto(RegistroCriminal $registro, ?UploadedFile $foto, string $tipo): void
+    /**
+     * Cambia la foto de un tipo y devuelve la ruta de la anterior, que se borra del disco tras confirmar.
+     */
+    private function reemplazarFoto(RegistroCriminal $registro, ?UploadedFile $foto, string $tipo): ?string
     {
         if (! $foto) {
-            return;
+            return null;
         }
 
         $anterior = FotosRegistro::where('id_registro_criminal', $registro->id)->where('tipo', $tipo)->first();
         $this->guardarFoto($registro, $foto, $tipo);
+        $anterior?->delete();
 
-        if ($anterior) {
-            Storage::disk('public')->delete($anterior->ruta_archivo);
-            $anterior->delete();
-        }
+        return $anterior?->ruta_archivo;
     }
 
     /**

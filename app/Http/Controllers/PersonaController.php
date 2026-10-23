@@ -7,6 +7,7 @@ use App\Models\Multimedia;
 use App\Models\Pais;
 use App\Models\Persona;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -142,35 +143,44 @@ class PersonaController extends Controller
         $registro = Persona::withTrashed()->findOrFail($persona);
 
         $request->validate([
-            'persona_migrar_id' => ['nullable', 'integer', Rule::notIn([$registro->id]), 'exists:persona,id'],
+            'persona_migrar_id' => [
+                'nullable', 'integer', Rule::notIn([$registro->id]),
+                Rule::exists('persona', 'id')->whereNull('deleted_at'),
+            ],
         ], [
             'persona_migrar_id.exists' => 'La persona elegida para migrar los datos no existe.',
             'persona_migrar_id.not_in' => 'Elija otra persona: no se pueden migrar los datos a la misma persona.',
         ]);
 
         try {
-            DB::transaction(function () use ($request, $registro) {
+            $archivos = DB::transaction(function () use ($request, $registro) {
                 // Si la migración falla no se elimina nada (el sistema anterior seguía y podía borrar los datos sin migrar).
                 if ($request->filled('persona_migrar_id')
                     && $registro->migrateRelationsTo(Persona::findOrFail($request->integer('persona_migrar_id'))) === false) {
                     throw new RuntimeException('No se pudieron migrar los datos relacionados; no se eliminó la persona.');
                 }
 
-                if ($request->boolean('eliminar_completo')) {
-                    Multimedia::where('id_persona', $registro->id)->get()->each(function (Multimedia $archivo) {
-                        Storage::disk('public')->delete($archivo->ruta);
-                        $archivo->delete();
-                    });
-
-                    $registro->deleteRelationsData();
-                    $registro->forceDelete();
-                } else {
+                if (! $request->boolean('eliminar_completo')) {
                     $registro->delete();
+
+                    return [];
                 }
+
+                $archivos = $registro->deleteRelationsData();
+                $registro->forceDelete();
+
+                return $archivos;
             });
+        } catch (QueryException $e) {
+            report($e);
+
+            return back()->with('error', 'No se pudo eliminar la persona: tiene datos vinculados que la base de datos no permite borrar. No se eliminó nada.');
         } catch (RuntimeException $e) {
             return back()->with('error', $e->getMessage());
         }
+
+        // Los archivos se borran sólo cuando la base ya confirmó el borrado.
+        Storage::disk('public')->delete($archivos);
 
         return back()->with('success', 'Persona eliminada correctamente.');
     }

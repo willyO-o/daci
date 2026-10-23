@@ -114,3 +114,39 @@ una vía de XSS. `App\Support\AccesosConsultados` devuelve descripción y URL po
 - Cabecera «Respuesta Req.» del listado de teléfonos mostraba la persona vinculada: ahora dice «Persona Vinculada».
 - La página de reportes anunciaba PDF, filtros e historial que no existían: sólo se muestra el CSV.
 - `crypto.randomUUID` no existe por HTTP fuera de localhost: el identificador de consulta tiene respaldo.
+
+## D-017 · Revisión de bugs (2026-10-22 23:15)
+
+Revisión completa del código migrado contra el esquema real de `felcc1` (claves foráneas y largos de columna) y
+contra los datos existentes (sólo lectura). Corregido:
+
+1. **Eliminar completo una persona** fallaba siempre que tuviera un registro criminal con fotos, fichas o vehículos:
+   `deleteRelationsData` borraba `registro_criminal` antes que sus hijos (FK RESTRICT). Ahora borra en el orden que
+   permiten las claves, incluye fotos y fichas de sus registros y borra del disco los archivos (persona y
+   mandamientos) **después** de confirmar. Un error de base se muestra como mensaje, sin borrar nada. No se puede
+   migrar los datos a una persona eliminada.
+2. **Eliminar un registro criminal** daba error 500 si tenía una ficha impresa o un vehículo vinculado (el anterior
+   también). Ahora borra sus fichas, deja el vínculo vehículo-persona sin el registro y quita las fotos del disco.
+3. **Archivos reemplazados** (imagen de mandamiento, fotos de registro): se borraban del disco dentro de la
+   transacción; si luego fallaba algo, la base volvía atrás pero el archivo ya no existía. Ahora se borran al final.
+   Eliminar un mandamiento o un vehículo también borra sus archivos (antes quedaban huérfanos).
+4. **Editar un vehículo** borraba los vínculos con personas eliminadas (no se muestran en el formulario). **Editar un
+   IMEI** desvinculaba sus teléfonos eliminados. Ahora se conservan.
+5. **Validación vs. datos heredados**: 1 persona tiene un C.I. de 26 caracteres (importado) y no se podía editar
+   (máx. 25). El C.I. admite el largo de su columna (250; el formulario sigue limitando a 25 lo que se escribe) y
+   `datos_segip` el de un TEXT. El alta de registro criminal valida los largos de columna y que las fotos sean
+   imágenes (antes: error de base o de Imagick → 500); el formulario muestra esos errores.
+6. **Borrar una foto** (`multimedia.destroy`) exige el permiso del registro dueño (persona, mandamiento o vehículo);
+   antes bastaba cualquiera de los tres.
+7. **Importaciones**: un archivo dañado o con otra extensión respondía 500; ahora 422 con mensaje. Personas ya no
+   ofrece `.xls` (ningún lector lo soporta, tampoco el anterior).
+8. **Auditoría de consultas**: un identificador ajeno ya no suma accesos a la consulta de otro usuario.
+9. Vincular persona a vehículo: la comprobación de duplicado normaliza el tipo igual que al guardar.
+10. Frontend: el scroll infinito no pedía la página siguiente si las tarjetas no llenaban la caja; una petición
+    cancelada apagaba el «Cargando» de la siguiente (también en `BuscadorRemoto`, que además mostraba «Sin
+    resultados» durante la espera).
+
+Pedido del usuario en la misma ronda: las fotos se ven en **FsLightbox 3.4.0-2**, la misma librería y versión del
+sistema anterior (archivo idéntico), en lugar del modal de Bootstrap. Se carga sólo al abrir un visor.
+
+Pruebas de regresión: `tests/Feature/Revision/IntegridadDatosTest.php` (10).

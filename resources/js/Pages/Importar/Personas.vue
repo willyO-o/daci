@@ -23,8 +23,8 @@ const NOTAS = [
         <PanelImportacion
             titulo="Importación Masiva de Personas"
             :url="route('personas.importar.store')"
-            acepta=".csv,.xlsx,.xls"
-            formatos="CSV, XLSX, XLS"
+            acepta=".csv,.xlsx"
+            formatos="CSV o XLSX"
             :campos="CAMPOS"
             :notas="NOTAS"
             :plantilla="route('personas.importar.plantilla')"

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Multimedia;
+use App\Models\Persona;
 use App\Models\Vehiculo;
 use App\Models\VehiculoCaso;
 use Illuminate\Database\Eloquent\Builder;
@@ -79,6 +80,8 @@ class VehiculoController extends Controller
 
     public function destroy(Vehiculo $vehiculo): RedirectResponse
     {
+        $fotos = $vehiculo->multimedia()->pluck('ruta')->all();
+
         DB::transaction(function () use ($vehiculo) {
             $vehiculo->casos()->delete();
             $vehiculo->inspecciones()->delete();
@@ -86,6 +89,8 @@ class VehiculoController extends Controller
             $vehiculo->multimedia()->delete();
             $vehiculo->forceDelete();
         });
+
+        Storage::disk('public')->delete($fotos);
 
         return back()->with('success', 'Vehículo eliminado correctamente');
     }
@@ -100,7 +105,7 @@ class VehiculoController extends Controller
 
         $existe = VehiculoCaso::where('vehiculo_id', $vehiculo->id)
             ->where('persona_id', $datos['persona_id'])
-            ->where('tipo', $datos['tipo'])
+            ->where('tipo', campoDB($datos['tipo']))
             ->exists();
 
         if ($existe) {
@@ -170,8 +175,13 @@ class VehiculoController extends Controller
             $conservados[] = $caso->id;
         }
 
+        // Sólo se quitan vínculos que el formulario mostraba: los de personas eliminadas (recuperables) o sin persona
+        // no aparecen en la lista y no deben perderse al editar el vehículo.
         if ($quitarAusentes) {
-            VehiculoCaso::where('vehiculo_id', $vehiculo->id)->whereNotIn('id', $conservados)->delete();
+            VehiculoCaso::where('vehiculo_id', $vehiculo->id)
+                ->whereNotIn('id', $conservados)
+                ->whereIn('persona_id', Persona::query()->select('id'))
+                ->delete();
         }
     }
 

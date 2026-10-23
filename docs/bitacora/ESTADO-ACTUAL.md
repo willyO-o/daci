@@ -1,12 +1,12 @@
 # Estado actual
 
-> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-10-22 22:51 (Bolivia).
+> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-10-22 23:15 (Bolivia).
 
 ## Resumen
 
 **Toda la funcionalidad de FELCC está migrada a DACI** (ver `MATRIZ-PARIDAD.md`). La base `felcc1` sólo cambió en
-roles y permisos (migración reversible aplicada). 86 pruebas automáticas en verde y prueba de humo de solo lectura
-contra los datos reales sin errores.
+roles y permisos (migración reversible aplicada). 96 pruebas automáticas en verde y prueba de humo de solo lectura
+contra los datos reales sin errores. Revisión de bugs del 2026-10-22: 10 correcciones (D-017); las fotos se ven en FsLightbox como antes.
 
 ## Módulos
 

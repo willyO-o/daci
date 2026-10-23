@@ -20,6 +20,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -81,7 +82,8 @@ class ImportacionController extends Controller
 
     public function storePersonas(Request $request): JsonResponse
     {
-        $archivo = $this->validarArchivo($request, ['csv', 'xlsx', 'xls'], 'CSV o Excel');
+        // `.xls` (Excel 97-2003) no se puede leer: ni el lector actual ni el del sistema anterior lo soportan.
+        $archivo = $this->validarArchivo($request, ['csv', 'xlsx'], 'CSV o Excel (.xlsx)');
         $filas = $this->primeraHoja($archivo);
 
         if ($filas === []) {
@@ -425,7 +427,16 @@ class ImportacionController extends Controller
      */
     private function hojas(UploadedFile $archivo, bool $todasLasHojas = false): array
     {
-        return LectorTabular::leer($archivo->getRealPath(), $archivo->getClientOriginalExtension(), $todasLasHojas);
+        try {
+            return LectorTabular::leer($archivo->getRealPath(), $archivo->getClientOriginalExtension(), $todasLasHojas);
+        } catch (Throwable $e) {
+            report($e);
+
+            // Un archivo dañado o renombrado con otra extensión: se avisa como error del campo, no como error 500.
+            throw ValidationException::withMessages([
+                'archivo' => 'No se pudo leer el archivo. Verifique que no esté dañado y que su formato coincida con la extensión.',
+            ]);
+        }
     }
 
     /**
