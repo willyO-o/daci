@@ -6,8 +6,14 @@ description: Convenciones OBLIGATORIAS de base de datos, persistencia y consulta
 # Convenciones de base de datos — FELCC / DACI
 
 > Este proyecto (`daci`) **reemplaza** al sistema anterior (`felcc`, Laravel + jQuery) y trabaja sobre **la misma
-> base de producción** (`felcc1`, MariaDB 11.7). La regla número uno no es de estilo: **el esquema existente no se
-> modifica**. Lo que sigue describe cómo es la base para escribir código que la respete, y cómo nombrar lo poco nuevo.
+> base de producción** (MariaDB). La regla número uno no es de estilo: **el esquema existente no se modifica y no se
+> pierde ningún dato**. Lo que sigue describe cómo es la base para escribir código que la respete, y cómo nombrar lo
+> poco nuevo.
+>
+> **La base de producción NO es la local.** Es otra, con mucha más información (más personas, usuarios, quizá roles
+> o datos que la copia local no tiene). Las bases locales (`felcc1`, `felcc` en Laragon) son copias parciales: todo
+> cambio debe ser seguro sobre datos desconocidos y su estado de migraciones se verifica en producción con
+> `php artisan migrate:status` antes de desplegar. Lo único que se puede modificar son roles, permisos y sus controles.
 
 ---
 
@@ -16,8 +22,9 @@ description: Convenciones OBLIGATORIAS de base de datos, persistencia y consulta
 1. **No se crean, renombran ni borran tablas o columnas existentes, ni se agregan índices.** La única migración que
    tocó el esquema es `2026_10_22_120000_migrar_roles_a_spatie_permission` (roles y permisos, autorizada por el
    usuario). Si una funcionalidad parece pedir una columna nueva, **se pregunta antes**.
-2. **Las 36 migraciones del sistema anterior** están copiadas en `database/migrations` sólo como registro: ya figuran
-   como ejecutadas en la tabla `migrations` de producción. **No se editan.**
+2. **Las 36 migraciones del sistema anterior** están copiadas en `database/migrations` sólo como registro. **No se
+   editan.** Una base puede no tenerlas todas ejecutadas (la copia local `felcc` tenía 34: le faltaban
+   `remove_unique_from_ci_in_persona_table` y `create_audits_table`); `migrate` las correría junto con la de roles.
 3. **Nunca** `migrate:fresh`, `migrate:refresh`, `db:wipe` ni `db:seed` sin `--class` contra `felcc1`.
    `DatabaseSeeder` sólo corre `acceso:sincronizar` (idempotente). Los catálogos iniciales de una base vacía están en
    `InstalacionNuevaSeeder` y **no** se corren en producción.
@@ -49,8 +56,10 @@ se unen, no se exportan, no se muestran. Si un código heredado las mencionaba (
 (`roles`, `permissions`, `model_has_roles`, `model_has_permissions`, `role_has_permissions`; `roles` tiene además
 `descripcion`).
 
-`roles_legado` es la tabla de roles del sistema anterior renombrada (respaldo); `users.role_id` la sigue apuntando
-y **no se escribe**. El rol vigente vive en Spatie.
+`roles_legado` es la tabla de roles del sistema anterior renombrada (respaldo); `users.role_id` la sigue apuntando.
+El rol vigente vive en Spatie y `role_id` se mantiene **en espejo**: se asigna siempre con `User::asignarRol()`
+(nunca `syncRoles`/`assignRole` sueltos en código de la aplicación), que deja el id del mismo rol en `roles_legado`
+o null si es un rol creado en DACI. `acceso:sincronizar` repara desfases y no toca a usuarios sin rol en Spatie.
 
 ## 3. Valores literales
 

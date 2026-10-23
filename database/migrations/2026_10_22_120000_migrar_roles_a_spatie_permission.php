@@ -119,12 +119,39 @@ return new class extends Migration
     {
         $tablaAnteriorExiste = Schema::hasTable('roles') && Schema::hasColumn('roles', 'nombre');
 
+        // Nunca pisar ni borrar tablas que no creó esta migración.
+        $ocupadas = collect(['permissions', 'model_has_permissions', 'model_has_roles', 'role_has_permissions', 'roles_legado'])
+            ->when(! $tablaAnteriorExiste, fn ($tablas) => $tablas->push('roles'))
+            ->filter(fn (string $tabla) => Schema::hasTable($tabla));
+
+        if ($ocupadas->isNotEmpty()) {
+            throw new RuntimeException('Migración de roles detenida sin cambios: ya existen las tablas '.$ocupadas->implode(', ').'.');
+        }
+
         if ($tablaAnteriorExiste) {
             Schema::rename('roles', 'roles_legado');
         }
 
-        $this->crearTablasSpatie();
+        // Si algo falla a mitad (dato inesperado en producción), la base vuelve a como estaba: la migración no
+        // queda registrada y `migrate:rollback` no podría deshacerla.
+        try {
+            $this->crearTablasSpatie();
+            $this->migrarRolesYUsuarios($tablaAnteriorExiste);
+        } catch (Throwable $error) {
+            $this->down();
 
+            throw $error;
+        }
+
+        rescue(fn () => app('cache')->forget(config('permission.cache.key', 'spatie.permission.cache')), report: false);
+    }
+
+    /**
+     * Crea los permisos, los roles (mismos ids que en la tabla anterior) con sus permisos traducidos y asigna a
+     * cada usuario el rol que tenía en `users.role_id`.
+     */
+    private function migrarRolesYUsuarios(bool $tablaAnteriorExiste): void
+    {
         $ahora = now();
 
         $permisos = collect(self::TRADUCCION)->flatten()
@@ -186,8 +213,6 @@ return new class extends Migration
                     'model_id' => $usuario->id,
                 ]));
         }
-
-        rescue(fn () => app('cache')->forget(config('permission.cache.key', 'spatie.permission.cache')), report: false);
     }
 
     public function down(): void

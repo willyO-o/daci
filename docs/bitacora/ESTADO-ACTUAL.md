@@ -1,12 +1,17 @@
 # Estado actual
 
-> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-10-22 23:15 (Bolivia).
+> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-10-23 11:05 (Bolivia).
 
 ## Resumen
 
 **Toda la funcionalidad de FELCC está migrada a DACI** (ver `MATRIZ-PARIDAD.md`). La base `felcc1` sólo cambió en
 roles y permisos (migración reversible aplicada). 96 pruebas automáticas en verde y prueba de humo de solo lectura
 contra los datos reales sin errores. Revisión de bugs del 2026-10-22: 10 correcciones (D-017); las fotos se ven en FsLightbox como antes.
+2026-10-23: `users.role_id` en espejo del rol de Spatie y migración de roles que se detiene o se deshace sola ante datos
+inesperados (D-018). 100 pruebas en verde.
+
+> **Producción es otra base** (más información que la local). No se borra nada; sólo se tocan roles, permisos y sus
+> controles. Su estado de migraciones se verifica allí antes de desplegar.
 
 ## Módulos
 
@@ -32,7 +37,11 @@ contra los datos reales sin errores. Revisión de bugs del 2026-10-22: 10 correc
 2. Importación de teléfonos: ¿debe actualizar un número existente en lugar de crear otro? (D-015).
 3. Reportes PDF y filtros: el anterior los anunciaba pero no existían. ¿Se implementan?
 4. Validar con usuarios reales los permisos de los roles base (traducción en la migración de roles).
-5. Despliegue: seguir `DESPLIEGUE.md`.
+5. Despliegue: seguir `DESPLIEGUE.md`. **Antes**, `php artisan migrate:status` en producción: si hay migraciones de
+   FELCC pendientes (la copia local no tenía `create_audits_table` ni `remove_unique_from_ci_in_persona_table`),
+   decidir con el usuario. Sin la tabla `audits`, DACI no puede guardar.
+6. `.env` local: apunta a `felcc` (no `felcc1`) y `APP_NAME=Laravel`.
+7. Páginas de error propias (FELCC tenía `errors/404`); hoy salen las genéricas de Laravel.
 
 ## Pruebas
 

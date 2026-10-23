@@ -95,3 +95,10 @@ Leyenda: ✅ migrado igual · 🔧 migrado con corrección · ➖ no se migra (c
 | Clic en la foto de una tarjeta (registro criminal, mandamientos, consultas) → FsLightbox 3.4.0-2 | `VisorImagenes` sobre la misma librería y versión | ✅ misma apariencia |
 | Eliminar completo una persona / eliminar un registro criminal | `personas.destroy` · `registro-criminal.destroy` | 🔧 ya no fallan por claves foráneas (D-017) |
 | Editar vehículo / IMEI | `vehiculos.update` · `imeis.update` | 🔧 conservan vínculos con personas / teléfonos eliminados (D-017) |
+
+## Roles en la base (2026-10-23 11:05)
+
+| Anterior | DACI | Estado |
+|---|---|---|
+| `users.role_id` → `roles` | Spatie (`model_has_roles`) + `users.role_id` → `roles_legado` en espejo (`User::asignarRol`) | 🔧 rollback a FELCC conserva el rol (D-018) |
+| — | `acceso:sincronizar` repara `users.role_id` | nuevo |

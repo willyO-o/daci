@@ -1,10 +1,11 @@
 # Proyecto FELCC / DACI
 
-Este sistema **reemplaza** a FELCC (`../felcc`, Laravel + jQuery) y trabaja sobre **la misma base de producción**
-(`felcc1`). Antes de tocar nada, leer `docs/bitacora/ESTADO-ACTUAL.md`.
+Este sistema **reemplaza** a FELCC (`../felcc`, Laravel + jQuery) y trabaja sobre **la misma base de producción**.
+La base local (`felcc`/`felcc1`) es una copia parcial: **producción es otra base, con mucha más información, y no se
+borra nada**. Antes de tocar nada, leer `docs/bitacora/ESTADO-ACTUAL.md`.
 
 - **El esquema de la base no se modifica** (salvo roles/permisos, ya migrados). Nunca `migrate:fresh`/`refresh`,
-  `db:wipe` ni seeders contra `felcc1`. Skill: `convenciones-base-datos`.
+  `db:wipe` ni seeders contra una base real. Skill: `convenciones-base-datos`.
 - Las tablas `ciudadano`, `libro`, `notario`, `localidad`, `departamento` y `documento` se ignoran.
 - Modelos en `App\Models` con el nombre de clase heredado (la auditoría guarda el FQCN).
 - Frontend: Inertia + Vue 3 + plantilla Velzon (Bootstrap 5, sin Tailwind ni jQuery). Skill: `felcc-frontend-vue`.

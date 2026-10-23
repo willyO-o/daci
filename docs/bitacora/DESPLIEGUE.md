@@ -33,11 +33,30 @@ Las rutas guardadas en `multimedia.ruta` y `fotos_registro.ruta_archivo` son rel
 
 ## 3. Base de datos
 
+> La base de producción **no es la local**: tiene más información y su estado puede ser otro. No se borra nada.
+
 ```bash
-php artisan migrate:status     # deben figurar 36 migraciones «Ran» y 1 «Pending» (2026_10_22_120000_migrar_roles_a_spatie_permission)
-php artisan migrate --force    # renombra roles → roles_legado y crea las tablas de Spatie con los 6 roles
-php artisan acceso:sincronizar # idempotente: crea permisos nuevos del catálogo y se los da a superadmin
+php artisan migrate:status     # revisar qué figura como «Pending» (sólo lee)
 ```
+
+Lo esperado es una sola pendiente: `2026_10_22_120000_migrar_roles_a_spatie_permission`. Si además figuran
+migraciones del propio FELCC (la copia local `felcc` tenía pendientes `remove_unique_from_ci_in_persona_table` y
+`create_audits_table`), **detenerse y revisar** antes de seguir:
+
+- `create_audits_table`: DACI la necesita (casi todos los modelos registran auditoría; sin la tabla, todo guardado
+  falla). Si la tabla `audits` ya existe pero la migración no figura, `migrate` fallará: registrar la migración
+  como ejecutada en vez de correrla.
+- `remove_unique_from_ci_in_persona_table`: quita el índice único de `persona.ci` (no borra datos; no se puede
+  revertir). DACI permite C.I. repetidos, como el FELCC actual.
+
+```bash
+php artisan migrate --force    # renombra roles → roles_legado y crea las tablas de Spatie con los roles
+php artisan acceso:sincronizar # idempotente: permisos nuevos del catálogo → superadmin; repara users.role_id
+```
+
+La migración de roles se protege sola: **se detiene sin cambios** si ya existe alguna tabla de Spatie, y si falla a
+mitad (p. ej. un rol escrito con otras mayúsculas que choca con un rol base) **deshace lo hecho** y deja `roles`
+como estaba. En ese caso, corregir el dato con el usuario y volver a correrla.
 
 **No** correr `migrate:fresh`, `migrate:refresh`, `db:wipe` ni `db:seed --class=InstalacionNuevaSeeder`.
 
@@ -48,6 +67,9 @@ php artisan tinker --execute 'echo DB::table("model_has_roles")->count()." usuar
 ```
 
 Si algo sale mal: `php artisan migrate:rollback --step=1` deja la tabla `roles` como estaba (FELCC vuelve a funcionar).
+Los usuarios creados o cambiados de rol en DACI conservan su rol en FELCC porque `users.role_id` se mantiene en
+espejo; sólo quien tenga un rol **creado en DACI** queda sin rol en FELCC. Los roles y permisos editados en DACI se
+pierden con el rollback (viven en las tablas de Spatie).
 
 ## 4. Optimización y tareas
 

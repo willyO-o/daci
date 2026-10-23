@@ -6,6 +6,7 @@ use App\Models\Rol;
 use App\Models\User;
 use App\Support\Acceso\CatalogoPermisos;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -99,5 +100,54 @@ class UsuariosTest extends TestCase
         $super = $this->superadmin();
 
         $this->actingAs($admin)->post(route('usuarios.toggle-status', $super))->assertForbidden();
+    }
+
+    public function test_asignar_rol_deja_role_id_en_espejo_de_roles_legado(): void
+    {
+        $admin = $this->usuarioConPermisos(['usuarios.crear', 'usuarios.editar']);
+        DB::table('roles_legado')->insert(['id' => 5, 'nombre' => CatalogoPermisos::ROL_TECNICO_DACI]);
+        $rolNuevo = Rol::create(['name' => 'analista', 'guard_name' => CatalogoPermisos::GUARD]);
+
+        $this->actingAs($admin)->post(route('usuarios.store'), [
+            'name' => 'Técnico Espejo',
+            'email' => 'espejo@felcc.bo',
+            'password' => 'secreto1',
+            'password_confirmation' => 'secreto1',
+            'role_id' => Rol::findByName(CatalogoPermisos::ROL_TECNICO_DACI)->id,
+        ])->assertSessionHas('success');
+
+        $usuario = User::where('email', 'espejo@felcc.bo')->firstOrFail();
+        $this->assertSame(5, $usuario->role_id);
+
+        // Un rol creado en DACI no existe en la tabla antigua.
+        $this->actingAs($admin)->put(route('usuarios.update', $usuario), [
+            'name' => 'Técnico Espejo',
+            'email' => 'espejo@felcc.bo',
+            'role_id' => $rolNuevo->id,
+        ])->assertSessionHas('success');
+
+        $this->assertNull($usuario->fresh()->role_id);
+        $this->assertSame('analista', $usuario->fresh()->nombreRol());
+    }
+
+    public function test_sincronizar_corrige_role_id_sin_tocar_usuarios_sin_rol(): void
+    {
+        $this->artisan('acceso:sincronizar');
+        DB::table('roles_legado')->insert([
+            ['id' => 2, 'nombre' => CatalogoPermisos::ROL_ADMINISTRADOR],
+            ['id' => 6, 'nombre' => CatalogoPermisos::ROL_CONSULTOR_DACI],
+        ]);
+
+        $desfasado = User::factory()->create();
+        $desfasado->assignRole(CatalogoPermisos::ROL_ADMINISTRADOR);
+        DB::table('users')->where('id', $desfasado->id)->update(['role_id' => 6]);
+
+        $sinRol = User::factory()->create();
+        DB::table('users')->where('id', $sinRol->id)->update(['role_id' => 6]);
+
+        $this->artisan('acceso:sincronizar')->assertSuccessful();
+
+        $this->assertSame(2, $desfasado->fresh()->role_id);
+        $this->assertSame(6, $sinRol->fresh()->role_id);
     }
 }

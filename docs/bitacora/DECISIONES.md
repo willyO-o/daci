@@ -150,3 +150,23 @@ Pedido del usuario en la misma ronda: las fotos se ven en **FsLightbox 3.4.0-2**
 sistema anterior (archivo idéntico), en lugar del modal de Bootstrap. Se carga sólo al abrir un visor.
 
 Pruebas de regresión: `tests/Feature/Revision/IntegridadDatosTest.php` (10).
+
+## D-018 · `users.role_id` en espejo del rol de Spatie; migración de roles a prueba de producción (2026-10-23 11:05)
+
+**Contexto:** producción es otra base, con mucha más información que la local; no se pierde nada y sólo se pueden
+modificar roles, permisos y sus controles.
+
+1. **`role_id` en espejo.** Antes DACI asignaba el rol sólo en Spatie y `users.role_id` quedaba con el valor de la
+   migración: tras un `migrate:rollback` de emergencia, los usuarios creados en DACI quedaban sin rol (FELCC falla con
+   `$user->role->nombre`) y los cambios de rol se perdían. Ahora `User::asignarRol()` guarda el id del mismo rol en
+   `roles_legado` (null si es un rol creado en DACI) y `acceso:sincronizar` repara desfases.
+   **Descartado:** dejar `role_id` como dato histórico — rompía la vuelta atrás que promete `DESPLIEGUE.md`.
+   **Descartado:** que `sincronizar` ponga null a usuarios sin rol en Spatie — borraría el único dato de rol que tienen.
+2. **Migración de roles.** Se detiene sin tocar nada si ya existe alguna tabla de Spatie o `roles_legado` (la
+   reversión las borraría), y si falla a mitad ejecuta `down()`: sin esto la base quedaba a medias y
+   `migrate:rollback` no podía deshacerla (la migración no queda registrada). Caso real posible: un rol antiguo con
+   otras mayúsculas (`Tecnico_DACI`) choca con el rol base en el índice único (la colación no distingue mayúsculas).
+3. **Migraciones de FELCC pendientes.** La copia local tenía 34 de 36 (sin `audits` y con `persona.ci` único).
+   No se fuerza nada: `DESPLIEGUE.md` indica revisar `migrate:status` en producción y decidir antes de migrar.
+
+Pruebas: `UsuariosTest` (2) y `MigracionRolesTest` (2).

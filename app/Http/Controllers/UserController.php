@@ -50,7 +50,7 @@ class UserController extends Controller
                 'email' => $request->input('email'),
                 'password' => $request->input('password'),
             ]);
-            $usuario->syncRoles([Rol::findOrFail($request->integer('role_id'))]);
+            $usuario->asignarRol(Rol::findOrFail($request->integer('role_id')));
         });
 
         return back()->with('success', 'Usuario creado correctamente.');
@@ -68,7 +68,7 @@ class UserController extends Controller
             }
 
             $usuario->update($datos);
-            $usuario->syncRoles([Rol::findOrFail($request->integer('role_id'))]);
+            $usuario->asignarRol(Rol::findOrFail($request->integer('role_id')));
         });
 
         return back()->with('success', 'Usuario actualizado correctamente.');

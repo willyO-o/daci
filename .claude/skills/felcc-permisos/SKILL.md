@@ -15,7 +15,11 @@ description: Roles y permisos DINÁMICOS de FELCC/DACI con spatie/laravel-permis
   (`roles.listar` para ver, `roles.gestionar` para cambiar). Los 6 roles base heredados (`superadmin`,
   `administrador`, `tecnico_felcc`, `consultor_felcc`, `tecnico_daci`, `consultor_daci`) no se pueden eliminar ni
   renombrar.
-- **Un rol por usuario** (como el sistema anterior), asignado en Usuarios.
+- **Un rol por usuario** (como el sistema anterior), asignado en Usuarios **siempre con `User::asignarRol($rol)`**:
+  sincroniza Spatie y deja `users.role_id` en espejo (id del mismo rol en `roles_legado`, o null si el rol es nuevo),
+  para que un `migrate:rollback` de emergencia devuelva a FELCC usuarios con su rol. `acceso:sincronizar` repara
+  desfases (no toca a usuarios sin rol en Spatie).
+- **Ningún control por nombre de rol** en servidor ni en Vue, salvo el superadmin (`Gate::before`, rol bloqueado).
 - **Superadmin**: `Gate::before` en `AppServiceProvider` le concede todo, también los permisos futuros. Su rol no
   se edita desde la pantalla, no aparece en el listado de usuarios ni en el selector de roles (igual que antes).
 - Modelo de rol: `App\Models\Rol` (extiende el de Spatie, agrega `descripcion` y auditoría).

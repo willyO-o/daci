@@ -28,4 +28,5 @@ persona o sesión pueda retomar el trabajo sin releer los dos proyectos y sin pe
 
 - Sistema anterior (referencia, NO se modifica): `../felcc` · plantilla Velzon HTML: `../material`.
 - Convenciones de referencia (NO se modifica): `C:\Users\marco\Desktop\combustible\tienda`.
-- Base de datos: `felcc1` (MariaDB 11.7, Laragon) — la misma de producción.
+- Base de datos local: `felcc` / `felcc1` (MariaDB, Laragon) — **copias parciales**. Producción es otra base, con mucha
+  más información: nunca se borra nada y su estado se verifica allí antes de desplegar.
