@@ -1,3 +1,123 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/*
+ * Ajustes propios sobre Velzon. La plantilla (public/assets/css) se usa tal cual; aquí sólo va lo que la
+ * migración a Vue necesita y los detalles que la plantilla deja en el valor por defecto del navegador.
+ */
+
+/* Superficies del navegador con la paleta de la plantilla. */
+::selection {
+    background-color: rgba(var(--vz-primary-rgb), 0.18);
+    color: inherit;
+}
+
+:focus-visible {
+    outline: 2px solid rgba(var(--vz-primary-rgb), 0.55);
+    outline-offset: 2px;
+}
+
+.form-control:focus-visible,
+.form-select:focus-visible,
+.btn:focus-visible {
+    outline: none;
+}
+
+/* Cifras alineadas en tablas, contadores y paginación. */
+.table td,
+.table th,
+.cifra,
+.pagination {
+    font-variant-numeric: tabular-nums;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+/* Fotos dentro de los avatares de la plantilla: recortadas, nunca deformadas. */
+.avatar-title > img,
+img.avatar-xs,
+img.avatar-sm,
+img.avatar-md,
+img.avatar-lg {
+    object-fit: cover;
+}
+
+/* Barra de progreso de Inertia por encima del topbar fijo. */
+#nprogress .bar {
+    z-index: 2000 !important;
+}
+
+/* Filas que se están cargando: conservan su altura y no saltan cuando llega el dato. */
+.fila-esqueleto td span {
+    display: inline-block;
+    height: 0.75rem;
+    width: 70%;
+    border-radius: 4px;
+    background-color: var(--vz-light);
+}
+
+.fila-esqueleto td span.corto {
+    width: 35%;
+}
+
+/* Lista desplegable del buscador remoto: flota sobre el modal y no se recorta. */
+.buscador-remoto .dropdown-menu {
+    max-height: 280px;
+    overflow-y: auto;
+    width: 100%;
+}
+
+.buscador-remoto .dropdown-item.activo {
+    background-color: var(--vz-dropdown-link-hover-bg);
+}
+
+/* Zona para soltar archivos (aspecto de dropzone de Velzon). */
+.zona-archivos {
+    border: 2px dashed var(--vz-border-color);
+    border-radius: 6px;
+    background: var(--vz-card-bg);
+    transition: border-color 150ms ease-out, background-color 150ms ease-out;
+}
+
+.zona-archivos.arrastrando {
+    border-color: var(--vz-primary);
+    background: rgba(var(--vz-primary-rgb), 0.04);
+}
+
+.miniatura-archivo {
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+}
+
+/* Menú lateral: el enlace activo de un submenú también se marca en su grupo. */
+.navbar-menu .navbar-nav .nav-link.activo-grupo {
+    color: var(--vz-vertical-menu-item-active-color);
+}
+
+/* SweetAlert2 con la tipografía y los botones de la plantilla. */
+.swal2-popup {
+    font-family: inherit;
+    border-radius: 0.5rem;
+}
+
+.swal2-styled.swal2-confirm,
+.swal2-styled.swal2-cancel {
+    border-radius: 0.25rem;
+    font-weight: 500;
+}
+
+/* Hoja de detalle impresa en una pestaña aparte (vista por código). */
+@media print {
+    .no-imprimir {
+        display: none !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+    }
+}

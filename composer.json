@@ -3,15 +3,24 @@
     "name": "laravel/laravel",
     "type": "project",
     "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "keywords": [
+        "laravel",
+        "framework"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.3",
         "inertiajs/inertia-laravel": "^2.0",
+        "intervention/image": "^3.11",
+        "jenssegers/agent": "^2.6",
         "laravel-lang/common": "^6.8",
         "laravel/framework": "^13.17",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",
+        "openspout/openspout": "^4.28",
+        "owen-it/laravel-auditing": "^14.0",
+        "setasign/fpdf": "^1.9",
+        "setasign/fpdi": "^2.6",
         "spatie/laravel-permission": "^8.3",
         "tightenco/ziggy": "^2.0"
     },
@@ -31,7 +40,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/Helpers/TextoHelper.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

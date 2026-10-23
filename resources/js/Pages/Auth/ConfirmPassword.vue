@@ -1,16 +1,10 @@
 <script setup>
-import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
+import CampoError from '@/Components/Ui/CampoError.vue';
 
-const form = useForm({
-    password: '',
-});
+const form = useForm({ password: '' });
 
-const submit = () => {
+const confirmar = () => {
     form.post(route('password.confirm'), {
         onFinish: () => form.reset(),
     });
@@ -18,38 +12,27 @@ const submit = () => {
 </script>
 
 <template>
-    <GuestLayout>
-        <Head title="Confirm Password" />
+    <Head title="Confirmar contraseña" />
 
-        <div class="mb-4 text-sm text-gray-600">
-            This is a secure area of the application. Please confirm your
-            password before continuing.
+    <div class="card mt-4">
+        <div class="card-body p-4">
+            <div class="text-center mt-2">
+                <h5 class="text-primary">Confirme su contraseña</h5>
+                <p class="text-muted">Es un área protegida. Confirme su contraseña para continuar.</p>
+            </div>
+
+            <div class="p-2">
+                <form novalidate @submit.prevent="confirmar">
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <input id="password" v-model="form.password" type="password" class="form-control" :class="{ 'is-invalid': form.errors.password }" autocomplete="current-password" required autofocus>
+                        <CampoError :mensaje="form.errors.password" />
+                    </div>
+                    <div class="mt-4">
+                        <button class="btn btn-success w-100" type="submit" :disabled="form.processing">Confirmar</button>
+                    </div>
+                </form>
+            </div>
         </div>
-
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="password" value="Password" />
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password"
-                    required
-                    autocomplete="current-password"
-                    autofocus
-                />
-                <InputError class="mt-2" :message="form.errors.password" />
-            </div>
-
-            <div class="mt-4 flex justify-end">
-                <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Confirm
-                </PrimaryButton>
-            </div>
-        </form>
-    </GuestLayout>
+    </div>
 </template>

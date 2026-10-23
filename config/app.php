@@ -65,7 +65,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'America/La_Paz',
 
     /*
     |--------------------------------------------------------------------------
@@ -121,6 +121,15 @@ return [
     'maintenance' => [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
+    ],
+
+    /* Información de la aplicación (heredada del sistema FELCC) */
+    'aplicacion' => [
+        'nombre' => 'Sistema de Mandamientos Judiciales',
+        'sigla' => 'SMJ-DACI',
+        'version' => '2.0.0',
+        'empresa' => 'Felcc',
+        'autor' => 'Willy Chana',
     ],
 
 ];

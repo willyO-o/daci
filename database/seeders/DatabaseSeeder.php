@@ -2,24 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
 
+/**
+ * Seguro de correr sobre la base de producción: sólo sincroniza permisos y roles base (idempotente).
+ * Los datos iniciales de una instalación NUEVA están en {@see InstalacionNuevaSeeder} y se llaman a mano.
+ */
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        Artisan::call('acceso:sincronizar');
     }
 }

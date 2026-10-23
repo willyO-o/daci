@@ -51,6 +51,15 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+
+        // Un usuario desactivado no entra (el sistema anterior lo expulsaba en la primera petición).
+        if (! Auth::user()->isActive()) {
+            Auth::guard('web')->logout();
+
+            throw ValidationException::withMessages([
+                'email' => 'Tu cuenta ha sido desactivada. Por favor, contacta con el administrador.',
+            ]);
+        }
     }
 
     /**

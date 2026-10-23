@@ -1,68 +1,64 @@
 <script setup>
-import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import CampoError from '@/Components/Ui/CampoError.vue';
 
 defineProps({
-    status: {
-        type: String,
-    },
+    status: { type: String, default: null },
 });
 
-const form = useForm({
-    email: '',
-});
+const form = useForm({ email: '' });
 
-const submit = () => {
-    form.post(route('password.email'));
-};
+const enviar = () => form.post(route('password.email'));
 </script>
 
 <template>
-    <GuestLayout>
-        <Head title="Forgot Password" />
+    <Head title="Recuperar contraseña" />
 
-        <div class="mb-4 text-sm text-gray-600">
-            Forgot your password? No problem. Just let us know your email
-            address and we will email you a password reset link that will allow
-            you to choose a new one.
-        </div>
-
-        <div
-            v-if="status"
-            class="mb-4 text-sm font-medium text-green-600"
-        >
-            {{ status }}
-        </div>
-
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    v-model="form.email"
-                    required
-                    autofocus
-                    autocomplete="username"
-                />
-
-                <InputError class="mt-2" :message="form.errors.email" />
+    <div class="card mt-4">
+        <div class="card-body p-4">
+            <div class="text-center mt-2">
+                <h5 class="text-primary">¿Olvidó su contraseña?</h5>
+                <p class="text-muted">Le enviaremos un enlace para restablecerla.</p>
+                <i class="ri-mail-send-line display-5 text-success" />
             </div>
 
-            <div class="mt-4 flex items-center justify-end">
-                <PrimaryButton
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Email Password Reset Link
-                </PrimaryButton>
+            <div v-if="status" class="alert alert-success text-center mb-2 mx-2" role="status">{{ status }}</div>
+            <div v-else class="alert alert-warning text-center mb-2 mx-2" role="alert">
+                Ingrese su correo y le llegarán las instrucciones.
             </div>
-        </form>
-    </GuestLayout>
+
+            <div class="p-2">
+                <form novalidate @submit.prevent="enviar">
+                    <div class="mb-4">
+                        <label for="email" class="form-label">Correo Electrónico</label>
+                        <input
+                            id="email"
+                            v-model="form.email"
+                            type="email"
+                            class="form-control"
+                            :class="{ 'is-invalid': form.errors.email }"
+                            placeholder="Ingrese su correo electrónico"
+                            autocomplete="username"
+                            required
+                            autofocus
+                        >
+                        <CampoError :mensaje="form.errors.email" />
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button class="btn btn-success w-100" type="submit" :disabled="form.processing">
+                            {{ form.processing ? 'Enviando…' : 'Enviar enlace' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4 text-center">
+        <p class="mb-0">
+            ¿La recordó?
+            <Link :href="route('login')" class="fw-semibold text-primary text-decoration-underline">Iniciar sesión</Link>
+        </p>
+    </div>
 </template>

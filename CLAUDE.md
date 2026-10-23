@@ -1,3 +1,17 @@
+# Proyecto FELCC / DACI
+
+Este sistema **reemplaza** a FELCC (`../felcc`, Laravel + jQuery) y trabaja sobre **la misma base de producción**
+(`felcc1`). Antes de tocar nada, leer `docs/bitacora/ESTADO-ACTUAL.md`.
+
+- **El esquema de la base no se modifica** (salvo roles/permisos, ya migrados). Nunca `migrate:fresh`/`refresh`,
+  `db:wipe` ni seeders contra `felcc1`. Skill: `convenciones-base-datos`.
+- Las tablas `ciudadano`, `libro`, `notario`, `localidad`, `departamento` y `documento` se ignoran.
+- Modelos en `App\Models` con el nombre de clase heredado (la auditoría guarda el FQCN).
+- Frontend: Inertia + Vue 3 + plantilla Velzon (Bootstrap 5, sin Tailwind ni jQuery). Skill: `felcc-frontend-vue`.
+- Permisos: catálogo `App\Support\Acceso\CatalogoPermisos`, toda ruta con `permission:`. Skill: `felcc-permisos`.
+- Pruebas: `php artisan test` sobre `felcc_pruebas` (MariaDB).
+- Toda modificación se registra en `docs/bitacora/` (entrada fechada + `ESTADO-ACTUAL.md` + `MATRIZ-PARIDAD.md`).
+
 <laravel-boost-guidelines>
 === foundation rules ===
 
