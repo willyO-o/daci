@@ -1,6 +1,7 @@
 <script setup>
 import { Head, useForm } from '@inertiajs/vue3';
-import CampoError from '@/Components/Ui/CampoError.vue';
+import CampoAcceso from '@/Components/Acceso/CampoAcceso.vue';
+import TarjetaAcceso from '@/Components/Acceso/TarjetaAcceso.vue';
 
 const props = defineProps({
     email: { type: String, required: true },
@@ -24,37 +25,41 @@ const guardar = () => {
 <template>
     <Head title="Restablecer contraseña" />
 
-    <div class="card mt-4">
-        <div class="card-body p-4">
-            <div class="text-center mt-2">
-                <h5 class="text-primary">Nueva contraseña</h5>
-                <p class="text-muted">Debe ser distinta de la anterior.</p>
-            </div>
+    <TarjetaAcceso texto="Elija una contraseña nueva, distinta de la anterior.">
+        <form class="acceso-formulario" novalidate @submit.prevent="guardar">
+            <CampoAcceso
+                id="email"
+                v-model="form.email"
+                tipo="email"
+                icono="ri-user-3-fill"
+                rotulo="Correo electrónico"
+                autocompletar="username"
+                :error="form.errors.email"
+            />
+            <CampoAcceso
+                id="password"
+                v-model="form.password"
+                tipo="password"
+                icono="ri-lock-2-fill"
+                rotulo="Contraseña nueva"
+                autocompletar="new-password"
+                :error="form.errors.password"
+                enfocar
+            />
+            <CampoAcceso
+                id="password_confirmation"
+                v-model="form.password_confirmation"
+                tipo="password"
+                icono="ri-lock-password-fill"
+                rotulo="Confirmar contraseña"
+                autocompletar="new-password"
+                :error="form.errors.password_confirmation"
+            />
 
-            <div class="p-2">
-                <form novalidate @submit.prevent="guardar">
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Correo Electrónico</label>
-                        <input id="email" v-model="form.email" type="email" class="form-control" :class="{ 'is-invalid': form.errors.email }" autocomplete="username" required>
-                        <CampoError :mensaje="form.errors.email" />
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Contraseña</label>
-                        <input id="password" v-model="form.password" type="password" class="form-control" :class="{ 'is-invalid': form.errors.password }" autocomplete="new-password" required autofocus>
-                        <CampoError :mensaje="form.errors.password" />
-                    </div>
-                    <div class="mb-3">
-                        <label for="password_confirmation" class="form-label">Confirmar contraseña</label>
-                        <input id="password_confirmation" v-model="form.password_confirmation" type="password" class="form-control" :class="{ 'is-invalid': form.errors.password_confirmation }" autocomplete="new-password" required>
-                        <CampoError :mensaje="form.errors.password_confirmation" />
-                    </div>
-                    <div class="mt-4">
-                        <button class="btn btn-success w-100" type="submit" :disabled="form.processing">
-                            {{ form.processing ? 'Guardando…' : 'Restablecer contraseña' }}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+            <button class="acceso-boton" type="submit" :disabled="form.processing">
+                <span v-if="form.processing" class="spinner-border spinner-border-sm" aria-hidden="true" />
+                {{ form.processing ? 'Guardando…' : 'Restablecer contraseña' }}
+            </button>
+        </form>
+    </TarjetaAcceso>
 </template>

@@ -1,47 +1,45 @@
 <script setup>
+import '@fontsource/barlow/latin-500.css';
+import '@fontsource/barlow/latin-500-italic.css';
+import '@fontsource/barlow/latin-600.css';
+import '@fontsource/barlow/latin-700.css';
+import '../../css/acceso.css';
+
+/**
+ * Layout de las pantallas de acceso («propuesta 5»): foto del Palacio con la bandera, encabezado institucional con
+ * la franja tricolor y el lema al pie. Cada página pone su tarjeta (`TarjetaAcceso`) en el slot.
+ */
 const anio = new Date().getFullYear();
 </script>
 
 <template>
-    <div class="auth-page-wrapper pt-5">
-        <div id="auth-particles" class="auth-one-bg-position auth-one-bg">
-            <div class="bg-overlay" />
-            <div class="shape">
-                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1440 120" aria-hidden="true">
-                    <path d="M 0,36 C 144,53.6 432,123.2 720,124 C 1008,124.8 1296,56.8 1440,40L1440 140L0 140z" />
-                </svg>
-            </div>
-        </div>
+    <div class="acceso">
+        <img class="acceso-fondo" src="/felcc/img/login-fondo.webp" alt="" fetchpriority="high" decoding="async">
 
-        <div class="auth-page-content">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="text-center mt-sm-5 mb-4 text-white-50">
-                            <img src="/felcc/img/felcc.png" alt="FELCC" height="72" class="d-inline-block">
-                            <p class="mt-3 fs-15 fw-medium">Sistema de Gestión de Mandamientos de Aprehensión</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row justify-content-center">
-                    <div class="col-md-8 col-lg-6 col-xl-5">
-                        <slot />
-                    </div>
+        <header class="acceso-cabecera">
+            <div class="acceso-institucion">
+                <span class="acceso-tricolor" aria-hidden="true" />
+                <div>
+                    <p class="acceso-institucion-nombre">POLICÍA BOLIVIANA</p>
+                    <p class="acceso-institucion-detalle">Fuerza Especial de Lucha Contra el Crimen</p>
+                    <p class="acceso-institucion-detalle">Dirección de Análisis de Información Criminal</p>
                 </div>
             </div>
-        </div>
 
-        <footer class="footer">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="text-center">
-                            <p class="mb-0 text-muted">&copy; {{ anio }} FELCC. Sistema de Gestión de Mandamientos</p>
-                        </div>
-                    </div>
-                </div>
+            <div class="acceso-marca">
+                <i class="ri-shield-check-line" aria-hidden="true" />
+                <span>
+                    <span class="acceso-marca-nombre">FELCC - DACI</span>
+                    <span class="acceso-marca-lema">Análisis · Investigación · Resultados</span>
+                </span>
             </div>
-        </footer>
+        </header>
+
+        <main class="acceso-contenido">
+            <slot />
+            <p class="acceso-lema">Por una Bolivia más segura</p>
+        </main>
+
+        <footer class="acceso-pie">&copy; {{ anio }} FELCC<span class="acceso-pie-detalle"> · Dirección de Análisis de Información Criminal</span></footer>
     </div>
 </template>

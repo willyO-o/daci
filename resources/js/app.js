@@ -8,6 +8,7 @@ import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import AppLayout from './Layouts/AppLayout.vue';
 import AuthLayout from './Layouts/AuthLayout.vue';
 import Directivas from './Utils/directivas';
+import { ocultarPreloader } from './Utils/preloader';
 
 const appName = import.meta.env.VITE_APP_NAME || 'FELCC DACI';
 
@@ -25,11 +26,16 @@ createInertiaApp({
             return module;
         }),
     setup({ el, App, props, plugin }) {
-        return createApp({ render: () => h(App, props) })
+        const app = createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)
             .use(Directivas)
             .mount(el);
+
+        // Como la plantilla: la pantalla de carga se retira cuando el sistema ya está listo.
+        ocultarPreloader();
+
+        return app;
     },
     progress: {
         color: '#0ab39c',

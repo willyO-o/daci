@@ -1,7 +1,7 @@
 <script setup>
-import { ref } from 'vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
-import CampoError from '@/Components/Ui/CampoError.vue';
+import CampoAcceso from '@/Components/Acceso/CampoAcceso.vue';
+import TarjetaAcceso from '@/Components/Acceso/TarjetaAcceso.vue';
 
 defineProps({
     canResetPassword: { type: Boolean, default: false },
@@ -9,7 +9,6 @@ defineProps({
 });
 
 const page = usePage();
-const verClave = ref(false);
 
 const form = useForm({
     email: '',
@@ -27,75 +26,54 @@ const ingresar = () => {
 <template>
     <Head title="Iniciar sesión" />
 
-    <div class="card mt-4">
-        <div class="card-body p-4">
-            <div class="text-center mt-2">
-                <h5 class="text-primary">¡Bienvenido!</h5>
-                <p class="text-muted">Inicia sesión para continuar</p>
+    <TarjetaAcceso>
+        <p v-if="status" class="acceso-aviso acceso-aviso-exito" role="status">
+            <i class="ri-checkbox-circle-line" aria-hidden="true" />{{ status }}
+        </p>
+        <p v-if="page.props.flash?.message" class="acceso-aviso acceso-aviso-alerta" role="alert">
+            <i class="ri-alert-line" aria-hidden="true" />{{ page.props.flash.message }}
+        </p>
+
+        <form class="acceso-formulario" novalidate @submit.prevent="ingresar">
+            <CampoAcceso
+                id="email"
+                v-model="form.email"
+                tipo="email"
+                icono="ri-user-3-fill"
+                rotulo="Correo electrónico"
+                autocompletar="username"
+                :error="form.errors.email"
+                enfocar
+            />
+            <CampoAcceso
+                id="password"
+                v-model="form.password"
+                tipo="password"
+                icono="ri-lock-2-fill"
+                rotulo="Contraseña"
+                autocompletar="current-password"
+                :error="form.errors.password"
+            />
+
+            <div class="acceso-opciones">
+                <label class="acceso-recordar" for="remember">
+                    <input id="remember" v-model="form.remember" type="checkbox">
+                    Recordarme
+                </label>
+                <Link v-if="canResetPassword" :href="route('password.request')" class="acceso-enlace">¿Olvidó su contraseña?</Link>
             </div>
 
-            <div v-if="status" class="alert alert-success" role="status">{{ status }}</div>
-            <div v-if="page.props.flash?.message" class="alert alert-warning" role="alert">{{ page.props.flash.message }}</div>
+            <button class="acceso-boton" type="submit" :disabled="form.processing">
+                <template v-if="form.processing">
+                    <span class="spinner-border spinner-border-sm" aria-hidden="true" />
+                    Ingresando…
+                </template>
+                <template v-else>
+                    Ingresar <i class="ri-login-box-line" aria-hidden="true" />
+                </template>
+            </button>
+        </form>
 
-            <div class="p-2 mt-4">
-                <form novalidate @submit.prevent="ingresar">
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Correo Electrónico</label>
-                        <input
-                            id="email"
-                            v-model="form.email"
-                            type="email"
-                            class="form-control"
-                            :class="{ 'is-invalid': form.errors.email }"
-                            placeholder="Ingrese su correo electrónico"
-                            autocomplete="username"
-                            required
-                            autofocus
-                        >
-                        <CampoError :mensaje="form.errors.email" />
-                    </div>
-
-                    <div class="mb-3">
-                        <div v-if="canResetPassword" class="float-end">
-                            <Link :href="route('password.request')" class="text-muted">¿Olvidó su contraseña?</Link>
-                        </div>
-                        <label class="form-label" for="password">Contraseña</label>
-                        <div class="position-relative auth-pass-inputgroup">
-                            <input
-                                id="password"
-                                v-model="form.password"
-                                :type="verClave ? 'text' : 'password'"
-                                class="form-control pe-5 password-input"
-                                :class="{ 'is-invalid': form.errors.password }"
-                                placeholder="Ingrese su contraseña"
-                                autocomplete="current-password"
-                                required
-                            >
-                            <button
-                                class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted shadow-none password-addon"
-                                type="button"
-                                :aria-label="verClave ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-                                @click="verClave = !verClave"
-                            >
-                                <i class="align-middle" :class="verClave ? 'ri-eye-off-fill' : 'ri-eye-fill'" />
-                            </button>
-                        </div>
-                        <CampoError :mensaje="form.errors.password" />
-                    </div>
-
-                    <div class="form-check">
-                        <input id="remember" v-model="form.remember" class="form-check-input" type="checkbox">
-                        <label class="form-check-label" for="remember">Recordarme</label>
-                    </div>
-
-                    <div class="mt-4">
-                        <button class="btn btn-success w-100" type="submit" :disabled="form.processing">
-                            <span v-if="form.processing" class="spinner-border spinner-border-sm me-1" role="status" />
-                            {{ form.processing ? 'Ingresando…' : 'Iniciar Sesión' }}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+        <p class="acceso-seguro"><i class="ri-shield-keyhole-fill" aria-hidden="true" />Acceso seguro</p>
+    </TarjetaAcceso>
 </template>

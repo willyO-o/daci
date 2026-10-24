@@ -10,21 +10,28 @@
 
         <title inertia>{{ config('app.name') }}</title>
 
-        <link rel="shortcut icon" href="/assets/images/favicon.ico">
+        {{-- Escudo de la FELCC (generado de public/felcc/img/felcc.png: .ico con 16/32/48/64 px). --}}
+        <link rel="icon" href="/favicon.ico" sizes="any">
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+        <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
-        {{-- Aplica el tema guardado antes de pintar (evita el parpadeo claro → oscuro). --}}
+        {{-- Aplica los ajustes de «Personalizar tema» antes de pintar (evita el parpadeo claro → oscuro). Misma
+             lectura que resources/js/Composables/useTema.js (acepta el formato anterior { modo, sidebar }). --}}
         <script>
             (function () {
                 try {
                     var tema = JSON.parse(localStorage.getItem('felcc.tema') || '{}');
+                    var atributos = tema.atributos || {};
+                    if (tema.modo && !atributos['data-layout-mode']) { atributos['data-layout-mode'] = tema.modo; }
+                    if (tema.sidebar && !atributos['data-sidebar-size']) { atributos['data-sidebar-size'] = tema.sidebar; }
                     var html = document.documentElement;
-                    if (tema.modo === 'dark') {
-                        html.setAttribute('data-layout-mode', 'dark');
-                        html.setAttribute('data-bs-theme', 'dark');
-                    }
-                    if (tema.sidebar === 'sm' && window.innerWidth >= 1025) {
-                        html.setAttribute('data-sidebar-size', 'sm');
-                    }
+                    Object.keys(atributos).forEach(function (atributo) {
+                        if (atributo.indexOf('data-') !== 0) { return; }
+                        if (atributo === 'data-sidebar-size' && window.innerWidth < 1025) { return; }
+                        html.setAttribute(atributo, atributos[atributo]);
+                    });
+                    if (atributos['data-layout-mode']) { html.setAttribute('data-bs-theme', atributos['data-layout-mode']); }
                 } catch (e) {}
             })();
         </script>
@@ -40,6 +47,15 @@
         @inertiaHead
     </head>
     <body>
+        {{-- Pantalla de carga de la plantilla: sólo visible con data-preloader="enable" (Personalizar tema). --}}
+        <div id="preloader">
+            <div id="status">
+                <div class="spinner-border text-primary avatar-sm" role="status">
+                    <span class="visually-hidden">Cargando…</span>
+                </div>
+            </div>
+        </div>
+
         @inertia
     </body>
 </html>

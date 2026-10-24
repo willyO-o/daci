@@ -1,0 +1,558 @@
+/*
+ * Pantallas de acceso (login, recuperar y restablecer contraseña) — «propuesta 5».
+ * Fotografía del Palacio con la bandera, encabezado institucional con la franja tricolor, tarjeta de vidrio con el
+ * escudo de la FELCC y el lema. Todo bajo el prefijo `acceso-`: no toca el resto del sistema.
+ */
+
+.acceso {
+    --acceso-tinta: #f4f8f7;
+    --acceso-tinta-suave: rgba(236, 245, 243, 0.84);
+    --acceso-tinta-tenue: rgba(236, 245, 243, 0.68);
+    --acceso-linea: rgba(226, 240, 237, 0.42);
+    --acceso-linea-fuerte: rgba(240, 248, 246, 0.72);
+    --acceso-campo: rgba(8, 30, 34, 0.38);
+    --acceso-verde: #13a85a;
+    --acceso-verde-oscuro: #0a7f42;
+    --acceso-verde-claro: #3ddc8a;
+    --acceso-error: #ffb3a7;
+    --acceso-rojo: #d52b1e;
+    --acceso-amarillo: #f4d300;
+    --acceso-verde-bandera: #007a3d;
+    --acceso-titulos: 'Barlow', var(--vz-font-sans-serif, 'Inter', sans-serif);
+
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100svh;
+    overflow: hidden;
+    color: var(--acceso-tinta);
+    background-color: #0a2a2f;
+    caret-color: var(--acceso-verde-claro);
+}
+
+.acceso ::selection {
+    background-color: rgba(61, 220, 138, 0.35);
+    color: #fff;
+}
+
+/* Fondo: la foto llena la pantalla y se oscurece hacia arriba (encabezado) y hacia abajo (lema). */
+.acceso-fondo {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 60% 38%;
+}
+
+.acceso::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+        linear-gradient(180deg, rgba(4, 20, 24, 0.78) 0%, rgba(4, 22, 26, 0.36) 26%, rgba(4, 22, 26, 0.3) 62%, rgba(3, 16, 19, 0.86) 100%),
+        radial-gradient(120% 90% at 50% 52%, rgba(3, 18, 21, 0.1) 0%, rgba(3, 18, 21, 0.55) 100%);
+}
+
+/* Encabezado institucional */
+.acceso-cabecera {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: clamp(1.5rem, 3.2vw, 2.75rem) clamp(1.25rem, 4vw, 3.25rem) 0;
+}
+
+.acceso-institucion {
+    display: flex;
+    gap: 0.9rem;
+    align-items: stretch;
+}
+
+.acceso-tricolor {
+    flex-shrink: 0;
+    width: 4px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, var(--acceso-rojo) 0 33.3%, var(--acceso-amarillo) 33.3% 66.6%, var(--acceso-verde-bandera) 66.6% 100%);
+}
+
+.acceso-institucion-nombre {
+    margin: 0 0 0.2rem;
+    font-family: var(--acceso-titulos);
+    font-weight: 700;
+    font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+    letter-spacing: 0.02em;
+    line-height: 1.15;
+    color: var(--acceso-tinta);
+}
+
+.acceso-institucion-detalle {
+    margin: 0;
+    font-size: clamp(0.78rem, 1vw, 0.88rem);
+    line-height: 1.4;
+    color: var(--acceso-tinta-suave);
+}
+
+.acceso-marca {
+    display: none;
+    align-items: center;
+    gap: 0.7rem;
+    color: var(--acceso-tinta);
+}
+
+.acceso-marca i {
+    font-size: 2.4rem;
+    line-height: 1;
+}
+
+.acceso-marca-nombre {
+    display: block;
+    font-family: var(--acceso-titulos);
+    font-weight: 600;
+    font-size: 1.35rem;
+    line-height: 1.1;
+}
+
+.acceso-marca-lema {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--acceso-tinta-suave);
+}
+
+@media (min-width: 992px) {
+    .acceso-marca {
+        display: flex;
+    }
+}
+
+/* Zona central */
+.acceso-contenido {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(1.5rem, 3vh, 2.25rem);
+    padding: clamp(1.5rem, 3vh, 2.5rem) 1.25rem;
+}
+
+/* Tarjeta de vidrio: deja ver la foto detrás, desenfocada, para que el texto se lea sobre ella. */
+.acceso-tarjeta {
+    width: min(100%, 29rem);
+    padding: clamp(1.75rem, 3vw, 2.25rem) clamp(1.5rem, 3vw, 2.25rem) 1.75rem;
+    border: 1px solid rgba(226, 240, 237, 0.28);
+    border-radius: 1.25rem;
+    background: linear-gradient(160deg, rgba(20, 58, 64, 0.5) 0%, rgba(8, 32, 37, 0.62) 100%);
+    box-shadow:
+        0 30px 60px -24px rgba(0, 0, 0, 0.65),
+        0 1px 0 rgba(255, 255, 255, 0.12) inset;
+    backdrop-filter: blur(14px) saturate(135%);
+    -webkit-backdrop-filter: blur(14px) saturate(135%);
+    animation: acceso-entrada 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes acceso-entrada {
+    from {
+        transform: translateY(14px) scale(0.985);
+        filter: blur(6px);
+        opacity: 0.4;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .acceso-tarjeta {
+        animation: none;
+    }
+}
+
+.acceso-escudo {
+    display: block;
+    width: clamp(7rem, 14.5vh, 9.75rem);
+    height: auto;
+    margin: 0 auto 1rem;
+    filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.45));
+}
+
+.acceso-titulo {
+    margin: 0;
+    font-family: var(--acceso-titulos);
+    font-weight: 700;
+    font-size: clamp(2.1rem, 3.4vw, 2.6rem);
+    line-height: 1.05;
+    letter-spacing: 0.01em;
+    text-align: center;
+    color: #fff;
+    text-wrap: balance;
+}
+
+.acceso-subtitulo {
+    margin: 0.65rem 0 0;
+    font-size: 0.78rem;
+    font-weight: 500;
+    line-height: 1.55;
+    letter-spacing: 0.07em;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--acceso-tinta-suave);
+}
+
+.acceso-texto {
+    margin: 0.75rem 0 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    text-align: center;
+    color: var(--acceso-tinta-suave);
+    text-wrap: pretty;
+}
+
+.acceso-formulario {
+    display: grid;
+    gap: 0.9rem;
+    margin-top: 1.75rem;
+}
+
+/* Avisos (cuenta desactivada, enlace enviado…) legibles sobre el vidrio. */
+.acceso-aviso {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    margin: 1.25rem 0 0;
+    padding: 0.7rem 0.85rem;
+    border-radius: 0.65rem;
+    font-size: 0.86rem;
+    line-height: 1.45;
+    color: #fff;
+}
+
+.acceso-aviso i {
+    font-size: 1.1rem;
+    line-height: 1.25;
+}
+
+.acceso-aviso-exito {
+    background: rgba(19, 168, 90, 0.22);
+    border: 1px solid rgba(61, 220, 138, 0.45);
+}
+
+.acceso-aviso-alerta {
+    background: rgba(244, 211, 0, 0.14);
+    border: 1px solid rgba(244, 211, 0, 0.45);
+}
+
+/* Campos */
+.acceso-campo {
+    position: relative;
+}
+
+.acceso-campo-icono {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    font-size: 1.3rem;
+    color: var(--acceso-tinta);
+    pointer-events: none;
+}
+
+.acceso-campo-control {
+    display: block;
+    width: 100%;
+    height: 3.25rem;
+    padding: 0 3.25rem;
+    border: 1px solid var(--acceso-linea);
+    border-radius: 0.7rem;
+    background: var(--acceso-campo);
+    font-size: 0.98rem;
+    color: #fff;
+    transition: border-color 160ms ease-out, box-shadow 160ms ease-out, background-color 160ms ease-out;
+}
+
+.acceso-campo-control::placeholder {
+    color: var(--acceso-tinta-tenue);
+    opacity: 1;
+}
+
+.acceso-campo-control:hover {
+    border-color: var(--acceso-linea-fuerte);
+}
+
+.acceso-campo-control:focus,
+.acceso-campo-control:focus-visible {
+    outline: none;
+    border-color: var(--acceso-verde-claro);
+    background: rgba(8, 30, 34, 0.55);
+    box-shadow: 0 0 0 3px rgba(61, 220, 138, 0.25);
+}
+
+.acceso-campo-control[aria-invalid='true'] {
+    border-color: var(--acceso-error);
+}
+
+/* El autocompletado del navegador pinta el campo de amarillo: se mantiene el vidrio oscuro. */
+.acceso-campo-control:-webkit-autofill,
+.acceso-campo-control:-webkit-autofill:hover,
+.acceso-campo-control:-webkit-autofill:focus {
+    -webkit-text-fill-color: #fff;
+    caret-color: var(--acceso-verde-claro);
+    box-shadow: 0 0 0 1000px #0e3238 inset;
+    transition: background-color 9999s ease-out 0s;
+}
+
+.acceso-campo-ojo {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0.7rem;
+    background: transparent;
+    font-size: 1.3rem;
+    color: var(--acceso-tinta-suave);
+    transition: color 160ms ease-out;
+}
+
+.acceso-campo-ojo:hover {
+    color: #fff;
+}
+
+.acceso-campo-ojo:focus-visible {
+    outline: 2px solid var(--acceso-verde-claro);
+    outline-offset: -4px;
+}
+
+.acceso-campo-error {
+    display: flex;
+    gap: 0.35rem;
+    align-items: flex-start;
+    margin: 0.4rem 0 0 0.15rem;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    color: var(--acceso-error);
+}
+
+/* Recordarme · ¿Olvidó su contraseña? */
+.acceso-opciones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    font-size: 0.86rem;
+}
+
+.acceso-recordar {
+    display: inline-flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin: 0;
+    color: var(--acceso-tinta-suave);
+    cursor: pointer;
+}
+
+.acceso-recordar input {
+    width: 1.05rem;
+    height: 1.05rem;
+    margin: 0;
+    accent-color: var(--acceso-verde);
+    cursor: pointer;
+}
+
+.acceso-enlace {
+    color: var(--acceso-tinta-suave);
+    text-decoration: underline;
+    text-decoration-color: rgba(236, 245, 243, 0.4);
+    text-underline-offset: 0.2em;
+    transition: color 160ms ease-out, text-decoration-color 160ms ease-out;
+}
+
+.acceso-enlace:hover {
+    color: #fff;
+    text-decoration-color: currentColor;
+}
+
+.acceso-enlace:focus-visible,
+.acceso-recordar input:focus-visible {
+    outline: 2px solid var(--acceso-verde-claro);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* Botón principal */
+.acceso-boton {
+    display: inline-flex;
+    gap: 0.6rem;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 3.4rem;
+    margin-top: 0.35rem;
+    border: 1px solid rgba(61, 220, 138, 0.55);
+    border-radius: 0.7rem;
+    background: linear-gradient(180deg, var(--acceso-verde) 0%, var(--acceso-verde-oscuro) 100%);
+    box-shadow: 0 12px 24px -12px rgba(10, 127, 66, 0.85), 0 1px 0 rgba(255, 255, 255, 0.18) inset;
+    font-family: var(--acceso-titulos);
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: #fff;
+    transition: filter 160ms ease-out, transform 120ms ease-out, box-shadow 160ms ease-out;
+}
+
+.acceso-boton i {
+    font-size: 1.35rem;
+}
+
+.acceso-boton:hover:not(:disabled) {
+    filter: brightness(1.08);
+    box-shadow: 0 16px 28px -12px rgba(10, 127, 66, 0.95), 0 1px 0 rgba(255, 255, 255, 0.2) inset;
+}
+
+.acceso-boton:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.acceso-boton:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+}
+
+.acceso-boton:disabled {
+    cursor: progress;
+    filter: saturate(0.7);
+    opacity: 0.85;
+}
+
+.acceso-seguro {
+    display: flex;
+    gap: 0.45rem;
+    align-items: center;
+    justify-content: center;
+    margin: 1.25rem 0 0;
+    font-size: 0.86rem;
+    font-weight: 500;
+    color: var(--acceso-tinta-suave);
+}
+
+.acceso-seguro i {
+    font-size: 1.15rem;
+    color: #fff;
+}
+
+/* Lema */
+.acceso-lema {
+    display: flex;
+    gap: 1.1rem;
+    align-items: center;
+    margin: 0;
+    font-family: var(--acceso-titulos);
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(1rem, 1.3vw, 1.15rem);
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+.acceso-lema::before,
+.acceso-lema::after {
+    content: '';
+    width: clamp(2.25rem, 5vw, 4rem);
+    height: 1px;
+    background: var(--acceso-linea-fuerte);
+}
+
+.acceso-pie {
+    padding: 0 1.25rem clamp(1.25rem, 2.5vh, 1.75rem);
+    font-size: 0.75rem;
+    text-align: center;
+    color: var(--acceso-tinta-tenue);
+}
+
+/* Celular: la foto se centra en el Palacio y la bandera; el formulario va sin caja, directo sobre la foto. */
+@media (max-width: 575.98px) {
+    .acceso-fondo {
+        object-position: 70% center;
+    }
+
+    .acceso::before {
+        background: linear-gradient(180deg, rgba(4, 20, 24, 0.82) 0%, rgba(4, 22, 26, 0.5) 30%, rgba(4, 22, 26, 0.55) 60%, rgba(3, 16, 19, 0.9) 100%);
+    }
+
+    .acceso-tarjeta {
+        padding: 0;
+        border: 0;
+        background: none;
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    .acceso-titulo {
+        text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .acceso-escudo {
+        width: 8.75rem;
+    }
+
+    .acceso-subtitulo {
+        font-size: 0.68rem;
+        letter-spacing: 0.035em;
+    }
+
+    .acceso-pie-detalle {
+        display: none;
+    }
+}
+
+/* Pantallas bajas (laptops de 768 px): todo, lema incluido, entra sin desplazar. */
+@media (min-width: 576px) and (max-height: 820px) {
+    .acceso-cabecera {
+        padding-top: 1.25rem;
+    }
+
+    .acceso-contenido {
+        gap: 1rem;
+        padding-block: 0.75rem;
+    }
+
+    .acceso-tarjeta {
+        padding-block: 1.4rem 1.25rem;
+    }
+
+    .acceso-escudo {
+        width: 5.75rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .acceso-titulo {
+        font-size: 2rem;
+    }
+
+    .acceso-formulario {
+        margin-top: 1.25rem;
+        gap: 0.75rem;
+    }
+
+    .acceso-seguro {
+        margin-top: 0.9rem;
+    }
+
+    .acceso-pie {
+        display: none;
+    }
+}

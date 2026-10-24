@@ -4,6 +4,8 @@ import { usePage } from '@inertiajs/vue3';
 import AppTopbar from '@/Components/Layout/AppTopbar.vue';
 import AppSidebar from '@/Components/Layout/AppSidebar.vue';
 import AppFooter from '@/Components/Layout/AppFooter.vue';
+import AppCustomizer from '@/Components/Layout/AppCustomizer.vue';
+import BotonVolverArriba from '@/Components/Layout/BotonVolverArriba.vue';
 import { useTema } from '@/Composables/useTema';
 import { useNotificacion } from '@/Composables/useNotificacion';
 
@@ -48,5 +50,8 @@ watch(
             </div>
             <AppFooter />
         </div>
+
+        <BotonVolverArriba />
+        <AppCustomizer />
     </div>
 </template>

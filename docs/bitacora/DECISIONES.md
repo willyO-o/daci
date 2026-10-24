@@ -170,3 +170,23 @@ modificar roles, permisos y sus controles.
    No se fuerza nada: `DESPLIEGUE.md` indica revisar `migrate:status` en producción y decidir antes de migrar.
 
 Pruebas: `UsuariosTest` (2) y `MigracionRolesTest` (2).
+
+## D-019 · Segunda verificación de paridad (2026-10-24 09:22)
+
+Se recorrieron otra vez las 142 rutas, las 60 vistas Blade y todos los eventos de los scripts jQuery del sistema
+anterior. Faltaban tres piezas del **layout** (la funcionalidad de los módulos ya estaba completa):
+
+1. **«Theme Customizer» de Velzon** (engranaje flotante): ahora `AppCustomizer` con los mismos ajustes — esquema de
+   color, ancho (completo/encajado), posición (fija/desplazable), color de la barra superior, tamaño del menú (4),
+   vista del menú (normal/separado), color del menú (claro, oscuro, 4 degradados), imagen del menú (4) y pantalla de
+   carga — guardados por navegador en `felcc.tema` (lee el formato anterior). **No se incluye** «Layout» horizontal /
+   dos columnas: requiere otro marcado del menú; queda a decisión del usuario.
+2. **Botón «volver arriba»** y **pantalla de carga** (`#preloader`) de la plantilla.
+3. **Página de error propia**: el anterior tenía su 404 («Uppsi! Página no encontrada»). Ahora `Errores/Error` con
+   el mismo diseño, también para 403/419/500/503; JSON sigue siendo JSON y en local los 500 muestran la depuración.
+
+Revisado y **sin nada que trasladar** (código muerto en el anterior): `telefonos.agregar-imei` (botón oculto y escribe
+en una columna inexistente `imeis_asociados`), `.btn-desvincular-persona-tabla` (el evento existe pero ningún HTML
+dibuja el botón), buscador móvil y notificaciones de la barra superior (plantilla sin función / comentado), rutas
+`create/edit/show/update/destroy` vacías de los catálogos y de `paises`, y los endpoints de filtros de auditoría
+(ahora llegan como props).

@@ -100,5 +100,15 @@ Leyenda: ✅ migrado igual · 🔧 migrado con corrección · ➖ no se migra (c
 
 | Anterior | DACI | Estado |
 |---|---|---|
-| `users.role_id` → `roles` | Spatie (`model_has_roles`) + `users.role_id` → `roles_legado` en espejo (`User::asignarRol`) | 🔧 rollback a FELCC conserva el rol (D-018) |
+| `users.role_id` → `roles` | Spatie (`model_has_roles`) + `users.role_id` → `roles_legado` en espejo (`User::asignarRol`) | 🔧 rollback a FELCC conserva el rol (D-019) |
 | — | `acceso:sincronizar` repara `users.role_id` | nuevo |
+
+## Layout (verificado 2026-10-24)
+
+| Anterior | DACI | Estado |
+|---|---|---|
+| Theme Customizer de Velzon (engranaje) | `AppCustomizer` | 🔧 todos los ajustes salvo layout horizontal / dos columnas |
+| Botón volver arriba · preloader | `BotonVolverArriba` · `#preloader` | ✅ |
+| `errors/404.blade.php` | `Errores/Error` (403/404/419/500/503) | ✅ |
+| Barra superior: pantalla completa, modo oscuro, usuario, perfil, salir | `AppTopbar` | ✅ (buscador móvil y notificaciones eran restos de la plantilla) |
+| Login Velzon (fondo de partículas) | `AuthLayout` «propuesta 5» (foto del Palacio, tarjeta de vidrio) | 🔧 rediseño pedido; misma funcionalidad |
