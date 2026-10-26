@@ -26,7 +26,7 @@ description: Convenciones OBLIGATORIAS de base de datos, persistencia y consulta
    editan.** Una base puede no tenerlas todas ejecutadas (la copia local `felcc` tenía 34: le faltaban
    `remove_unique_from_ci_in_persona_table` y `create_audits_table`); `migrate` las correría junto con la de roles.
 3. **Nunca** `migrate:fresh`, `migrate:refresh`, `db:wipe` ni `db:seed` sin `--class` contra `felcc1`.
-   `DatabaseSeeder` sólo corre `acceso:sincronizar` (idempotente). Los catálogos iniciales de una base vacía están en
+   `DatabaseSeeder` sólo corre `PermisosSeeder` (idempotente, sólo agrega permisos/roles base; seguro en producción). Los catálogos iniciales de una base vacía están en
    `InstalacionNuevaSeeder` y **no** se corren en producción.
 4. Los tests usan la base **`felcc_pruebas`** (MariaDB, porque el código heredado usa `CONCAT`, `JSON_OBJECT`, `MD5()`…);
    `tests/TestCase.php` aborta si la base configurada es otra. Jamás apuntan a `felcc1`.

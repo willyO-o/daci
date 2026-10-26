@@ -190,3 +190,22 @@ en una columna inexistente `imeis_asociados`), `.btn-desvincular-persona-tabla` 
 dibuja el botón), buscador móvil y notificaciones de la barra superior (plantilla sin función / comentado), rutas
 `create/edit/show/update/destroy` vacías de los catálogos y de `paises`, y los endpoints de filtros de auditoría
 (ahora llegan como props).
+
+## D-020 · `PermisosSeeder`: actualizar permisos sin afectar el resto de la base (2026-10-26 17:31)
+
+**Pedido:** un seeder que, cada vez que se agregue un permiso, lo inserte al ejecutarse sin afectar el resto de la
+información.
+
+**Decisión:** la lógica vive en `App\Support\Acceso\SincronizadorAcceso` y la usan `PermisosSeeder` (que llama
+`DatabaseSeeder`) y `acceso:sincronizar` (atajo del seeder). Corre en una transacción y **sólo agrega**: permisos y
+roles base que falten, todos los permisos al superadmin, el espejo de `users.role_id` y la asignación de
+`CatalogoPermisos::asignacionInicial()` **sólo para los permisos creados en esa corrida**. No usa `syncPermissions`
+ni borra nada: lo configurado en la pantalla de roles se respeta. Los permisos de la base que ya no están en el
+catálogo se informan, no se borran.
+
+**Descartado:** sincronizar «a espejo» (borrar lo que no está en el catálogo o rehacer los permisos de cada rol) —
+borraría asignaciones hechas por el administrador. **Descartado:** dar cada permiso nuevo a los roles en todas las
+corridas — volvería a dar un permiso que el administrador quitó.
+
+Verificado sobre la base local `felcc`: segunda corrida con sumas de verificación idénticas en `permissions`,
+`roles`, `role_has_permissions`, `model_has_roles`, `users` y `persona`. Pruebas: `PermisosSeederTest` (6).

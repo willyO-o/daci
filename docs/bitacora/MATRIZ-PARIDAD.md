@@ -86,6 +86,7 @@ Leyenda: ✅ migrado igual · 🔧 migrado con corrección · ➖ no se migra (c
 | `db:backup` (programado 00:00) | igual, en `routes/console.php` | ✅ |
 | `backup:verify` | igual | ✅ |
 | — | `acceso:sincronizar` | nuevo |
+| — | `PermisosSeeder` (`db:seed --class=PermisosSeeder`; `acceso:sincronizar` lo llama) | nuevo (2026-10-26): sólo agrega |
 | — | `personas:eliminar-duplicados` | 🔧 reemplaza la URL |
 
 ## Comportamientos de pantalla revisados (2026-10-22 23:15)

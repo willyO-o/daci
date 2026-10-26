@@ -12,8 +12,9 @@ namespace App\Support\Acceso;
  *  - el menú lateral (`resources/js/Navegacion/navegacion.js`),
  *  - los botones de cada pantalla (`usePermisos().puede('personas.crear')`).
  *
- * Para añadir un permiso: sumarlo a {@see self::modulos()}, protegerlo en su ruta y correr
- * `php artisan acceso:sincronizar` (crea el permiso y se lo da al rol superadmin).
+ * Para añadir un permiso: sumarlo a {@see self::modulos()}, declarar en {@see self::asignacionInicial()} qué roles
+ * lo reciben al crearse, protegerlo en su ruta y correr `php artisan db:seed --class=PermisosSeeder` (o
+ * `php artisan acceso:sincronizar`, que hace lo mismo): crea el permiso, se lo da al superadmin y a esos roles.
  */
 final class CatalogoPermisos
 {
@@ -165,6 +166,24 @@ final class CatalogoPermisos
         }
 
         return $permisos;
+    }
+
+    /**
+     * Roles que reciben un permiso NUEVO la primera vez que se crea en la base (`PermisosSeeder` /
+     * `acceso:sincronizar`). Sólo se aplica en esa corrida: después, el permiso se administra desde la pantalla de
+     * roles y volver a sembrar no lo reasigna. El superadmin no se lista: recibe todos siempre.
+     *
+     * Al agregar un permiso al catálogo, declarar aquí quién debe tenerlo desde el inicio, por ejemplo:
+     *
+     *     'reportes.pdf' => [self::ROL_ADMINISTRADOR],
+     *
+     * @return array<string, list<string>>
+     */
+    public static function asignacionInicial(): array
+    {
+        return [
+            // Los 49 permisos originales se asignaron en la migración de roles (2026_10_22_120000).
+        ];
     }
 
     /**

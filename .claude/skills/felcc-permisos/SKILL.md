@@ -46,10 +46,15 @@ El menú (`Navegacion/navegacion.js`) usa el mismo slug que la ruta.
 ## Agregar un permiso
 
 1. Sumarlo a `CatalogoPermisos::modulos()` con su etiqueta.
-2. Protegerlo en la ruta y usarlo en `navegacion.js` / botones.
-3. `php artisan acceso:sincronizar` — crea el permiso y se lo da a superadmin. **No** quita permisos a ningún rol.
-4. Darlo a los demás roles desde la pantalla de roles (o, si debe venir en una instalación, en un seeder idempotente).
-5. Tests: el de autorización de rutas y el del menú.
+2. Si otros roles deben tenerlo desde el inicio, declararlo en `CatalogoPermisos::asignacionInicial()`
+   (`'reportes.pdf' => [self::ROL_ADMINISTRADOR]`). Se aplica **sólo la corrida en que el permiso se crea**.
+3. Protegerlo en la ruta y usarlo en `navegacion.js` / botones.
+4. `php artisan db:seed --class=PermisosSeeder --force` (o `php artisan acceso:sincronizar`, mismo efecto). La lógica
+   está en `App\Support\Acceso\SincronizadorAcceso`, en una transacción, y **sólo agrega**: permisos y roles base
+   faltantes, todo al superadmin, la asignación inicial de los permisos recién creados y el espejo de
+   `users.role_id`. Nunca borra ni quita permisos; los que están en la base pero no en el catálogo sólo se informan.
+5. Después, el permiso se administra en la pantalla de roles (volver a sembrar no lo reasigna).
+6. Tests: el de autorización de rutas y el del menú.
 
 ## Traducción del sistema anterior (no perder accesos)
 
