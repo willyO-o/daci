@@ -29,6 +29,14 @@ class ImeiController extends Controller
         ]);
     }
 
+    /**
+     * «Registrar IMEI» como página propia: sólo el formulario, sin el listado (permiso `imeis.crear`).
+     */
+    public function create(): Response
+    {
+        return Inertia::render('Imeis/Registrar');
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $datos = $this->validar($request);

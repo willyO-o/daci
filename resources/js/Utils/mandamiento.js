@@ -7,6 +7,9 @@ const COLORES = {
 
 export const colorEstado = (estado) => COLORES[estado] ?? 'secondary';
 
+/** El estado pide datos de ejecución si contiene «EJECUTADO» (mismo criterio que el servidor). */
+export const esEjecutado = (estado) => (estado ?? '').toUpperCase().includes('EJECUTADO');
+
 /** Filtros de búsqueda del listado y la consulta de mandamientos (mismos valores que el servidor). */
 export const FILTROS_MANDAMIENTO = [
     { valor: 'hoja_ruta', etiqueta: 'Hoja de Ruta' },

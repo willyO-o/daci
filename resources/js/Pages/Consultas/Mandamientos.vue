@@ -6,8 +6,10 @@ import RangoFechas from '@/Components/Ui/RangoFechas.vue';
 import VisorImagenes from '@/Components/Ui/VisorImagenes.vue';
 import DetalleMandamiento from '@/Components/Mandamientos/DetalleMandamiento.vue';
 import ListadoMandamientos from '@/Components/Mandamientos/ListadoMandamientos.vue';
+import ModalEstadoMandamiento from '@/Components/Mandamientos/ModalEstadoMandamiento.vue';
 import { useCargaInfinita } from '@/Composables/useCargaInfinita';
 import { useNotificacion } from '@/Composables/useNotificacion';
+import { usePermisos } from '@/Composables/usePermisos';
 import { useVistaGuardada } from '@/Composables/useVistaGuardada';
 import { FILTROS_MANDAMIENTO } from '@/Utils/mandamiento';
 import { http } from '@/Utils/http';
@@ -17,7 +19,13 @@ import { nuevoIdentificador } from '@/Utils/uuid';
  * Consulta de mandamientos: se busca con un filtro elegido y al menos 4 caracteres. Cada búsqueda nueva lleva un
  * identificador que el servidor registra en la Auditoría de consultas junto con los detalles que se abran.
  */
+defineProps({
+    /** Estados más usados, para sugerir en el modal de estado (vacío sin el permiso). */
+    estados: { type: Array, default: () => [] },
+});
+
 const { errorDeRespuesta } = useNotificacion();
+const { puede } = usePermisos();
 
 const FILTROS = [
     FILTROS_MANDAMIENTO[0],
@@ -63,6 +71,19 @@ const verDetalle = async (mandamiento) => {
     } catch (err) {
         modalDetalle.value = false;
         errorDeRespuesta(err);
+    }
+};
+
+// Estado de ejecución (permiso `mandamientos.estado`): actualiza la tarjeta sin repetir la búsqueda.
+const modalEstado = ref(false);
+const enEstado = ref(null);
+const abrirEstado = (mandamiento) => {
+    enEstado.value = mandamiento;
+    modalEstado.value = true;
+};
+const estadoGuardado = (datos) => {
+    if (datos) {
+        lista.actualizar(datos);
     }
 };
 
@@ -117,7 +138,9 @@ const verImagenes = (rutas) => {
                 :lista="lista"
                 :vista="vista"
                 ayuda-vacio="Revise el texto buscado o pruebe con otro filtro."
+                :puede-cambiar-estado="puede('mandamientos.estado')"
                 @ver="verDetalle"
+                @cambiar-estado="abrirEstado"
                 @ver-imagenes="verImagenes"
             />
             <div v-else class="card-body text-center text-muted py-5">
@@ -133,6 +156,8 @@ const verImagenes = (rutas) => {
                 <button type="button" class="btn btn-light" @click="cerrar">Cerrar</button>
             </template>
         </BaseModal>
+
+        <ModalEstadoMandamiento v-model="modalEstado" :mandamiento="enEstado" :estados="estados" @guardado="estadoGuardado" />
 
         <VisorImagenes v-model="visor" :rutas="imagenes" />
     </div>

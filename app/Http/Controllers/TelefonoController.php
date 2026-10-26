@@ -36,6 +36,14 @@ class TelefonoController extends Controller
         ]);
     }
 
+    /**
+     * «Registrar Teléfono» como página propia: sólo el formulario, sin el listado (permiso `telefonos.crear`).
+     */
+    public function create(): Response
+    {
+        return Inertia::render('Telefonos/Registrar');
+    }
+
     public function store(Request $request): RedirectResponse
     {
         Telefono::create($this->validar($request));

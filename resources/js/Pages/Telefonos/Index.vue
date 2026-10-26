@@ -8,6 +8,7 @@ import CampoError from '@/Components/Ui/CampoError.vue';
 import EstadoVacio from '@/Components/Ui/EstadoVacio.vue';
 import FilasCargando from '@/Components/Ui/FilasCargando.vue';
 import Paginacion from '@/Components/Ui/Paginacion.vue';
+import FormularioTelefono from '@/Components/Telefonos/FormularioTelefono.vue';
 import { useListado } from '@/Composables/useListado';
 import { useNotificacion } from '@/Composables/useNotificacion';
 import { usePermisos } from '@/Composables/usePermisos';
@@ -37,47 +38,18 @@ const FILTROS = [
 const numero = (indice) => (props.telefonos.from ?? 1) + indice;
 const textoPersona = (persona) => `${persona.nombres} ${persona.apellidos ?? ''}${persona.ci ? ` (${persona.ci})` : ''}`;
 
-// Alta / edición
-const VACIO = {
-    numero_celular: '',
-    empresa: '',
-    persona_caso: '',
-    caso: '',
-    persona_id: null,
-    respuesta_requerimiento: '',
-    informacion: '',
-    callapp: '',
-    truecall: '',
-    uninet: '',
-};
+// Alta / edición: el formulario es `FormularioTelefono` (el mismo de «Registrar Teléfono»).
 const modalFormulario = ref(false);
 const editando = ref(null);
-const textoPersonaInicial = ref('');
-const form = useForm({ ...VACIO });
+const formulario = ref(null);
 
 const abrirNuevo = () => {
     editando.value = null;
-    form.defaults({ ...VACIO });
-    form.reset();
-    form.clearErrors();
-    textoPersonaInicial.value = '';
     modalFormulario.value = true;
 };
 const abrirEditar = (telefono) => {
     editando.value = telefono;
-    form.defaults(Object.fromEntries(Object.keys(VACIO).map((campo) => [campo, telefono[campo] ?? VACIO[campo]])));
-    form.reset();
-    form.clearErrors();
-    textoPersonaInicial.value = telefono.persona ? textoPersona(telefono.persona) : '';
     modalFormulario.value = true;
-};
-const guardar = () => {
-    const opciones = { preserveScroll: true, preserveState: true, onSuccess: () => (modalFormulario.value = false) };
-    if (editando.value) {
-        form.put(route('telefonos.update', editando.value.id), opciones);
-    } else {
-        form.post(route('telefonos.store'), opciones);
-    }
 };
 
 // Detalle
@@ -209,68 +181,11 @@ const urlPersona = computed(() => (detalle.value?.persona && route().has('person
         </div>
 
         <BaseModal v-model="modalFormulario" :titulo="editando ? 'Editar Teléfono' : 'Nuevo Teléfono'" tamano="lg" estatico>
-            <form id="formTelefono" novalidate @submit.prevent="guardar">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label for="numero_celular" class="form-label">Número Celular <span class="text-danger">*</span></label>
-                        <input id="numero_celular" v-model="form.numero_celular" v-solo-numeros type="text" class="form-control" :class="{ 'is-invalid': form.errors.numero_celular }" placeholder="Ej: 71234567">
-                        <CampoError :mensaje="form.errors.numero_celular" />
-                    </div>
-                    <div class="col-md-6">
-                        <label for="empresa" class="form-label">Empresa</label>
-                        <input id="empresa" v-model="form.empresa" v-mayuscula type="text" class="form-control" :class="{ 'is-invalid': form.errors.empresa }" placeholder="Ej: Viva, Entel, Tigo">
-                        <CampoError :mensaje="form.errors.empresa" />
-                    </div>
-                    <div class="col-md-6">
-                        <label for="persona_caso" class="form-label">Persona del caso</label>
-                        <input id="persona_caso" v-model="form.persona_caso" v-mayuscula type="text" class="form-control" :class="{ 'is-invalid': form.errors.persona_caso }" placeholder="Nombre de la persona o caso">
-                        <CampoError :mensaje="form.errors.persona_caso" />
-                    </div>
-                    <div class="col-md-6">
-                        <label for="caso" class="form-label">Caso</label>
-                        <input id="caso" v-model="form.caso" v-mayuscula type="text" class="form-control" :class="{ 'is-invalid': form.errors.caso }" placeholder="Referencia del caso">
-                        <CampoError :mensaje="form.errors.caso" />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Relacionar con Persona (opcional)</label>
-                        <BuscadorRemoto
-                            v-model="form.persona_id"
-                            :url="route('personas.search')"
-                            :texto-inicial="textoPersonaInicial"
-                            placeholder="Seleccionar persona (opcional)"
-                            :mapear="(p) => ({ id: p.id, texto: textoPersona(p) })"
-                            :invalido="Boolean(form.errors.persona_id)"
-                        />
-                        <CampoError :mensaje="form.errors.persona_id" />
-                    </div>
-                    <div class="col-md-6">
-                        <label for="respuesta_requerimiento" class="form-label">Respuesta Requerimiento</label>
-                        <input id="respuesta_requerimiento" v-model="form.respuesta_requerimiento" type="text" class="form-control" :class="{ 'is-invalid': form.errors.respuesta_requerimiento }" placeholder="Estado de la respuesta">
-                        <CampoError :mensaje="form.errors.respuesta_requerimiento" />
-                    </div>
-                    <div class="col-md-6">
-                        <label for="informacion" class="form-label">Información</label>
-                        <input id="informacion" v-model="form.informacion" type="text" class="form-control" :class="{ 'is-invalid': form.errors.informacion }" placeholder="Información adicional sobre el teléfono">
-                        <CampoError :mensaje="form.errors.informacion" />
-                    </div>
-                    <div class="col-md-6">
-                        <label for="callapp" class="form-label">CallApp</label>
-                        <input id="callapp" v-model="form.callapp" type="text" class="form-control" :class="{ 'is-invalid': form.errors.callapp }" placeholder="Información CallApp">
-                    </div>
-                    <div class="col-md-6">
-                        <label for="truecall" class="form-label">TrueCall</label>
-                        <input id="truecall" v-model="form.truecall" type="text" class="form-control" :class="{ 'is-invalid': form.errors.truecall }" placeholder="Información TrueCall">
-                    </div>
-                    <div class="col-md-6">
-                        <label for="uninet" class="form-label">UniNet</label>
-                        <input id="uninet" v-model="form.uninet" type="text" class="form-control" :class="{ 'is-invalid': form.errors.uninet }" placeholder="Información UniNet">
-                    </div>
-                </div>
-            </form>
+            <FormularioTelefono ref="formulario" :telefono="editando" @guardado="modalFormulario = false" />
             <template #pie="{ cerrar }">
                 <button type="button" class="btn btn-secondary" @click="cerrar"><i class="ri-close-line align-middle me-1" /> Cancelar</button>
-                <button type="submit" form="formTelefono" class="btn btn-primary" :disabled="form.processing">
-                    <i class="align-middle me-1" :class="form.processing ? 'ri-loader-4-line' : 'ri-save-3-line'" /> {{ form.processing ? 'Guardando…' : 'Guardar' }}
+                <button type="submit" form="formTelefono" class="btn btn-primary" :disabled="formulario?.procesando">
+                    <i class="align-middle me-1" :class="formulario?.procesando ? 'ri-loader-4-line' : 'ri-save-3-line'" /> {{ formulario?.procesando ? 'Guardando…' : 'Guardar' }}
                 </button>
             </template>
         </BaseModal>

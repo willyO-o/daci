@@ -59,6 +59,7 @@ export const navegacion = [
     },
     {
         titulo: 'EREBOR',
+        // «Registrar …»: para quien registra pero no ve el listado (igual que «Registrar Mandamiento»).
         items: [
             {
                 etiqueta: 'Registro Criminal',
@@ -75,11 +76,23 @@ export const navegacion = [
                 permiso: 'personas.listar',
             },
             {
+                etiqueta: 'Registrar Persona',
+                icono: 'mdi mdi-account-plus-outline',
+                ruta: 'personas.create',
+                permiso: (puede) => puede('personas.crear') && !puede('personas.listar'),
+            },
+            {
                 etiqueta: 'Teléfonos',
                 icono: 'mdi mdi-phone',
                 ruta: 'telefonos.index',
                 activo: ['telefonos.index', 'telefonos.show'],
                 permiso: 'telefonos.listar',
+            },
+            {
+                etiqueta: 'Registrar Teléfono',
+                icono: 'mdi mdi-phone-plus',
+                ruta: 'telefonos.create',
+                permiso: (puede) => puede('telefonos.crear') && !puede('telefonos.listar'),
             },
             {
                 etiqueta: 'IMEIs',
@@ -89,11 +102,23 @@ export const navegacion = [
                 permiso: 'imeis.listar',
             },
             {
+                etiqueta: 'Registrar IMEI',
+                icono: 'mdi mdi-plus-box-outline',
+                ruta: 'imeis.create',
+                permiso: (puede) => puede('imeis.crear') && !puede('imeis.listar'),
+            },
+            {
                 etiqueta: 'Vehículos',
                 icono: 'mdi mdi-car',
                 ruta: 'vehiculos.index',
                 activo: ['vehiculos.index', 'vehiculos.show'],
                 permiso: 'vehiculos.listar',
+            },
+            {
+                etiqueta: 'Registrar Vehículo',
+                icono: 'mdi mdi-car-arrow-right',
+                ruta: 'vehiculos.create',
+                permiso: (puede) => puede('vehiculos.crear') && !puede('vehiculos.listar'),
             },
         ],
     },

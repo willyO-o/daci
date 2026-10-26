@@ -48,6 +48,7 @@ final class CatalogoPermisos
                     'mandamientos.crear' => 'Registrar',
                     'mandamientos.editar' => 'Editar',
                     'mandamientos.eliminar' => 'Eliminar',
+                    'mandamientos.estado' => 'Actualizar estado de ejecución (desde Consultas)',
                 ],
             ],
             'consultas' => [
@@ -183,6 +184,9 @@ final class CatalogoPermisos
     {
         return [
             // Los 49 permisos originales se asignaron en la migración de roles (2026_10_22_120000).
+
+            // 2026-10-26: los roles que ya podían editar mandamientos (incluido el estado) y consultarlos.
+            'mandamientos.estado' => [self::ROL_ADMINISTRADOR, self::ROL_TECNICO_FELCC, self::ROL_TECNICO_DACI],
         ];
     }
 

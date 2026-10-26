@@ -1,6 +1,6 @@
 # Estado actual
 
-> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-10-26 17:31 (Bolivia).
+> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-10-26 18:42 (Bolivia).
 
 ## Resumen
 
@@ -12,7 +12,9 @@ inesperados (D-018). 100 pruebas en verde.
 2026-10-24: segunda verificación de paridad; se agregaron el panel «Personalizar tema», «volver arriba», la pantalla de
 carga y las páginas de error de la plantilla (D-019). 103 pruebas en verde.
 2026-10-26: `PermisosSeeder` para actualizar permisos cada vez que se agregan, sin afectar el resto de la base (D-020).
-109 pruebas en verde.
+2026-10-26: botón «Estado de ejecución» en Consultas › Mandamientos, permiso `mandamientos.estado` (D-021).
+2026-10-26: páginas «Registrar Persona / Teléfono / IMEI / Vehículo» con el permiso «Registrar» y tarjetas de
+registro rápido en el Dashboard (D-022). 130 pruebas en verde.
 
 > **Producción es otra base** (más información que la local). No se borra nada; sólo se tocan roles, permisos y sus
 > controles. Su estado de migraciones se verifica allí antes de desplegar.

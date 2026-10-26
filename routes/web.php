@@ -66,6 +66,7 @@ Route::middleware('auth')->group(function () {
 
     // Consultas
     Route::get('/consultas/mandamientos', [MandamientoController::class, 'consultarMandamientos'])->name('consultas.mandamientos')->middleware('permission:consultas.mandamientos');
+    Route::patch('/consultas/mandamientos/{mandamiento}/estado', [MandamientoController::class, 'actualizarEstado'])->whereNumber('mandamiento')->name('consultas.mandamientos.estado')->middleware('permission:consultas.mandamientos', 'permission:mandamientos.estado');
 
     Route::get('/consultas/registro-criminal', [RegistroCriminalController::class, 'consultarRegistroCriminal'])->name('consultas.registro-criminal')->middleware('permission:consultas.registro_criminal');
 
@@ -84,6 +85,7 @@ Route::middleware('auth')->group(function () {
 
     // EREBOR › Personas
     Route::get('/personas', [PersonaController::class, 'index'])->name('personas.index')->middleware('permission:personas.listar');
+    Route::get('/personas/create', [PersonaController::class, 'create'])->name('personas.create')->middleware('permission:personas.crear');
     Route::post('/personas', [PersonaController::class, 'store'])->name('personas.store')->middleware('permission:personas.crear');
     Route::get('/personas/{persona}', [PersonaController::class, 'show'])->whereNumber('persona')->name('personas.show')->middleware('permission:personas.ver');
     Route::match(['put', 'patch'], '/personas/{persona}', [PersonaController::class, 'update'])->whereNumber('persona')->name('personas.update')->middleware('permission:personas.editar');
@@ -97,6 +99,7 @@ Route::middleware('auth')->group(function () {
 
     // EREBOR › Teléfonos
     Route::get('/telefonos', [TelefonoController::class, 'index'])->name('telefonos.index')->middleware('permission:telefonos.listar');
+    Route::get('/telefonos/create', [TelefonoController::class, 'create'])->name('telefonos.create')->middleware('permission:telefonos.crear');
     Route::post('/telefonos', [TelefonoController::class, 'store'])->name('telefonos.store')->middleware('permission:telefonos.crear');
     Route::get('/telefonos/{telefono}', [TelefonoController::class, 'show'])->whereNumber('telefono')->name('telefonos.show')->middleware('permission:telefonos.ver');
     Route::match(['put', 'patch'], '/telefonos/{telefono}', [TelefonoController::class, 'update'])->whereNumber('telefono')->name('telefonos.update')->middleware('permission:telefonos.editar');
@@ -106,6 +109,7 @@ Route::middleware('auth')->group(function () {
 
     // EREBOR › IMEIs
     Route::get('/imeis', [ImeiController::class, 'index'])->name('imeis.index')->middleware('permission:imeis.listar');
+    Route::get('/imeis/create', [ImeiController::class, 'create'])->name('imeis.create')->middleware('permission:imeis.crear');
     Route::post('/imeis', [ImeiController::class, 'store'])->name('imeis.store')->middleware('permission:imeis.crear');
     Route::get('/imeis/{imei}', [ImeiController::class, 'show'])->whereNumber('imei')->name('imeis.show')->middleware('permission:imeis.ver');
     Route::match(['put', 'patch'], '/imeis/{imei}', [ImeiController::class, 'update'])->whereNumber('imei')->name('imeis.update')->middleware('permission:imeis.editar');
@@ -114,6 +118,7 @@ Route::middleware('auth')->group(function () {
 
     // EREBOR › Vehículos
     Route::get('/vehiculos', [VehiculoController::class, 'index'])->name('vehiculos.index')->middleware('permission:vehiculos.listar');
+    Route::get('/vehiculos/create', [VehiculoController::class, 'create'])->name('vehiculos.create')->middleware('permission:vehiculos.crear');
     Route::post('/vehiculos', [VehiculoController::class, 'store'])->name('vehiculos.store')->middleware('permission:vehiculos.crear');
     Route::get('/vehiculos/{vehiculo}', [VehiculoController::class, 'show'])->whereNumber('vehiculo')->name('vehiculos.show')->middleware('permission:vehiculos.ver');
     Route::match(['put', 'patch'], '/vehiculos/{vehiculo}', [VehiculoController::class, 'update'])->whereNumber('vehiculo')->name('vehiculos.update')->middleware('permission:vehiculos.editar');

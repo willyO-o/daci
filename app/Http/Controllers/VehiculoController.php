@@ -34,6 +34,14 @@ class VehiculoController extends Controller
         ]);
     }
 
+    /**
+     * «Registrar Vehículo» como página propia: sólo el formulario, sin el listado (permiso `vehiculos.crear`).
+     */
+    public function create(): Response
+    {
+        return Inertia::render('Vehiculos/Registrar');
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $datos = $this->validar($request);

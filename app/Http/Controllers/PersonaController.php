@@ -55,6 +55,16 @@ class PersonaController extends Controller
     /**
      * Alta desde el listado (Inertia) o al vuelo desde otro formulario, p. ej. mandamientos (JSON con `datos`).
      */
+    /**
+     * «Registrar Persona» como página propia: sólo el formulario, sin el listado (permiso `personas.crear`).
+     */
+    public function create(): Response
+    {
+        return Inertia::render('Personas/Registrar', [
+            'paises' => Pais::query()->orderBy('gentilicio')->get(['id', 'gentilicio']),
+        ]);
+    }
+
     public function store(PersonaRequest $request): JsonResponse|RedirectResponse
     {
         $persona = DB::transaction(function () use ($request) {

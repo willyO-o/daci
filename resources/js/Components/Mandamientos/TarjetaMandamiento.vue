@@ -12,9 +12,11 @@ const props = defineProps({
     vista: { type: String, default: 'grid' },
     puedeEditar: { type: Boolean, default: false },
     puedeEliminar: { type: Boolean, default: false },
+    /** Botón «Estado de ejecución» (sólo Consultas › Mandamientos). */
+    puedeCambiarEstado: { type: Boolean, default: false },
 });
 
-defineEmits(['ver', 'editar', 'eliminar', 'ver-imagenes']);
+defineEmits(['ver', 'editar', 'eliminar', 'ver-imagenes', 'cambiar-estado']);
 
 const foto = computed(() => urlArchivo(props.mandamiento.imagenes_persona?.[0]) ?? '/assets/images/users/user-dummy-img.jpg');
 const tieneFotos = computed(() => (props.mandamiento.imagenes_persona?.length ?? 0) > 0);
@@ -31,6 +33,9 @@ const badge = computed(() => `bg-soft-${colorEstado(props.mandamiento.estado)} t
                 <div class="d-flex gap-1 mt-2 mt-sm-0">
                     <button type="button" class="btn btn-soft-secondary btn-sm" title="Ver Detalles" @click="$emit('ver', mandamiento)">
                         <i class="ri-eye-line" />
+                    </button>
+                    <button v-if="puedeCambiarEstado" type="button" class="btn btn-soft-success btn-sm" title="Estado de Ejecución" aria-label="Cambiar estado de ejecución" @click="$emit('cambiar-estado', mandamiento)">
+                        <i class="ri-checkbox-circle-line" />
                     </button>
                     <button v-if="puedeEditar" type="button" class="btn btn-soft-secondary btn-sm" title="Editar Mandamiento" @click="$emit('editar', mandamiento)">
                         <i class="ri-pencil-line" />

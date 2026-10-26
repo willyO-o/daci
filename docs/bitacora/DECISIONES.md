@@ -209,3 +209,49 @@ corridas — volvería a dar un permiso que el administrador quitó.
 
 Verificado sobre la base local `felcc`: segunda corrida con sumas de verificación idénticas en `permissions`,
 `roles`, `role_has_permissions`, `model_has_roles`, `users` y `persona`. Pruebas: `PermisosSeederTest` (6).
+
+## D-021 · Cambiar el estado de ejecución desde Consultas › Mandamientos (2026-10-26 17:48)
+
+**Pedido:** con permiso, un botón que abra un modal para cambiar sólo el estado; si el estado dice «ejecutado», además
+fecha de ejecución, ejecutado por y acta; con otros estados, sólo el campo. Sólo en el módulo de consulta.
+
+1. Permiso nuevo **`mandamientos.estado`** (módulo Mandamientos). Por `asignacionInicial()` lo reciben al crearse
+   `administrador`, `tecnico_felcc` y `tecnico_daci` (los que ya podían editar mandamientos, estado incluido);
+   los consultores no. La ruta exige además `consultas.mandamientos`.
+2. `PATCH /consultas/mandamientos/{id}/estado` (`ActualizarEstadoMandamientoRequest`): «EJECUTADO» se detecta
+   como en el formulario de edición (el estado lo contiene; «POR EJECUTAR» no). Con «EJECUTADO»: fecha (≤ hoy),
+   ejecutado por y acta obligatorios (el acta no, si ya tiene una), detalle opcional. Con otro estado **sólo se
+   escribe `estado`**: fecha, ejecutor, detalle y acta registrados se conservan y el resto de campos que lleguen
+   se ignora. Estado y ejecutor se guardan en mayúsculas.
+3. El acta va a las mismas carpetas (`mandamientos-pdf-actas` / `mandamientos-img-actas`) y la anterior se
+   conserva (igual que al editar); se muestra la más reciente. El cambio queda en la Auditoría de cambios.
+4. Sugerencias propias: botón «Hoy» para la fecha, «Detalle de la ejecución» (columna existente
+   `detalle_ejecucion`, que ninguna pantalla mostraba; ahora también en el detalle), resumen del mandamiento y
+   estado actual en el modal, enlace al acta actual, sugerencias con los 30 estados más usados.
+
+**Descartado:** reutilizar `mandamientos.editar` — daría el botón a quien sólo debe editar desde el listado y no
+permitiría separar quién cambia estados. **Descartado:** vaciar fecha/ejecutor al pasar a otro estado — perdería datos.
+
+Pruebas: `tests/Feature/Mandamientos/EstadoMandamientoTest.php` (7).
+
+## D-022 · Registrar personas, teléfonos, IMEIs y vehículos sin ver el listado (2026-10-26 18:42)
+
+**Pedido:** que quien sólo deba registrar tenga un acceso como «Registrar Mandamiento», reutilizando los
+formularios, con botones en forma de tarjetas en el Dashboard. El usuario eligió **reutilizar el permiso
+«Registrar» (`*.crear`)** en lugar de crear permisos nuevos.
+
+1. Rutas `personas.create`, `telefonos.create`, `imeis.create`, `vehiculos.create` (permiso `*.crear`) y
+   páginas `*/Registrar` sobre un marco común `Components/Ui/PaginaRegistro.vue`. Guardan con las mismas rutas
+   `*.store`; el servidor vuelve a la página y el formulario queda limpio para el siguiente.
+2. Los formularios salieron de los listados a componentes (`FormularioPersona`, `FormularioTelefono`,
+   `FormularioImei`, `FormularioVehiculo`), como ya era `FormularioMandamiento`; el modal del listado y la página
+   usan el mismo. Verificado contra la versión anterior: mismas líneas de plantilla (sólo cambia el `id` por prop
+   y, en teléfono y vehículo, un `:key` en el buscador para vaciarlo al registrar otro).
+3. Menú: «Registrar …» en EREBOR sólo para quien tiene `*.crear` sin `*.listar` (misma regla que mandamientos).
+4. Dashboard: sección «Registro rápido» con una tarjeta por módulo que el usuario puede registrar; reemplaza al
+   botón suelto «Nuevo Mandamiento».
+
+**Descartado:** permisos nuevos `*.registrar` — el usuario prefirió no duplicar «Registrar». Con esto,
+`tecnico_felcc` (tiene `personas.crear` sin listar) ve ahora «Registrar Persona» en el menú y en el Dashboard.
+
+Pruebas: `tests/Feature/Acceso/RegistroDirectoTest.php` (10) y 4 pantallas nuevas en `PaginasTest`.

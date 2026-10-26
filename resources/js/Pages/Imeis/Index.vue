@@ -8,6 +8,7 @@ import CampoError from '@/Components/Ui/CampoError.vue';
 import EstadoVacio from '@/Components/Ui/EstadoVacio.vue';
 import FilasCargando from '@/Components/Ui/FilasCargando.vue';
 import Paginacion from '@/Components/Ui/Paginacion.vue';
+import FormularioImei from '@/Components/Imeis/FormularioImei.vue';
 import { useListado } from '@/Composables/useListado';
 import { useNotificacion } from '@/Composables/useNotificacion';
 import { usePermisos } from '@/Composables/usePermisos';
@@ -27,46 +28,18 @@ const numero = (indice) => (props.imeis.from ?? 1) + indice;
 const textoTelefono = (telefono) =>
     `${telefono.numero_celular}${telefono.persona ? ` - ${telefono.persona.nombres} ${telefono.persona.apellidos ?? ''}` : ''}`;
 
-// Alta / edición: el IMEI puede quedar vinculado a varios teléfonos.
+// Alta / edición: el formulario es `FormularioImei` (el mismo de «Registrar IMEI»).
 const modalFormulario = ref(false);
 const editando = ref(null);
-const telefonosElegidos = ref([]);
-const telefonoPorAgregar = ref(null);
-const form = useForm({ imei: '', caracteristicas: '', telefono_id: [] });
+const formulario = ref(null);
 
 const abrirNuevo = () => {
     editando.value = null;
-    telefonosElegidos.value = [];
-    form.defaults({ imei: '', caracteristicas: '', telefono_id: [] });
-    form.reset();
-    form.clearErrors();
     modalFormulario.value = true;
 };
 const abrirEditar = (imei) => {
     editando.value = imei;
-    telefonosElegidos.value = (imei.telefonos ?? []).map((telefono) => ({ id: telefono.id, texto: textoTelefono(telefono) }));
-    form.defaults({ imei: imei.imei, caracteristicas: imei.caracteristicas ?? '', telefono_id: telefonosElegidos.value.map((t) => t.id) });
-    form.reset();
-    form.clearErrors();
     modalFormulario.value = true;
-};
-const agregarTelefono = (telefono) => {
-    if (telefono && !telefonosElegidos.value.some((t) => t.id === telefono.id)) {
-        telefonosElegidos.value.push({ id: telefono.id, texto: telefono.text });
-    }
-    telefonoPorAgregar.value = null;
-};
-const quitarTelefono = (id) => {
-    telefonosElegidos.value = telefonosElegidos.value.filter((t) => t.id !== id);
-};
-const guardar = () => {
-    form.telefono_id = telefonosElegidos.value.map((t) => t.id);
-    const opciones = { preserveScroll: true, preserveState: true, onSuccess: () => (modalFormulario.value = false) };
-    if (editando.value) {
-        form.put(route('imeis.update', editando.value.id), opciones);
-    } else {
-        form.post(route('imeis.store'), opciones);
-    }
 };
 
 // Detalle
@@ -183,41 +156,11 @@ const eliminar = async (imei) => {
         </div>
 
         <BaseModal v-model="modalFormulario" :titulo="editando ? 'Editar IMEI' : 'Nuevo IMEI'" estatico>
-            <form id="formImei" novalidate @submit.prevent="guardar">
-                <div class="mb-3">
-                    <label for="imei" class="form-label">IMEI *</label>
-                    <input id="imei" v-model="form.imei" v-sin-espacios type="text" class="form-control" :class="{ 'is-invalid': form.errors.imei }" placeholder="Ingresa el IMEI">
-                    <CampoError :mensaje="form.errors.imei" />
-                </div>
-                <div class="mb-3">
-                    <label for="caracteristicas" class="form-label">Características</label>
-                    <textarea id="caracteristicas" v-model="form.caracteristicas" class="form-control" :class="{ 'is-invalid': form.errors.caracteristicas }" rows="3" placeholder="Características del IMEI" />
-                    <CampoError :mensaje="form.errors.caracteristicas" />
-                </div>
-                <div>
-                    <label class="form-label">Vincular Teléfonos</label>
-                    <BuscadorRemoto
-                        v-model="telefonoPorAgregar"
-                        :url="route('imeis.telefonos-search')"
-                        :minimo="3"
-                        placeholder="Número o nombre (mínimo 3 caracteres)"
-                        :permitir-limpiar="false"
-                        @seleccionado="agregarTelefono"
-                    />
-                    <div class="d-flex flex-wrap gap-1 mt-2">
-                        <span v-for="telefono in telefonosElegidos" :key="telefono.id" class="badge bg-soft-primary text-primary d-inline-flex align-items-center gap-1 py-1">
-                            {{ telefono.texto }}
-                            <button type="button" class="btn-close btn-close-sm" style="font-size: 0.55rem" :aria-label="`Quitar ${telefono.texto}`" @click="quitarTelefono(telefono.id)" />
-                        </span>
-                        <small v-if="!telefonosElegidos.length" class="text-muted">-- Sin vincular --</small>
-                    </div>
-                    <CampoError :mensaje="form.errors.telefono_id || form.errors['telefono_id.0']" />
-                </div>
-            </form>
+            <FormularioImei ref="formulario" :imei="editando" @guardado="modalFormulario = false" />
             <template #pie="{ cerrar }">
                 <button type="button" class="btn btn-secondary" @click="cerrar"><i class="ri-close-line align-middle me-1" /> Cancelar</button>
-                <button type="submit" form="formImei" class="btn btn-primary" :disabled="form.processing">
-                    <i class="align-middle me-1" :class="form.processing ? 'ri-loader-4-line' : 'ri-save-3-line'" /> {{ form.processing ? 'Guardando…' : 'Guardar' }}
+                <button type="submit" form="formImei" class="btn btn-primary" :disabled="formulario?.procesando">
+                    <i class="align-middle me-1" :class="formulario?.procesando ? 'ri-loader-4-line' : 'ri-save-3-line'" /> {{ formulario?.procesando ? 'Guardando…' : 'Guardar' }}
                 </button>
             </template>
         </BaseModal>

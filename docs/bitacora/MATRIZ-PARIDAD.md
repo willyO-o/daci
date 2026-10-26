@@ -42,6 +42,7 @@ Leyenda: ✅ migrado igual · 🔧 migrado con corrección · ➖ no se migra (c
 | `PUT /mandamientos/{id}`, `DELETE` | `mandamientos.update/destroy` | JSON | `mandamientos.editar/eliminar` | ✅ |
 | `GET /mandamiento/{codigo}` | `mandamientos.showByCodigo` | `Mandamientos/Ver` | `mandamientos.ver` | ✅ |
 | `GET /consultas/mandamientos` | `consultas.mandamientos` | `Consultas/Mandamientos` | `consultas.mandamientos` | 🔧 filtro «encargado» corregido (decía «encargardo») |
+| — | `consultas.mandamientos.estado` | `PATCH /consultas/mandamientos/{id}/estado` · modal `ModalEstadoMandamiento` | `consultas.mandamientos` + `mandamientos.estado` | nuevo (D-021) |
 | `GET /consultas/registro-criminal` | `consultas.registro-criminal` | `Consultas/RegistroCriminal` | `consultas.registro_criminal` | ✅ |
 | `resource tipos-mandamientos`, `juzgados`, `delitos`, `paises`, `divisiones` (index + store) | `*.index`, `*.store` | JSON (los demás métodos estaban vacíos) | listar: sesión; alta: permiso del módulo que la usa | 🔧 alta protegida |
 | `DELETE /multimedia/{id}` | `multimedia.destroy` | JSON | `personas/mandamientos/vehiculos.editar` | 🔧 antes sin control |
@@ -66,6 +67,16 @@ Leyenda: ✅ migrado igual · 🔧 migrado con corrección · ➖ no se migra (c
 | `resource imeis`, `POST /imeis-vincular-telefono/{id}` | `imeis.*` | `Imeis/Index` | `imeis.*` | ✅ |
 | `resource vehiculos` | `vehiculos.*` | `Vehiculos/Index` + `DetalleVehiculo` | `vehiculos.*` | 🔧 el caso de la persona se guarda; fotos no se pisan (D-014) |
 | `POST /vehiculos/{id}/vincular-persona`, `DELETE …/desvincular-persona/{persona}` | `vehiculos.vincular/desvincular-persona` | Inertia | `vehiculos.vincular` | ✅ |
+
+## Registro directo (nuevo, 2026-10-26)
+
+| Anterior | Nombre | DACI | Permiso | Estado |
+|---|---|---|---|---|
+| — | `personas.create` | `Personas/Registrar` (`FormularioPersona`) | `personas.crear` | nuevo (D-022) |
+| — | `telefonos.create` | `Telefonos/Registrar` (`FormularioTelefono`) | `telefonos.crear` | nuevo (D-022) |
+| — | `imeis.create` | `Imeis/Registrar` (`FormularioImei`) | `imeis.crear` | nuevo (D-022) |
+| — | `vehiculos.create` | `Vehiculos/Registrar` (`FormularioVehiculo`) | `vehiculos.crear` | nuevo (D-022) |
+| Botón «Nuevo Mandamiento» del dashboard | Tarjetas «Registro rápido» (mandamiento, persona, teléfono, IMEI, vehículo) | `*.crear` | 🔧 una tarjeta por módulo |
 
 ## Importaciones y reportes
 

@@ -85,6 +85,14 @@ El servidor responde `back()->with('success', '…')`; el toast lo muestra `AppL
 `form.errors` con `CampoError`. «Guardar y registrar nuevo» = `onSuccess: () => form.reset()` sin cerrar.
 Para editar con archivos: `form.transform(d => ({ ...d, _method: 'put' })).post(...)`.
 
+**Un formulario, dos lugares**: el formulario de cada módulo vive en `Components/{Modulo}/Formulario{Modulo}.vue`
+(`FormularioMandamiento`, `FormularioPersona`, `FormularioTelefono`, `FormularioImei`, `FormularioVehiculo`): prop
+del registro a editar (`null` = alta) e `idFormulario`; `defineExpose({ guardar, procesando })`; emite `guardado` y,
+tras un alta, queda limpio. El botón Guardar va fuera (`<button type="submit" :form="idFormulario">`). Lo usan el
+modal del listado (`BaseModal` monta el contenido al abrir, así cada apertura empieza de cero) y la página
+`{Modulo}/Registrar.vue` sobre `Components/Ui/PaginaRegistro.vue` (ruta `*.create`, permiso `*.crear`, ítem de
+menú sólo con `*.crear` sin `*.listar`, tarjeta «Registro rápido» en el Dashboard). No duplicar campos en la página.
+
 **Detalle en modal** (reemplaza el `show` que devolvía HTML): el controlador responde JSON si
 `$request->wantsJson()`; la página lo pide con `axios.get(route('x.show', id))` y lo pinta con un componente
 `Components/{Modulo}/Detalle*.vue`, el mismo que usa la página por código (`showByCodigo`).

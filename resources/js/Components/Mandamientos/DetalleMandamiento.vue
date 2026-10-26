@@ -94,6 +94,7 @@ const esPdf = (adjunto) => (adjunto?.tipo_archivo ?? '').toLowerCase() === 'pdf'
                             <tr><th scope="row" style="width: 200px">Estado</th><td>{{ guion(mandamiento.estado) }}</td></tr>
                             <tr><th scope="row">Fecha Ejecución</th><td class="cifra">{{ fechaNum(mandamiento.fecha_ejecucion) }}</td></tr>
                             <tr><th scope="row">Ejecutado por</th><td>{{ guion(mandamiento.ejecutado_por) }}</td></tr>
+                            <tr v-if="mandamiento.detalle_ejecucion"><th scope="row">Detalle de ejecución</th><td style="white-space: pre-line">{{ mandamiento.detalle_ejecucion }}</td></tr>
                             <tr>
                                 <th scope="row">Acta de Ejecución</th>
                                 <td>

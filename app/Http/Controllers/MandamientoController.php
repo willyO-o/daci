@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ActualizarEstadoMandamientoRequest;
 use App\Models\AuditarConsultas;
 use App\Models\Delito;
 use App\Models\Juzgado;
@@ -163,6 +164,36 @@ class MandamientoController extends Controller
         return response()->json(['success' => 'Mandamiento actualizado correctamente.', 'datos' => $datos ? $this->tarjeta($datos) : null]);
     }
 
+    /**
+     * Sólo el estado de ejecución (botón de Consultas › Mandamientos). Con «EJECUTADO» guarda también fecha, quién
+     * lo ejecutó, el detalle y el acta; con otro estado no toca los demás datos de ejecución.
+     */
+    public function actualizarEstado(ActualizarEstadoMandamientoRequest $request, Mandamiento $mandamiento): JsonResponse
+    {
+        $archivosGuardados = [];
+
+        try {
+            DB::transaction(function () use ($request, $mandamiento, &$archivosGuardados) {
+                if ($request->esEjecutado()) {
+                    // El acta anterior se conserva, igual que al editar; se muestra la más reciente.
+                    $this->adjuntar($mandamiento, $request->file('acta_ejecucion'), 'acta_ejecucion', $archivosGuardados);
+                }
+
+                $mandamiento->update($request->camposAGuardar());
+            });
+        } catch (Throwable $e) {
+            Storage::disk('public')->delete($archivosGuardados);
+            $this->registrarError('actualizar el estado', $e, $request);
+            $mensaje = 'Error al actualizar el estado: '.$e->getMessage();
+
+            return response()->json(['error' => $mensaje, 'message' => $mensaje], 500);
+        }
+
+        $datos = Mandamiento::getMandamientos([], $mandamiento->id)->first();
+
+        return response()->json(['success' => 'Estado actualizado correctamente.', 'datos' => $datos ? $this->tarjeta($datos) : null]);
+    }
+
     public function destroy(Mandamiento $mandamiento): JsonResponse
     {
         $archivos = $mandamiento->multimedia()->pluck('ruta')->all();
@@ -185,7 +216,14 @@ class MandamientoController extends Controller
     public function consultarMandamientos(Request $request): JsonResponse|Response
     {
         if (! $request->wantsJson()) {
-            return Inertia::render('Consultas/Mandamientos');
+            return Inertia::render('Consultas/Mandamientos', [
+                // Sugerencias del modal «Estado de ejecución»: los estados más usados primero.
+                'estados' => $request->user()->can('mandamientos.estado')
+                    ? Mandamiento::query()->whereNotNull('estado')->where('estado', '!=', '')
+                        ->groupBy('estado')->orderByRaw('COUNT(*) DESC')->orderBy('estado')
+                        ->limit(30)->pluck('estado')
+                    : [],
+            ]);
         }
 
         if (blank($request->input('tipo_filtro')) || mb_strlen((string) $request->input('search')) < 4) {
