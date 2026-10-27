@@ -1,6 +1,6 @@
 # Estado actual
 
-> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-10-27 15:30 (Bolivia).
+> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-10-27 15:35 (Bolivia).
 
 ## Resumen
 
@@ -27,6 +27,7 @@ listados) con `RolesSeeder` (D-024).
 Faltas y Contravenciones (D-029).
 2026-10-27: guía resumida (ícono de ayuda) en todos los formularios de registro, usuarios y roles (D-030).
 2026-10-27: buscadores sin botón esperan 900 ms desde la última tecla antes de consultar (D-031).
+2026-10-27: la ficha de registro usa el texto estándar si la base no tiene plantilla (D-032).
 
 > **Producción es otra base** (más información que la local). No se borra nada; sólo se tocan roles, permisos y sus
 > controles. Su estado de migraciones se verifica allí antes de desplegar.

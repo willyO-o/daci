@@ -5,6 +5,7 @@ namespace Tests\Feature\RegistroCriminal;
 use App\Models\AuditarConsultas;
 use App\Models\Division;
 use App\Models\FichaRegistro;
+use App\Models\FichaRegistroPlantilla;
 use App\Models\FotosRegistro;
 use App\Models\Persona;
 use App\Models\RegistroCriminal;
@@ -115,6 +116,20 @@ class RegistroCriminalTest extends TestCase
         $this->assertSame(1, $ficha->numero_ficha);
 
         $this->get($respuesta->json('data.url'))->assertOk()->assertHeader('Content-Type', 'application/pdf');
+    }
+
+    public function test_sin_plantilla_en_la_base_la_ficha_usa_el_texto_estandar_sin_guardarlo(): void
+    {
+        $this->actingAs($this->usuarioConPermisos(['registro_criminal.ficha']));
+        $registro = $this->registro();
+        $this->assertSame(0, FichaRegistroPlantilla::count());
+
+        $vista = $this->getJson(route('registro.vista-previa', $registro))->assertOk();
+
+        $this->assertStringContainsString('REGISTRO CRIMINAL', $vista->json('campos.requerimiento'));
+        $this->assertStringContainsString('PEDRO MAMANI', $vista->json('campos.persona'));
+        $this->assertStringContainsString('DIVISION ROBOS', $vista->json('campos.resultado_busqueda'));
+        $this->assertSame(0, FichaRegistroPlantilla::count(), 'No debía escribir en la base.');
     }
 
     public function test_sin_permiso_de_ficha_no_genera(): void

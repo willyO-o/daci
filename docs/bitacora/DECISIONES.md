@@ -455,3 +455,18 @@ formularios; antes 250 ms), el aviso de C.I. existente (antes 400 ms) y el aviso
 Personas (antes 350 ms). Cada búsqueda nueva sigue cancelando la anterior. Los selects y el rango de fechas filtran
 al instante, y `SelectorCatalogo` filtra su lista en el navegador (no consulta al servidor). Las consultas con botón
 «Buscar» no cambian.
+
+## D-032 · La ficha de registro ya no falla si la base no tiene plantilla (2026-10-27 15:35)
+
+**Error reportado:** «No query results for model [App\Models\FichaRegistroPlantilla]» al imprimir la ficha.
+
+**Causa:** la vista previa exigía una fila ACTIVA en `ficha_registro_plantilla` (`firstOrFail`). En la base local esa
+tabla tiene 0 filas: FELCC la llenaba con `PlantillaFichaSeeder` al instalarse y esta copia no lo corrió.
+
+**Corrección (sin escribir en la base):** `FichaRegistroPlantilla::TEXTO_ESTANDAR` (el texto del seeder, ahora en un solo
+lugar) y `activaOEstandar()`: si hay plantilla activa se usa (producción), si no, el texto estándar sin guardarlo. Lo
+mismo en Faltas y Contravenciones, con «REGISTRO DE FALTAS Y CONTRAVENCIONES». `PlantillaFichaSeeder` usa la constante.
+Verificado sobre la base local (vista previa 200, la tabla sigue vacía). Pruebas: +2.
+
+Para editar el texto en la base local se podría correr `php artisan db:seed --class=PlantillaFichaSeeder` (inserta una
+fila); no se hizo, porque escribe en una tabla existente.

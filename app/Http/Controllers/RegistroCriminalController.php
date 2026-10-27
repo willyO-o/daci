@@ -228,12 +228,14 @@ class RegistroCriminalController extends Controller
     }
 
     /**
-     * Datos de la ficha de registro editable: la plantilla activa con los datos del registro ya reemplazados.
+     * Datos de la ficha de registro editable: la plantilla activa (o el texto estándar, si la base no tiene ninguna) con
+     * los datos del registro ya reemplazados.
      */
     public function vistaPrevia(RegistroCriminal $registroCriminal): JsonResponse
     {
         $registroCriminal->load(['persona', 'division']);
-        $plantilla = FichaRegistroPlantilla::where('estado', 'ACTIVO')->firstOrFail();
+        // Sin plantilla en la base se usa el texto estándar (antes: error «No query results»).
+        $plantilla = FichaRegistroPlantilla::activaOEstandar();
         $ahora = Carbon::now()->locale('es');
 
         $ultima = FichaRegistro::whereYear('created_at', $ahora->year)->max('numero_ficha');

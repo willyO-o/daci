@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Support\Antecedentes\ModuloAntecedente;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
@@ -271,5 +272,17 @@ class AntecedentesTest extends TestCase
 
         $this->assertSame('CASADO', $registro->persona->fresh()->estado_civil);
         $this->assertSame('COMERCIANTE', $registro->persona->fresh()->ocupacion);
+    }
+
+    public function test_sin_plantilla_propia_la_ficha_usa_el_texto_estandar_con_el_nombre_del_modulo(): void
+    {
+        $this->actingAs($this->usuarioConPermisos([]));
+        $registro = $this->registro();
+        DB::table('ficha_falta_contravencion_plantilla')->delete();
+
+        $this->actingAs($this->usuarioCon(['ficha']))
+            ->getJson(route('faltas-contravenciones.vista-previa', $registro->id))
+            ->assertOk()
+            ->assertJsonPath('campos.requerimiento', fn ($texto) => str_contains($texto, 'REGISTRO DE FALTAS Y CONTRAVENCIONES'));
     }
 }

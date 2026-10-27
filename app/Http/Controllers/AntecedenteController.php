@@ -7,6 +7,7 @@ use App\Lib\ReportesPdf;
 use App\Models\AuditarConsultas;
 use App\Models\Division;
 use App\Models\FichaAntecedente;
+use App\Models\FichaRegistroPlantilla;
 use App\Models\Pais;
 use App\Models\Persona;
 use App\Models\RegistroAntecedente;
@@ -287,7 +288,12 @@ abstract class AntecedenteController extends Controller
         $registro = $this->registro($registro);
         $registro->load(['persona', 'division']);
         $plantillaModelo = $this->modulo()->modeloPlantilla();
-        $plantilla = $plantillaModelo::where('estado', 'ACTIVO')->orderBy('id')->firstOrFail();
+        // Sin plantilla en la base se usa el texto estándar de la ficha con el nombre del módulo.
+        $plantilla = $plantillaModelo::where('estado', 'ACTIVO')->orderBy('id')->first()
+            ?? new $plantillaModelo([
+                ...FichaRegistroPlantilla::TEXTO_ESTANDAR,
+                'requerimiento' => str_replace('REGISTRO CRIMINAL', 'REGISTRO DE '.mb_strtoupper($this->modulo()->titulo()), FichaRegistroPlantilla::TEXTO_ESTANDAR['requerimiento']),
+            ]);
         $fichaModelo = $this->modulo()->modeloFicha();
         $ahora = Carbon::now()->locale('es');
 
