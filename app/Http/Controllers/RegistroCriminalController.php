@@ -51,8 +51,11 @@ class RegistroCriminalController extends Controller
 
         $consulta = $this->consulta()
             ->when($request->filled('search'), fn (Builder $q) => $this->buscar($q, $request->input('filtro'), (string) $request->input('search')));
+        $respuesta = $this->pagina($consulta, $request);
 
-        return $this->pagina($consulta, $request);
+        $this->auditarBusqueda($request, 'listado_registro_criminal', ['tipo_filtro' => $request->input('filtro'), 'busqueda' => $request->input('search')], (int) $respuesta->getData(true)['total']);
+
+        return $respuesta;
     }
 
     public function create(): Response
@@ -99,7 +102,7 @@ class RegistroCriminalController extends Controller
      */
     public function show(Request $request, RegistroCriminal $registroCriminal): JsonResponse
     {
-        AuditarConsultas::agregarIdsAccedidos($request->input('identificador'), $registroCriminal->id, RegistroCriminal::class);
+        AuditarConsultas::registrarAcceso($request->input('identificador'), $registroCriminal, 'detalle_registro_criminal');
 
         return response()->json($this->detalle($registroCriminal));
     }
@@ -108,7 +111,7 @@ class RegistroCriminalController extends Controller
     {
         $registro = RegistroCriminal::whereRaw('MD5(id) = ?', [$codigo])->firstOrFail();
 
-        AuditarConsultas::agregarIdsAccedidos($request->input('identificador'), $registro->id, RegistroCriminal::class);
+        AuditarConsultas::registrarAcceso($request->input('identificador'), $registro, 'detalle_registro_criminal');
 
         return Inertia::render('RegistroCriminal/Ver', [
             'registro' => $this->detalle($registro),

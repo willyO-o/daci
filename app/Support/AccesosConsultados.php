@@ -2,10 +2,13 @@
 
 namespace App\Support;
 
+use App\Models\Imei;
 use App\Models\Mandamiento;
 use App\Models\Persona;
 use App\Models\RegistroAntecedente;
 use App\Models\RegistroCriminal;
+use App\Models\Telefono;
+use App\Models\Vehiculo;
 use Illuminate\Database\Eloquent\Model;
 use Throwable;
 
@@ -67,7 +70,10 @@ class AccesosConsultados
             $registro instanceof RegistroCriminal => [$persona($registro->persona), route('registro-criminal.showByCodigo', md5((string) $registro->id))],
             $registro instanceof RegistroAntecedente => [$persona($registro->persona), route($registro::modulo()->ruta('showByCodigo'), md5((string) $registro->id))],
             $registro instanceof Mandamiento => [$persona($registro->persona), route('mandamientos.showByCodigo', md5((string) $registro->id))],
-            $registro instanceof Persona => [trim("{$registro->nombres} {$registro->apellidos}"), null],
+            $registro instanceof Persona => [trim("{$registro->nombres} {$registro->apellidos}").' - C.I: '.($registro->ci ?? ''), route('personas.show', $registro->getKey())],
+            $registro instanceof Telefono => ['Teléfono '.$registro->numero_celular, null],
+            $registro instanceof Imei => ['IMEI '.$registro->imei, null],
+            $registro instanceof Vehiculo => ['Vehículo placa '.$registro->placa, null],
             default => [class_basename($registro).' #'.$registro->getKey(), null],
         };
     }

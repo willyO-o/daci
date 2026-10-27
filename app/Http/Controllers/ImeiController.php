@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditarConsultas;
 use App\Models\Imei;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -22,6 +23,8 @@ class ImeiController extends Controller
             ->orderByDesc('id')
             ->paginate($this->tamanoPagina($request))
             ->withQueryString();
+
+        $this->auditarBusqueda($request, 'listado_imeis', ['tipo_filtro' => $request->input('filtro'), 'busqueda' => $request->input('search')], $imeis->total());
 
         return Inertia::render('Imeis/Index', [
             'imeis' => $imeis,
@@ -49,8 +52,10 @@ class ImeiController extends Controller
         return back()->with('success', 'IMEI registrado correctamente.');
     }
 
-    public function show(Imei $imei): JsonResponse
+    public function show(Request $request, Imei $imei): JsonResponse
     {
+        AuditarConsultas::registrarAcceso($request->input('identificador'), $imei, 'detalle_imei');
+
         return response()->json($imei->load(['telefonos:telefono.id,numero_celular,persona_id', 'telefonos.persona:id,nombres,apellidos,ci']));
     }
 

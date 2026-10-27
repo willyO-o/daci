@@ -3,10 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Auditable;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
-class FichaRegistroPlantilla extends Model
+/**
+ * Texto base de la ficha de registro de Registro Criminal. Se edita en «Plantilla de la Ficha»; los cambios quedan en la
+ * Auditoría de cambios.
+ */
+class FichaRegistroPlantilla extends Model implements AuditableContract
 {
-    //
+    use Auditable;
+
     protected $table = 'ficha_registro_plantilla';
 
     protected $fillable = [

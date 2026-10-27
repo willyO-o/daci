@@ -470,3 +470,63 @@ Verificado sobre la base local (vista previa 200, la tabla sigue vacía). Prueba
 
 Para editar el texto en la base local se podría correr `php artisan db:seed --class=PlantillaFichaSeeder` (inserta una
 fila); no se hizo, porque escribe en una tabla existente.
+
+## D-033 · Pantalla «Plantilla de la Ficha» (2026-10-27 15:43)
+
+**Pedido:** una interfaz para modificar la plantilla de la ficha de registro.
+
+1. `PlantillaFichaController` + página `PlantillaFicha/Editar` (menú EREBOR › Plantilla de la Ficha). Pestañas por
+   módulo con plantilla: **Registro Criminal** (`ficha_registro_plantilla`) y **Faltas y Contravenciones**
+   (`ficha_falta_contravencion_plantilla`); sólo se ven las que el usuario puede editar.
+2. Editor por bloque (introducción, requiere, persona, resultado, nota de certificación, nota general) con contador
+   (largo de la columna), **variables con un clic** insertadas en el cursor (`{fecha_hora_actual}`, `{nombre_persona}`,
+   `{ci_persona}`, `{division}`, `{fecha_aprehension}`, `{delito}`, cada una sólo en su bloque) y aviso de variable
+   inexistente. **Vista previa en vivo** (`Components/RegistroCriminal/HojaFicha.vue`, mismo diseño que la ficha
+   editable, de sólo lectura) con datos de ejemplo y el bloque en edición resaltado.
+3. «Usar texto estándar» (`FichaRegistroPlantilla::TEXTO_ESTANDAR`, no guarda hasta «Guardar»), «Descartar cambios» y
+   aviso al salir con cambios sin guardar. Guía con el ícono de ayuda.
+4. **Servidor:** sólo escribe en la fila ACTIVA del módulo (la crea si no hay ninguna); no toca filas inactivas ni
+   otras tablas. Valida largos y rechaza variables que no existen en el bloque. Permisos nuevos
+   `registro_criminal.plantilla` y `faltas_contravenciones.plantilla` (sólo administrador; el del módulo se exige
+   también al guardar). Los dos modelos de plantilla pasan a ser auditables (Auditoría de cambios).
+
+Base local: `PermisosSeeder` creó los 2 permisos (59 en total) y se los dio a administrador. La tabla de plantillas de
+Registro Criminal sigue vacía hasta que alguien guarde. Pruebas: `PlantillaFichaTest` (7) + pantalla en `PaginasTest`.
+
+## D-034 · Auditoría de consultas en todos los módulos (2026-10-27 15:54)
+
+**Pedido:** auditar todas las consultas de todos los módulos (personas, teléfonos, IMEIs, etc.) de cualquier usuario,
+sin romper lo actual ni los datos de producción.
+
+**Sin cambios en la tabla** `auditar_consultas` (sólo filas nuevas; las existentes no se tocan). Se registra:
+
+1. **Búsquedas en los listados** — `listado_personas`, `listado_telefonos`, `listado_imeis`, `listado_vehiculos`,
+   `listado_mandamientos`, `listado_registro_criminal`, `listado_faltas_contravenciones`, `listado_usuarios` — con sus
+   criterios y la cantidad de resultados (`Controller::auditarBusqueda` → `AuditarConsultas::registrarBusqueda`). No se
+   registran: el listado sin filtros, elegir sólo el campo sin texto, las páginas siguientes / el scroll, ni la misma
+   búsqueda del mismo usuario dentro de 10 minutos (`MINUTOS_SIN_REPETIR`).
+2. **Detalles abiertos** — persona, teléfono, IMEI, vehículo, mandamiento, registro criminal, faltas y contravenciones
+   (`registrarAcceso`): si llegan con el `identificador` de una consulta auditada se suman a ella, **igual que antes**;
+   si no, quedan como fila `detalle_*` con el registro en `ids_accedidos` (sin repetir en 10 minutos).
+3. **Exportación de reportes** CSV (`exportar_reporte`), con el tipo y la cantidad de registros.
+4. **Nunca interrumpe** la consulta: los registros van dentro de `rescue()` (si fallan, el error queda en el log y el
+   usuario recibe sus resultados).
+5. Pantalla de auditoría: nombre legible de cada módulo (`AuditarConsultas::ETIQUETAS`) en el filtro, la tabla y el
+   detalle; los accesos a teléfonos, IMEIs y vehículos se describen por número / IMEI / placa y la persona enlaza a su
+   ficha.
+
+**No incluido:** los buscadores auxiliares de los formularios (elegir persona o teléfono, aviso de C.I.), que
+generarían una fila por cada consulta de autocompletado. Pruebas: `tests/Feature/Revision/AuditoriaConsultasTodosTest.php` (7).
+
+## D-035 · Sin «¿Olvidó su contraseña?» en el login (2026-10-27 16:00)
+
+**Pedido:** deshabilitar el enlace de recuperar contraseña del login; lo hará el administrador.
+
+Se quitaron las rutas `password.request`, `password.email`, `password.reset` y `password.store` (ahora 404), sus
+controladores (`PasswordResetLinkController`, `NewPasswordController`), sus pantallas (`ForgotPassword.vue`,
+`ResetPassword.vue`) y su prueba de Breeze. El login muestra «¿Olvidó su contraseña? Solicítela al administrador.»
+La contraseña se restablece en Seguridad › Usuarios › Editar (ya existía); cada usuario puede cambiar la suya en
+Perfil. Se conservan `password.confirm` y `perfil.password`. La tabla `password_reset_tokens` no se toca. Los archivos
+quitados quedan en el historial de git.
+
+Pruebas: `tests/Feature/Auth/RecuperarClaveDeshabilitadaTest.php` (3).

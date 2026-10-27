@@ -47,6 +47,7 @@ class AuditarConsultasController extends Controller
             'registros' => $registros,
             'modulos' => fn () => AuditarConsultas::query()->distinct()->orderBy('modulo')->pluck('modulo'),
             'roles' => fn () => AuditarConsultas::query()->distinct()->orderBy('rol_usuario')->pluck('rol_usuario'),
+            'etiquetas' => AuditarConsultas::ETIQUETAS,
             'filtros' => $request->only(['search', 'modulo', 'rol_usuario', 'fecha_inicio', 'fecha_fin']),
         ]);
     }

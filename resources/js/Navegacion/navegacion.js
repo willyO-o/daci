@@ -83,6 +83,12 @@ export const navegacion = [
                 permiso: 'faltas_contravenciones.listar',
             },
             {
+                etiqueta: 'Plantilla de la Ficha',
+                icono: 'mdi mdi-file-document-edit-outline',
+                ruta: 'plantilla-ficha.edit',
+                permiso: (puede) => puede('registro_criminal.plantilla') || puede('faltas_contravenciones.plantilla'),
+            },
+            {
                 etiqueta: 'Personas',
                 icono: 'mdi mdi-account-outline',
                 ruta: 'personas.index',

@@ -1,10 +1,9 @@
 <script setup>
-import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
 import CampoAcceso from '@/Components/Acceso/CampoAcceso.vue';
 import TarjetaAcceso from '@/Components/Acceso/TarjetaAcceso.vue';
 
 defineProps({
-    canResetPassword: { type: Boolean, default: false },
     status: { type: String, default: null },
 });
 
@@ -60,7 +59,7 @@ const ingresar = () => {
                     <input id="remember" v-model="form.remember" type="checkbox">
                     Recordarme
                 </label>
-                <Link v-if="canResetPassword" :href="route('password.request')" class="acceso-enlace">¿Olvidó su contraseña?</Link>
+                <span class="acceso-ayuda">¿Olvidó su contraseña? Solicítela al administrador.</span>
             </div>
 
             <button class="acceso-boton" type="submit" :disabled="form.processing">

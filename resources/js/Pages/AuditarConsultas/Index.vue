@@ -13,6 +13,8 @@ import { http } from '@/Utils/http';
 const props = defineProps({
     registros: { type: Object, required: true },
     modulos: { type: Array, default: () => [] },
+    /** Nombre legible de cada módulo (`listado_personas` → «Búsqueda en Personas»). */
+    etiquetas: { type: Object, default: () => ({}) },
     roles: { type: Array, default: () => [] },
     filtros: { type: Object, default: () => ({}) },
 });
@@ -47,6 +49,8 @@ const ver = async (registro) => {
     }
 };
 
+const etiqueta = (modulo) => props.etiquetas[modulo] ?? modulo;
+
 const criterios = computed(() =>
     Object.entries(detalle.value?.criterios_consulta ?? {}).filter(([, valor]) => valor !== null && valor !== ''),
 );
@@ -69,7 +73,7 @@ const criterios = computed(() =>
                     <div class="col-lg-2">
                         <select v-model="filtros.modulo" class="form-select" aria-label="Módulo">
                             <option value="">Todos los Módulos</option>
-                            <option v-for="modulo in modulos" :key="modulo" :value="modulo">{{ modulo }}</option>
+                            <option v-for="modulo in modulos" :key="modulo" :value="modulo">{{ etiqueta(modulo) }}</option>
                         </select>
                     </div>
                     <div class="col-lg-2">
@@ -104,7 +108,7 @@ const criterios = computed(() =>
                                         <small class="text-muted">{{ registro.usuario?.email }}</small>
                                     </td>
                                     <td><span class="badge badge-outline-secondary">{{ registro.rol_usuario }}</span></td>
-                                    <td><span class="badge badge-outline-primary">{{ registro.modulo }}</span></td>
+                                    <td><span class="badge badge-outline-primary">{{ etiqueta(registro.modulo) }}</span></td>
                                     <td class="text-center"><span class="badge badge-outline-secondary cifra">{{ registro.cantidad_resultados }}</span></td>
                                     <td class="small text-muted">{{ registro.user_agent ? `${registro.user_agent.browser} (${registro.user_agent.platform})` : '—' }}</td>
                                     <td class="cifra small text-nowrap">{{ fechaHora(registro.created_at) }}</td>
@@ -136,7 +140,7 @@ const criterios = computed(() =>
                     <div class="col-md-6">
                         <h6 class="text-muted mb-2">Información de la Consulta</h6>
                         <dl class="row mb-0">
-                            <dt class="col-sm-5">Módulo Accedido:</dt><dd class="col-sm-7"><span class="badge badge-outline-primary">{{ detalle.modulo }}</span></dd>
+                            <dt class="col-sm-5">Módulo Accedido:</dt><dd class="col-sm-7"><span class="badge badge-outline-primary">{{ etiqueta(detalle.modulo) }}</span></dd>
                             <dt class="col-sm-5">Cantidad Resultados:</dt><dd class="col-sm-7"><span class="badge badge-outline-success cifra">{{ detalle.cantidad_resultados }}</span></dd>
                             <dt class="col-sm-5">Fecha/Hora:</dt><dd class="col-sm-7"><small class="text-muted cifra">{{ fechaHora(detalle.created_at) }}</small></dd>
                         </dl>

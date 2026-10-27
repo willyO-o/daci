@@ -27,6 +27,8 @@ class AuditoriaController extends Controller
         'App\Models\FichaFaltaContravencion' => 'Ficha de Faltas y Contravenciones',
         'App\Models\FotoFaltaContravencion' => 'Fotos de Faltas y Contravenciones',
         'App\Models\FichaRegistro' => 'Ficha de Registro',
+        'App\Models\FichaRegistroPlantilla' => 'Plantilla de la Ficha (Registro Criminal)',
+        'App\Models\FichaFaltaContravencionPlantilla' => 'Plantilla de la Ficha (Faltas y Contravenciones)',
         'App\Models\FotosRegistro' => 'Fotos de Registro',
         'App\Models\Imei' => 'IMEI',
         'App\Models\ImeiTelefono' => 'IMEI-Teléfono',

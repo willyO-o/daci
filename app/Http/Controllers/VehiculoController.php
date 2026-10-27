@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditarConsultas;
 use App\Models\Multimedia;
 use App\Models\Persona;
 use App\Models\Vehiculo;
@@ -27,6 +28,8 @@ class VehiculoController extends Controller
             ->orderByDesc('id')
             ->paginate($this->tamanoPagina($request))
             ->withQueryString();
+
+        $this->auditarBusqueda($request, 'listado_vehiculos', ['tipo_filtro' => $request->input('filtro'), 'busqueda' => $request->input('search')], $vehiculos->total());
 
         return Inertia::render('Vehiculos/Index', [
             'vehiculos' => $vehiculos,
@@ -58,8 +61,10 @@ class VehiculoController extends Controller
     /**
      * Ficha completa del vehículo (personas por tipo de registro, carguíos e ITV).
      */
-    public function show(Vehiculo $vehiculo): JsonResponse
+    public function show(Request $request, Vehiculo $vehiculo): JsonResponse
     {
+        AuditarConsultas::registrarAcceso($request->input('identificador'), $vehiculo, 'detalle_vehiculo');
+
         $vehiculo->load([
             'multimedia:id,id_vehiculo,ruta',
             'personas:persona.id,nombres,apellidos,ci,telefono',

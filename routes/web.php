@@ -15,6 +15,7 @@ use App\Http\Controllers\MultimediaController;
 use App\Http\Controllers\PaisController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PersonaController;
+use App\Http\Controllers\PlantillaFichaController;
 use App\Http\Controllers\RegistroCriminalController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\RolController;
@@ -83,6 +84,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/registro-vista-previa/{registroCriminal}', [RegistroCriminalController::class, 'vistaPrevia'])->whereNumber('registroCriminal')->name('registro.vista-previa')->middleware('permission:registro_criminal.ficha');
     Route::post('/ficha-registro', [FichaRegistroController::class, 'store'])->name('ficha-registro.store')->middleware('permission:registro_criminal.ficha');
     Route::get('/ficha-registro/pdf/{codigo}', [FichaRegistroController::class, 'pdf'])->name('ficha-registro.pdf')->middleware('permission:registro_criminal.ficha');
+
+    // Plantilla de la ficha de registro (Registro Criminal y Faltas y Contravenciones). El permiso del módulo concreto se
+    // comprueba también al guardar.
+    Route::get('/plantilla-ficha', [PlantillaFichaController::class, 'edit'])->name('plantilla-ficha.edit')->middleware('permission:registro_criminal.plantilla|faltas_contravenciones.plantilla');
+    Route::put('/plantilla-ficha/{modulo}', [PlantillaFichaController::class, 'update'])->whereIn('modulo', ['registro_criminal', 'faltas_contravenciones'])->name('plantilla-ficha.update')->middleware('permission:registro_criminal.plantilla|faltas_contravenciones.plantilla');
 
     // EREBOR › Faltas y Contravenciones (mismo funcionamiento que Registro Criminal, con sus propias tablas y permisos)
     Route::get('/faltas-contravenciones', [FaltaContravencionController::class, 'index'])->name('faltas-contravenciones.index')->middleware('permission:faltas_contravenciones.listar');

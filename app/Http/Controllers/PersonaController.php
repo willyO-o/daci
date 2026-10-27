@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PersonaRequest;
+use App\Models\AuditarConsultas;
 use App\Models\Multimedia;
 use App\Models\Pais;
 use App\Models\Persona;
@@ -41,6 +42,14 @@ class PersonaController extends Controller
             ->orderByDesc('id')
             ->paginate($this->tamanoPagina($request))
             ->withQueryString();
+
+        $this->auditarBusqueda($request, 'listado_personas', [
+            'tipo_filtro' => $request->input('filtro'),
+            'busqueda' => $request->input('search'),
+            'genero' => $request->input('genero'),
+            'estado_civil' => $request->input('estado_civil'),
+            'visible' => $visible === 'eliminados' ? 'eliminados' : null,
+        ], $personas->total());
 
         return Inertia::render('Personas/Index', [
             'personas' => $personas,
@@ -98,6 +107,8 @@ class PersonaController extends Controller
                 'telefonos:id,persona_id,numero_celular,persona_caso,caso,empresa',
             ])
             ->findOrFail($persona);
+
+        AuditarConsultas::registrarAcceso($request->input('identificador'), $datos, 'detalle_persona');
 
         $detalle = $this->detalle($datos);
 

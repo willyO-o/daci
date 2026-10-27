@@ -11,7 +11,7 @@ Leyenda: ✅ migrado igual · 🔧 migrado con corrección · ➖ no se migra (c
 |---|---|---|---|---|
 | `GET /` | — | redirige a `/login` | — | ✅ |
 | `GET /login`, `POST /login`, `POST /logout` | `login`, `logout` | Breeze + `Auth/Login.vue` | — | 🔧 rechaza usuarios inactivos en el login (D-008) |
-| `password/*` (reset, email, confirm) | `password.*` | Breeze (`forgot-password`, `reset-password`, `confirm-password`) | — | ✅ (URL de Breeze) |
+| `password/*` (reset, email, confirm) | `password.*` | Sólo `confirm-password`; recuperar contraseña quitado: la restablece el administrador en Usuarios | — | 🔧 D-035 |
 | `GET /home` | `home` | redirige a `dashboard` | sesión | ✅ |
 | `GET /dashboard` | `dashboard` | `Dashboard/Index` | sesión | 🔧 enlaces y «Nuevo Mandamiento» sólo si hay permiso |
 | `GET /perfil`, `POST /perfil/password` | `perfil`, `perfil.password` | `Perfil/Index` | sesión | ✅ |

@@ -35,6 +35,8 @@ class UserController extends Controller
             ->withQueryString()
             ->through(fn (User $usuario) => $this->fila($usuario));
 
+        $this->auditarBusqueda($request, 'listado_usuarios', ['busqueda' => $request->input('search'), 'rol' => $request->input('role_id')], $usuarios->total());
+
         return Inertia::render('Usuarios/Index', [
             'usuarios' => $usuarios,
             'roles' => $this->rolesAsignables(),

@@ -49,6 +49,7 @@ class PaginasTest extends TestCase
             'reportes' => ['reportes.index', 'Reportes/Index'],
             'auditoria consultas' => ['auditar-consultas.index', 'AuditarConsultas/Index'],
             'auditoria cambios' => ['auditorias.index', 'Auditorias/Index'],
+            'plantilla de la ficha' => ['plantilla-ficha.edit', 'PlantillaFicha/Editar'],
         ];
     }
 

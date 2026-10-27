@@ -372,6 +372,13 @@
     cursor: pointer;
 }
 
+/* Aviso en lugar del enlace «¿Olvidó su contraseña?»: la contraseña la restablece el administrador. */
+.acceso-ayuda {
+    color: var(--acceso-tinta-suave);
+    font-size: 0.82rem;
+    text-align: right;
+}
+
 .acceso-enlace {
     color: var(--acceso-tinta-suave);
     text-decoration: underline;

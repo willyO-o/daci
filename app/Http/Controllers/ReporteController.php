@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditarConsultas;
 use App\Models\Mandamiento;
 use App\Models\Persona;
 use App\Models\RegistroCriminal;
@@ -33,6 +34,18 @@ class ReporteController extends Controller
 
     public function exportar(Request $request): StreamedResponse
     {
+        // Sacar todos los registros de un tipo también es una consulta: queda en la Auditoría de consultas.
+        $total = match ($request->input('tipo')) {
+            'mandamientos' => Mandamiento::count(),
+            'registro-criminal' => RegistroCriminal::count(),
+            'personas' => Persona::count(),
+            'celulares' => Telefono::count(),
+            default => null,
+        };
+        if ($total !== null) {
+            AuditarConsultas::registrarExportacion($request->user(), (string) $request->input('tipo'), $total);
+        }
+
         return match ($request->input('tipo')) {
             'mandamientos' => $this->mandamientos(),
             'registro-criminal' => $this->registroCriminal(),

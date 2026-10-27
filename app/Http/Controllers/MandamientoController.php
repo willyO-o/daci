@@ -38,7 +38,18 @@ class MandamientoController extends Controller
     public function index(Request $request): JsonResponse|Response
     {
         if ($request->wantsJson()) {
-            return $this->pagina(Mandamiento::getMandamientos($request->only(self::FILTROS)), $request);
+            $respuesta = $this->pagina(Mandamiento::getMandamientos($request->only(self::FILTROS)), $request);
+
+            $this->auditarBusqueda($request, 'listado_mandamientos', [
+                'tipo_filtro' => $request->input('tipo_filtro'),
+                'busqueda' => $request->input('search'),
+                'delito' => $request->input('id_delito'),
+                'estado' => $request->input('estado'),
+                'fecha_inicio' => $request->input('fecha_inicio'),
+                'fecha_fin' => $request->input('fecha_fin'),
+            ], (int) $respuesta->getData(true)['total']);
+
+            return $respuesta;
         }
 
         return Inertia::render('Mandamientos/Index', [
@@ -102,7 +113,7 @@ class MandamientoController extends Controller
 
         abort_if(! $datos, 404, 'Mandamiento no encontrado');
 
-        AuditarConsultas::agregarIdsAccedidos($request->input('identificador'), $datos->id, Mandamiento::class);
+        AuditarConsultas::registrarAcceso($request->input('identificador'), $datos, 'detalle_mandamiento');
 
         return response()->json($this->detalle($datos));
     }
@@ -116,7 +127,7 @@ class MandamientoController extends Controller
 
         abort_if(! $datos, 404, 'Mandamiento no encontrado');
 
-        AuditarConsultas::agregarIdsAccedidos($request->input('identificador'), $datos->id, Mandamiento::class);
+        AuditarConsultas::registrarAcceso($request->input('identificador'), $datos, 'detalle_mandamiento');
 
         return Inertia::render('Mandamientos/Ver', [
             'mandamiento' => $this->detalle($datos),

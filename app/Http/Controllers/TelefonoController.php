@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditarConsultas;
 use App\Models\Telefono;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -30,6 +31,8 @@ class TelefonoController extends Controller
             ->paginate($this->tamanoPagina($request))
             ->withQueryString();
 
+        $this->auditarBusqueda($request, 'listado_telefonos', ['tipo_filtro' => $request->input('filtro'), 'busqueda' => $request->input('search')], $telefonos->total());
+
         return Inertia::render('Telefonos/Index', [
             'telefonos' => $telefonos,
             'filtros' => $request->only(['search', 'filtro']),
@@ -51,8 +54,10 @@ class TelefonoController extends Controller
         return back()->with('success', 'Teléfono registrado correctamente.');
     }
 
-    public function show(Telefono $telefono): JsonResponse
+    public function show(Request $request, Telefono $telefono): JsonResponse
     {
+        AuditarConsultas::registrarAcceso($request->input('identificador'), $telefono, 'detalle_telefono');
+
         return response()->json($telefono->load(['persona:id,nombres,apellidos,ci', 'imeis:imei.id,imei']));
     }
 

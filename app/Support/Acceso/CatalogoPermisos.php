@@ -68,6 +68,7 @@ final class CatalogoPermisos
                     'registro_criminal.editar' => 'Editar',
                     'registro_criminal.eliminar' => 'Eliminar',
                     'registro_criminal.ficha' => 'Imprimir ficha de registro',
+                    'registro_criminal.plantilla' => 'Editar la plantilla de la ficha',
                 ],
             ],
             'faltas_contravenciones' => [
@@ -79,6 +80,7 @@ final class CatalogoPermisos
                     'faltas_contravenciones.editar' => 'Editar',
                     'faltas_contravenciones.eliminar' => 'Eliminar',
                     'faltas_contravenciones.ficha' => 'Imprimir ficha de registro',
+                    'faltas_contravenciones.plantilla' => 'Editar la plantilla de la ficha',
                 ],
             ],
             'personas' => [
@@ -199,6 +201,9 @@ final class CatalogoPermisos
 
             // 2026-10-26: los roles que ya podían editar mandamientos (incluido el estado) y consultarlos.
             'mandamientos.estado' => [self::ROL_ADMINISTRADOR, self::ROL_TECNICO_FELCC, self::ROL_TECNICO_DACI],
+
+            // 2026-10-27: editar la plantilla de la ficha, sólo administradores al inicio.
+            'registro_criminal.plantilla' => [self::ROL_ADMINISTRADOR],
 
             // 2026-10-27: Faltas y Contravenciones es sólo de los administradores (y del rol `conciliacion_ciudadana`,
             // que recibe sus permisos al crearse con `RolesSeeder`). El superadmin tiene todo.

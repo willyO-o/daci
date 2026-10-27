@@ -1,6 +1,6 @@
 # Estado actual
 
-> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-10-27 15:35 (Bolivia).
+> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-10-27 16:00 (Bolivia).
 
 ## Resumen
 
@@ -28,6 +28,10 @@ Faltas y Contravenciones (D-029).
 2026-10-27: guía resumida (ícono de ayuda) en todos los formularios de registro, usuarios y roles (D-030).
 2026-10-27: buscadores sin botón esperan 900 ms desde la última tecla antes de consultar (D-031).
 2026-10-27: la ficha de registro usa el texto estándar si la base no tiene plantilla (D-032).
+2026-10-27: pantalla «Plantilla de la Ficha» para editar el texto de la ficha, con vista previa (D-033).
+2026-10-27: la Auditoría de consultas registra búsquedas, detalles abiertos y exportaciones de todos los módulos
+(D-034).
+2026-10-27: sin «¿Olvidó su contraseña?»: la restablece el administrador (D-035). 177 pruebas.
 
 > **Producción es otra base** (más información que la local). No se borra nada; sólo se tocan roles, permisos y sus
 > controles. Su estado de migraciones se verifica allí antes de desplegar.
@@ -36,7 +40,7 @@ Faltas y Contravenciones (D-029).
 
 | Módulo | Estado |
 |---|---|
-| Acceso (login, recuperar contraseña, usuario inactivo) | ✅ |
+| Acceso (login, usuario inactivo; la contraseña la restablece el administrador) | ✅ |
 | Layout Velzon persistente, menú por permisos, modo oscuro | ✅ |
 | Usuarios · Roles y permisos dinámicos (nuevo) · Perfil | ✅ |
 | Dashboard | ✅ |

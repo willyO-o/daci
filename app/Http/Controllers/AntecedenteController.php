@@ -70,8 +70,11 @@ abstract class AntecedenteController extends Controller
 
         $consulta = $this->consulta()
             ->when($request->filled('search'), fn (Builder $q) => $this->buscar($q, $request->input('filtro'), (string) $request->input('search')));
+        $respuesta = $this->pagina($consulta, $request);
 
-        return $this->pagina($consulta, $request);
+        $this->auditarBusqueda($request, 'listado_'.$this->modulo()->value, ['tipo_filtro' => $request->input('filtro'), 'busqueda' => $request->input('search')], (int) $respuesta->getData(true)['total']);
+
+        return $respuesta;
     }
 
     public function create(): Response
@@ -133,7 +136,7 @@ abstract class AntecedenteController extends Controller
     {
         $registro = $this->registro($registro);
 
-        AuditarConsultas::agregarIdsAccedidos($request->input('identificador'), $registro->id, $registro::class);
+        AuditarConsultas::registrarAcceso($request->input('identificador'), $registro, 'detalle_'.$this->modulo()->value);
 
         return response()->json($this->detalle($registro));
     }
@@ -143,7 +146,7 @@ abstract class AntecedenteController extends Controller
         $modelo = $this->modulo()->modelo();
         $registro = $modelo::whereRaw('MD5(id) = ?', [$codigo])->firstOrFail();
 
-        AuditarConsultas::agregarIdsAccedidos($request->input('identificador'), $registro->id, $registro::class);
+        AuditarConsultas::registrarAcceso($request->input('identificador'), $registro, 'detalle_'.$this->modulo()->value);
 
         return Inertia::render('Antecedentes/Ver', [
             'modulo' => $this->modulo()->paraVista(),
