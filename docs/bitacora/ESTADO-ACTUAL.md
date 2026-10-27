@@ -1,6 +1,6 @@
 # Estado actual
 
-> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-10-27 14:12 (Bolivia).
+> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-10-27 14:47 (Bolivia).
 
 ## Resumen
 
@@ -22,6 +22,7 @@ listados) con `RolesSeeder` (D-024).
 2026-10-27: rol `conciliacion_ciudadana`; Faltas y Contravenciones sólo para él y los administradores (D-025).
 2026-10-27: al editar un registro se pueden actualizar estado civil y ocupación de la persona (D-026).
 2026-10-27: al registrar se busca la persona por C.I. + complemento con COALESCE y se avisa si existe (D-027). 161 pruebas.
+2026-10-27: pantalla «Cargando…» con el logo al navegar entre páginas (D-028).
 
 > **Producción es otra base** (más información que la local). No se borra nada; sólo se tocan roles, permisos y sus
 > controles. Su estado de migraciones se verifica allí antes de desplegar.

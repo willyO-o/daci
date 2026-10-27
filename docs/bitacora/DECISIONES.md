@@ -370,3 +370,23 @@ existe, usando COALESCE para evitar errores en las búsquedas.
 
 **Sin cambiar** (otro alcance, se avisa): las importaciones y la alta rápida de `Persona` siguen buscando sólo por C.I.
 Pruebas: `tests/Feature/Personas/BusquedaCiTest.php` (6).
+
+## D-028 · Pantalla «Cargando…» al navegar entre páginas (2026-10-27 14:47)
+
+**Pedido:** un cargador con el logo y «Cargando…» al navegar entre rutas, sin bugs.
+
+`Components/Layout/CargaNavegacion.vue` en el layout persistente (`AppLayout`), sobre los eventos `start`/`finish` del
+router de Inertia:
+
+1. Sólo cambios de página: GET con `preserveState === false`, sin `only`, sin `prefetch` ni `async`. No se abre con
+   filtros y paginación de listados (`useListado`: `preserveState`), recargas parciales (`router.reload({ only })`),
+   precargas ni formularios (POST/PUT, que ya muestran «Guardando…»).
+2. Sin parpadeo: aparece si tarda más de 250 ms y, visible, dura al menos 400 ms.
+3. Lleva la cuenta de las visitas en curso por objeto de visita (Inertia 2.3 pasa el mismo objeto a `start` y
+   `finish`, y emite `finish` también al cancelar o interrumpir): si una navegación interrumpe a otra, sigue visible
+   hasta la última. Limpia escuchas y temporizadores al desmontarse (p. ej. al cerrar sesión).
+4. Logo FELCC con pulso, barra indeterminada, variables `--vz-*` (modo oscuro), `prefers-reduced-motion`,
+   `role="status"`; bloquea clics mientras carga. La barra de progreso de Inertia se conserva.
+
+Verificado con una simulación de la misma lógica (5 casos: rápida sin parpadeo, lenta ≥ 400 ms, interrumpida, visitas
+que no deben abrirla, `finish` ajeno). El proyecto no tiene pruebas de JS.

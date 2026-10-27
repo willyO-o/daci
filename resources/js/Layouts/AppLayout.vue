@@ -6,6 +6,7 @@ import AppSidebar from '@/Components/Layout/AppSidebar.vue';
 import AppFooter from '@/Components/Layout/AppFooter.vue';
 import AppCustomizer from '@/Components/Layout/AppCustomizer.vue';
 import BotonVolverArriba from '@/Components/Layout/BotonVolverArriba.vue';
+import CargaNavegacion from '@/Components/Layout/CargaNavegacion.vue';
 import { useTema } from '@/Composables/useTema';
 import { useNotificacion } from '@/Composables/useNotificacion';
 
@@ -53,5 +54,6 @@ watch(
 
         <BotonVolverArriba />
         <AppCustomizer />
+        <CargaNavegacion />
     </div>
 </template>
