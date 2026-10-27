@@ -298,3 +298,39 @@ asignaciones directas a usuarios) y se aplicó la definitiva; en producción nun
 la persona.
 
 Pruebas: `tests/Feature/Antecedentes/AntecedentesTest.php` (11) y `MigracionAntecedentesTest.php` (3).
+
+## D-024 · Rol predefinido `pol_110` (2026-10-27 13:05)
+
+**Pedido:** un seeder para un rol nuevo `pol_110` que consulte mandamientos y registre vehículos, teléfonos,
+personas e IMEIs, sin poder ver los módulos (usando las páginas «Registrar …» de D-022).
+
+1. El rol se define en `CatalogoPermisos::rolesPredefinidos()` y lo crea `RolesSeeder` (que antes corre
+   `PermisosSeeder`; `DatabaseSeeder` llama a `RolesSeeder`). Permisos: `consultas.mandamientos`, `mandamientos.ver`
+   (abrir el detalle desde la consulta, como `consultor_felcc`), `personas.crear`, `telefonos.crear`, `imeis.crear`,
+   `vehiculos.crear`. Sin `*.listar` ve en el menú y en el Dashboard las páginas «Registrar …» y no los listados.
+2. El seeder sólo crea el rol si falta; a un rol que ya existe no lo toca, así lo que se cambie en la pantalla de
+   roles se respeta. Falla si la definición menciona un permiso que no está en el catálogo.
+3. No es rol base: se puede editar desde Roles. No existe en `roles_legado`, así que sus usuarios quedan con
+   `users.role_id` nulo (D-018).
+
+**Descartado:** asignar los permisos en cada corrida — devolvería permisos quitados a mano.
+
+Aplicado en la base local `felcc`: rol creado con sus 6 permisos; los otros 6 roles sin cambios. Pruebas:
+`tests/Feature/Acceso/RolesSeederTest.php` (5).
+
+## D-025 · Rol `conciliacion_ciudadana`; Faltas y Contravenciones sólo para él y los administradores (2026-10-27 13:15)
+
+**Pedido:** un rol nuevo `conciliacion_ciudadana` que consulte mandamientos y registre faltas y contravenciones; «en
+principio sólo éste debería tener el permiso de faltas y contravenciones, y los administradores»; sin afectar la base.
+
+1. Se suma a `CatalogoPermisos::rolesPredefinidos()` (lo crea `RolesSeeder`, como `pol_110`) con `consultas.mandamientos`,
+   `mandamientos.ver` y del módulo Faltas y Contravenciones: listar, ver, crear, editar, ficha y su consulta. **Eliminar
+   queda para los administradores.** Descripción en la cabecera: «Conciliación Ciudadana».
+2. La asignación inicial de Faltas y Contravenciones (D-023) pasa a ser **sólo administrador** (superadmin tiene
+   todo). En la base local se quitaron esas asignaciones a `tecnico_daci` (6) y `consultor_daci` (2): el módulo no
+   tenía registros ni asignaciones directas a usuarios; los permisos siguen existiendo. En producción nunca existieron.
+
+**Interpretación a confirmar:** «registrar faltas y contravenciones» se tomó como trabajar el módulo (ver el listado,
+registrar, editar, consultar, imprimir la ficha), no sólo dar de alta.
+
+Pruebas: `RolesSeederTest` (+3).

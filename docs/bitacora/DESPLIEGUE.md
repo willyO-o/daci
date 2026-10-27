@@ -52,7 +52,7 @@ migraciones del propio FELCC (la copia local `felcc` tenía pendientes `remove_u
 
 ```bash
 php artisan migrate --force    # renombra roles → roles_legado y crea las tablas de Spatie con los roles
-php artisan db:seed --class=PermisosSeeder --force  # = acceso:sincronizar; sólo agrega permisos/roles base, repara users.role_id
+php artisan db:seed --class=RolesSeeder --force    # corre PermisosSeeder (permisos, roles base, users.role_id) y crea pol_110 y conciliacion_ciudadana si faltan
 ```
 
 La migración de roles se protege sola: **se detiene sin cambios** si ya existe alguna tabla de Spatie, y si falla a

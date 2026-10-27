@@ -200,30 +200,64 @@ final class CatalogoPermisos
             // 2026-10-26: los roles que ya podían editar mandamientos (incluido el estado) y consultarlos.
             'mandamientos.estado' => [self::ROL_ADMINISTRADOR, self::ROL_TECNICO_FELCC, self::ROL_TECNICO_DACI],
 
-            // 2026-10-26: Faltas y Contravenciones, con el mismo acceso que cada rol tiene en Registro Criminal.
-            ...self::comoRegistroCriminal('faltas_contravenciones'),
+            // 2026-10-27: Faltas y Contravenciones es sólo de los administradores (y del rol `conciliacion_ciudadana`,
+            // que recibe sus permisos al crearse con `RolesSeeder`). El superadmin tiene todo.
+            ...array_fill_keys(self::permisosDe('faltas_contravenciones'), [self::ROL_ADMINISTRADOR]),
         ];
     }
 
     /**
-     * Asignación de un módulo copiada de Registro Criminal: administrador todo; técnico DACI todo menos eliminar;
-     * consultor DACI consultar y ver el detalle.
+     * Slugs de un módulo del catálogo (p. ej. `faltas_contravenciones` → `faltas_contravenciones.listar`, …) más su
+     * consulta, si la tiene (`consultas.faltas_contravenciones`).
      *
-     * @return array<string, list<string>>
+     * @return list<string>
      */
-    private static function comoRegistroCriminal(string $modulo): array
+    private static function permisosDe(string $modulo): array
     {
-        $administrador = [self::ROL_ADMINISTRADOR];
-        $tecnico = [self::ROL_ADMINISTRADOR, self::ROL_TECNICO_DACI];
+        $permisos = array_keys(self::modulos()[$modulo]['permisos']);
+        $consulta = "consultas.{$modulo}";
 
+        return array_key_exists($consulta, self::modulos()['consultas']['permisos']) ? [...$permisos, $consulta] : $permisos;
+    }
+
+    /**
+     * Roles nuevos de DACI que se crean con `RolesSeeder` (además de los 6 heredados). El seeder sólo crea el rol que
+     * falte, con estos permisos; a un rol que ya existe no lo toca (se administra en la pantalla de roles).
+     *
+     * @return array<string, array{descripcion: string, permisos: list<string>}>
+     */
+    public static function rolesPredefinidos(): array
+    {
         return [
-            "{$modulo}.listar" => $tecnico,
-            "{$modulo}.ver" => [...$tecnico, self::ROL_CONSULTOR_DACI],
-            "{$modulo}.crear" => $tecnico,
-            "{$modulo}.editar" => $tecnico,
-            "{$modulo}.eliminar" => $administrador,
-            "{$modulo}.ficha" => $tecnico,
-            "consultas.{$modulo}" => [...$tecnico, self::ROL_CONSULTOR_DACI],
+            // Consulta mandamientos y registra personas, teléfonos, IMEIs y vehículos sin ver los listados: usa las
+            // páginas «Registrar …» (menú y Dashboard), que aparecen con `*.crear` sin `*.listar`.
+            // Consulta mandamientos y trabaja el módulo Faltas y Contravenciones (registra, edita, consulta e imprime la
+            // ficha; eliminar queda para los administradores).
+            'conciliacion_ciudadana' => [
+                'descripcion' => 'Conciliación Ciudadana',
+                'permisos' => [
+                    'consultas.mandamientos',
+                    'mandamientos.ver',
+                    'faltas_contravenciones.listar',
+                    'faltas_contravenciones.ver',
+                    'faltas_contravenciones.crear',
+                    'faltas_contravenciones.editar',
+                    'faltas_contravenciones.ficha',
+                    'consultas.faltas_contravenciones',
+                ],
+            ],
+            'pol_110' => [
+                // Lo que se ve en la cabecera junto al nombre del usuario (como «Técnico DACI»).
+                'descripcion' => 'POL 110',
+                'permisos' => [
+                    'consultas.mandamientos',
+                    'mandamientos.ver',
+                    'personas.crear',
+                    'telefonos.crear',
+                    'imeis.crear',
+                    'vehiculos.crear',
+                ],
+            ],
         ];
     }
 

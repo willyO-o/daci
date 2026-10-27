@@ -19,6 +19,9 @@ description: Roles y permisos DINÁMICOS de FELCC/DACI con spatie/laravel-permis
   sincroniza Spatie y deja `users.role_id` en espejo (id del mismo rol en `roles_legado`, o null si el rol es nuevo),
   para que un `migrate:rollback` de emergencia devuelva a FELCC usuarios con su rol. `acceso:sincronizar` repara
   desfases (no toca a usuarios sin rol en Spatie).
+- **Roles predefinidos de DACI** (hoy `pol_110`): se declaran en `CatalogoPermisos::rolesPredefinidos()` con su
+  descripción y permisos y los crea `RolesSeeder` (`php artisan db:seed --class=RolesSeeder --force`), que sólo
+  crea el que falta y no toca uno existente. No son roles base: se editan y eliminan desde la pantalla de roles.
 - **Ningún control por nombre de rol** en servidor ni en Vue, salvo el superadmin (`Gate::before`, rol bloqueado).
 - **Superadmin**: `Gate::before` en `AppServiceProvider` le concede todo, también los permisos futuros. Su rol no
   se edita desde la pantalla, no aparece en el listado de usuarios ni en el selector de roles (igual que antes).
