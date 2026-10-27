@@ -133,3 +133,9 @@ Leyenda: ✅ migrado igual · 🔧 migrado con corrección · ➖ no se migra (c
 | `errors/404.blade.php` | `Errores/Error` (403/404/419/500/503) | ✅ |
 | Barra superior: pantalla completa, modo oscuro, usuario, perfil, salir | `AppTopbar` | ✅ (buscador móvil y notificaciones eran restos de la plantilla) |
 | Login Velzon (fondo de partículas) | `AuthLayout` «propuesta 5» (foto del Palacio, tarjeta de vidrio) | 🔧 rediseño pedido; misma funcionalidad |
+
+## Cambios de comportamiento (2026-10-27)
+
+| Anterior | DACI | Estado |
+|---|---|---|
+| Editar registro criminal: los datos personales no se guardaban | Estado civil y ocupación se guardan en la persona; el resto, en Personas | 🔧 D-026 (también en Faltas y Contravenciones) |

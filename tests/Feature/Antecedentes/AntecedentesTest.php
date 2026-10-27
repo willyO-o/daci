@@ -254,4 +254,22 @@ class AntecedentesTest extends TestCase
         $this->assertDatabaseCount('foto_falta_contravencion', 0);
         $this->assertDatabaseCount('ficha_falta_contravencion', 0);
     }
+
+    public function test_al_editar_se_actualizan_el_estado_civil_y_la_ocupacion_de_la_persona(): void
+    {
+        $this->actingAs($this->usuarioConPermisos([]));
+        $registro = $this->registro();
+        $registro->persona->update(['estado_civil' => 'SOLTERO', 'ocupacion' => 'ESTUDIANTE']);
+
+        $this->actingAs($this->usuarioCon(['editar', 'listar']))
+            ->put(route('faltas-contravenciones.update', $registro->id), [
+                'fecha_registro' => '2026-01-10',
+                'id_division' => $registro->id_division,
+                'estado_civil' => 'CASADO',
+                'ocupacion' => 'COMERCIANTE',
+            ])->assertRedirect(route('faltas-contravenciones.index'));
+
+        $this->assertSame('CASADO', $registro->persona->fresh()->estado_civil);
+        $this->assertSame('COMERCIANTE', $registro->persona->fresh()->ocupacion);
+    }
 }

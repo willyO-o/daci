@@ -68,7 +68,7 @@ class RegistroCriminalController extends Controller
         DB::transaction(function () use ($request) {
             $persona = $request->filled('id_persona')
                 ? Persona::find($request->integer('id_persona'))
-                : ($request->filled('ci') ? Persona::where('ci', $request->input('ci'))->first() : null);
+                : ($request->filled('ci') ? Persona::conCi($request->input('ci'), $request->input('complemento'))->orderBy('id')->first() : null);
 
             $persona ??= Persona::create($request->only([
                 'nombres', 'apellidos', 'ci', 'domicilio', 'telefono', 'fecha_nacimiento', 'lugar_nacimiento',
@@ -134,7 +134,8 @@ class RegistroCriminalController extends Controller
     }
 
     /**
-     * Actualiza el registro (los datos personales se editan en Personas, igual que antes).
+     * Actualiza el registro. De los datos personales sólo el estado civil y la ocupación se corrigen aquí (cambian con
+     * el tiempo); el resto se edita en Personas, igual que antes.
      */
     public function update(Request $request, RegistroCriminal $registroCriminal): RedirectResponse
     {
@@ -151,12 +152,18 @@ class RegistroCriminalController extends Controller
             'estatura' => ['nullable', 'string', 'max:255'],
             'peso' => ['nullable', 'string', 'max:255'],
             'cud' => ['nullable', 'string', 'max:255'],
+            // Datos de la persona que cambian con el tiempo: se actualizan en su ficha de Personas.
+            'estado_civil' => ['nullable', 'in:SOLTERO,CASADO,DIVORCIADO,VIUDO,CONYUGUE'],
+            'ocupacion' => ['nullable', 'string', 'max:150'],
             'foto_frente' => ['nullable', 'image', 'max:10240'],
             'foto_perfil' => ['nullable', 'image', 'max:10240'],
         ]);
 
         $reemplazadas = DB::transaction(function () use ($request, $registroCriminal) {
             $registroCriminal->update($request->only(self::CAMPOS));
+
+            // Estado civil y ocupación son de la persona: se corrigen aquí porque cambian con el tiempo.
+            $registroCriminal->persona?->update($request->only(['estado_civil', 'ocupacion']));
 
             if (filled($request->input('telefono')) && $registroCriminal->persona) {
                 $this->vincularTelefono($registroCriminal->persona, trim($request->input('telefono')));

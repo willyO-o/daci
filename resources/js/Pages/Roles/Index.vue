@@ -38,7 +38,31 @@ const abrirNuevo = () => {
     editando.value = null;
     form.reset();
     form.clearErrors();
+    rolOrigen.value = '';
     modal.value = true;
+};
+
+// Copiar permisos de otro rol: sólo los que están en el catálogo (el servidor rechaza los demás).
+const permisosDelCatalogo = computed(() => new Set(Object.values(props.modulos).flatMap((modulo) => Object.keys(modulo.permisos))));
+const permisosCopiables = (rol) => rol.permisos.filter((permiso) => permisosDelCatalogo.value.has(permiso));
+const rolOrigen = ref('');
+const rolesParaCopiar = computed(() => props.roles.filter((rol) => rol.id !== editando.value?.id));
+
+const copiarPermisos = (modo) => {
+    const origen = props.roles.find((rol) => rol.id === Number(rolOrigen.value));
+    if (!origen) {
+        return;
+    }
+    const copiados = permisosCopiables(origen);
+    form.permisos = modo === 'reemplazar' ? copiados : [...new Set([...form.permisos, ...copiados])];
+};
+
+/** «Duplicar»: abre «Nuevo Rol» con los permisos del rol, para ponerle nombre y ajustarlos. */
+const duplicar = (rol) => {
+    abrirNuevo();
+    form.descripcion = rol.descripcion ? `Copia de ${rol.descripcion}` : '';
+    form.permisos = permisosCopiables(rol);
+    rolOrigen.value = String(rol.id);
 };
 
 const abrirEditar = (rol) => {
@@ -47,6 +71,7 @@ const abrirEditar = (rol) => {
     form.name = rol.name;
     form.descripcion = rol.descripcion ?? '';
     form.permisos = [...rol.permisos];
+    rolOrigen.value = '';
     modal.value = true;
 };
 
@@ -132,11 +157,14 @@ const eliminar = async (rol) => {
                         </div>
                         <p v-else class="text-muted small mb-0">Este rol todavía no tiene permisos.</p>
                     </div>
-                    <div v-if="gestiona && !rol.es_superadmin" class="card-footer d-flex justify-content-end gap-2">
-                        <button v-if="!rol.es_base" type="button" class="btn btn-sm btn-soft-danger" @click="eliminar(rol)">
+                    <div v-if="gestiona" class="card-footer d-flex justify-content-end gap-2">
+                        <button v-if="!rol.es_base && !rol.es_superadmin" type="button" class="btn btn-sm btn-soft-danger" @click="eliminar(rol)">
                             <i class="ri-delete-bin-line align-bottom me-1" /> Eliminar
                         </button>
-                        <button type="button" class="btn btn-sm btn-soft-primary" @click="abrirEditar(rol)">
+                        <button type="button" class="btn btn-sm btn-soft-secondary" :title="`Nuevo rol con los permisos de ${rol.name}`" @click="duplicar(rol)">
+                            <i class="ri-file-copy-line align-bottom me-1" /> Duplicar
+                        </button>
+                        <button v-if="!rol.es_superadmin" type="button" class="btn btn-sm btn-soft-primary" @click="abrirEditar(rol)">
                             <i class="ri-shield-keyhole-line align-bottom me-1" /> Editar permisos
                         </button>
                     </div>
@@ -167,6 +195,29 @@ const eliminar = async (rol) => {
                         <input id="descripcionRol" v-model="form.descripcion" type="text" class="form-control" :class="{ 'is-invalid': form.errors.descripcion }" placeholder="Para qué sirve este rol">
                         <CampoError :mensaje="form.errors.descripcion" />
                     </div>
+                </div>
+
+                <div class="bg-light rounded p-3 mb-3">
+                    <label for="rolOrigen" class="form-label mb-1">Copiar permisos de otro rol</label>
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md">
+                            <select id="rolOrigen" v-model="rolOrigen" class="form-select">
+                                <option value="">Elegir un rol…</option>
+                                <option v-for="rol in rolesParaCopiar" :key="rol.id" :value="String(rol.id)">
+                                    {{ rol.name }}{{ rol.descripcion ? ` — ${rol.descripcion}` : '' }} ({{ permisosCopiables(rol).length }} permisos)
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-auto d-flex gap-2">
+                            <button type="button" class="btn btn-soft-primary" :disabled="!rolOrigen" title="Deja exactamente los permisos del rol elegido" @click="copiarPermisos('reemplazar')">
+                                <i class="ri-file-copy-line align-bottom me-1" /> Reemplazar
+                            </button>
+                            <button type="button" class="btn btn-soft-secondary" :disabled="!rolOrigen" title="Agrega los permisos del rol elegido a los marcados" @click="copiarPermisos('sumar')">
+                                <i class="ri-add-line align-bottom me-1" /> Sumar
+                            </button>
+                        </div>
+                    </div>
+                    <small class="text-muted">Después puede marcar o quitar permisos antes de guardar. El rol elegido no cambia.</small>
                 </div>
 
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">

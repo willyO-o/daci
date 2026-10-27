@@ -227,21 +227,48 @@ class PersonaController extends Controller
     }
 
     /**
-     * ¿Ya existe alguien con este CI y complemento? (aviso en vivo del formulario).
+     * Registros que se pueden contar en `checkCI` y el permiso que hace falta para verlos (alta del módulo).
+     *
+     * @var array<string, array{relacion: string, permiso: string}>
+     */
+    private const CONTEOS_CI = [
+        'registro_criminal' => ['relacion' => 'registroCriminal', 'permiso' => 'registro_criminal.crear'],
+        'faltas_contravenciones' => ['relacion' => 'faltasContravenciones', 'permiso' => 'faltas_contravenciones.crear'],
+    ];
+
+    /**
+     * ¿Ya existe alguien con este CI y complemento? Aviso en vivo de los formularios de Personas, Registro Criminal y
+     * Faltas y Contravenciones. Compara con COALESCE ({@see Persona::scopeConCi()}). Con `contar` (lista blanca) dice
+     * además cuántos registros tiene la persona en ese módulo, si el usuario puede registrar en él.
      */
     public function checkCI(Request $request): JsonResponse
     {
-        $persona = Persona::query()
-            ->where('ci', $request->input('ci'))
-            ->when(
-                $request->filled('complemento'),
-                fn (Builder $q) => $q->where('complemento', $request->input('complemento')),
-                fn (Builder $q) => $q->whereNull('complemento'),
-            )
-            ->when($request->filled('excluir'), fn (Builder $q) => $q->whereKeyNot($request->integer('excluir')))
-            ->first(['id', 'nombres', 'apellidos', 'ci', 'complemento']);
+        $ci = trim((string) $request->input('ci'));
 
-        return response()->json(['data' => $persona]);
+        if ($ci === '') {
+            return response()->json(['data' => null]);
+        }
+
+        $persona = Persona::query()
+            ->conCi($ci, $request->input('complemento'))
+            ->when($request->filled('excluir'), fn (Builder $q) => $q->whereKeyNot($request->integer('excluir')))
+            ->orderBy('id')
+            ->first(['id', 'nombres', 'apellidos', 'ci', 'complemento', 'domicilio', 'lugar_nacimiento', 'nombre_conyuge',
+                'ocupacion', 'estado_civil', 'id_pais', 'genero', 'fecha_nacimiento', 'alias']);
+
+        if (! $persona) {
+            return response()->json(['data' => null]);
+        }
+
+        $conteo = self::CONTEOS_CI[(string) $request->input('contar')] ?? null;
+
+        return response()->json(['data' => [
+            ...$persona->toArray(),
+            'fecha_nacimiento' => $persona->fecha_nacimiento?->toDateString(),
+            'registros' => $conteo && $request->user()->can($conteo['permiso'])
+                ? $persona->{$conteo['relacion']}()->count()
+                : null,
+        ]]);
     }
 
     /**
@@ -256,13 +283,13 @@ class PersonaController extends Controller
             match ($filtro) {
                 'nombre' => $q->where('nombres', 'like', $como),
                 'apellidos' => $q->where('apellidos', 'like', $como),
-                'ci' => $q->where('ci', 'like', $como)->orWhereRaw('CONCAT(ci, "-", complemento) LIKE ?', [$como]),
+                'ci' => $q->where('ci', 'like', $como)->orWhereRaw("CONCAT(COALESCE(ci, ''), '-', COALESCE(complemento, '')) LIKE ?", [$como]),
                 'nombre_padre' => $q->where('padre', 'like', $como),
                 'nombre_madre' => $q->where('madre', 'like', $como),
                 default => $q->where('nombres', 'like', $como)
                     ->orWhere('apellidos', 'like', $como)
                     ->orWhere('ci', 'like', $como)
-                    ->orWhereRaw('CONCAT(ci, "-", complemento) LIKE ?', [$como])
+                    ->orWhereRaw("CONCAT(COALESCE(ci, ''), '-', COALESCE(complemento, '')) LIKE ?", [$como])
                     ->orWhereRaw("CONCAT(COALESCE(nombres, ''), ' ', COALESCE(apellidos, '')) LIKE ?", [$como]),
             };
         });

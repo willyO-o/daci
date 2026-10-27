@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, ref } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import PageHeader from '@/Components/Layout/PageHeader.vue';
+import AvisoPersonaExistente from '@/Components/Personas/AvisoPersonaExistente.vue';
 import BuscadorRemoto from '@/Components/Ui/BuscadorRemoto.vue';
 import CampoError from '@/Components/Ui/CampoError.vue';
 import SelectorCatalogo from '@/Components/Ui/SelectorCatalogo.vue';
@@ -108,9 +109,18 @@ const personaElegida = (p) => {
     });
 };
 
+// Aviso de C.I. existente: «Usar esta persona» la elige en el buscador y completa sus datos.
+const textoPersona = ref('');
+const usarPersona = (p) => {
+    form.id_persona = p.id;
+    textoPersona.value = `${p.nombres} ${p.apellidos ?? ''} - ${p.ci || 'Sin CI'}`;
+    personaElegida(p);
+};
+
 const limpiar = () => {
     form.defaults(valoresIniciales());
     form.reset();
+    textoPersona.value = '';
     vistaFrente.value = null;
     vistaPerfil.value = null;
     if (entradaFrente.value) {
@@ -198,6 +208,7 @@ const titulo = computed(() => (editando.value ? `${props.modulo.titulo} · Edita
                             <label class="form-label">Buscar Persona</label>
                             <BuscadorRemoto
                                 v-model="form.id_persona"
+                                :texto-inicial="textoPersona"
                                 :url="route('personas.search')"
                                 placeholder="Buscar por CI-complemento, Nombre, apellido, nombres o alias"
                                 :mapear="(p) => ({ id: p.id, texto: `${p.nombres} ${p.apellidos ?? ''} - ${p.ci || 'Sin CI'}` })"
@@ -209,7 +220,7 @@ const titulo = computed(() => (editando.value ? `${props.modulo.titulo} · Edita
 
                     <div class="card">
                         <div class="card-body">
-                            <div v-if="editando" class="alert alert-info py-2 small">Los datos personales se corrigen en <strong>Personas</strong>.</div>
+                            <div v-if="editando" class="alert alert-info py-2 small">El <strong>estado civil</strong> y la <strong>ocupación</strong> se pueden actualizar aquí; los demás datos personales se corrigen en <strong>Personas</strong>.</div>
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label" for="fecha_registro">Fecha de Registro <span class="text-danger">*</span></label>
@@ -223,6 +234,16 @@ const titulo = computed(() => (editando.value ? `${props.modulo.titulo} · Edita
                                 <div class="col-md-4">
                                     <label class="form-label" for="complemento">Complemento</label>
                                     <input id="complemento" v-model="form.complemento" maxlength="40" v-mayuscula type="text" class="form-control" :disabled="editando || Boolean(form.id_persona)" placeholder="Ingrese complemento">
+                                </div>
+                                <div v-if="!editando" class="col-12">
+                                    <AvisoPersonaExistente
+                                        :ci="form.ci"
+                                        :complemento="form.complemento"
+                                        :activo="!form.id_persona"
+                                        :contar="'faltas_contravenciones'"
+                                        etiqueta-registros="registro(s) de faltas y contravenciones"
+                                        @usar="usarPersona"
+                                    />
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label" for="nombres">Nombres <span class="text-danger">*</span></label>
@@ -320,7 +341,7 @@ const titulo = computed(() => (editando.value ? `${props.modulo.titulo} · Edita
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="estado_civil">Estado civil</label>
-                                    <select id="estado_civil" v-model="form.estado_civil" class="form-select" :disabled="editando || Boolean(form.id_persona)">
+                                    <select id="estado_civil" v-model="form.estado_civil" class="form-select" :class="{ 'is-invalid': form.errors.estado_civil }" :disabled="!editando && Boolean(form.id_persona)">
                                         <option value="">Seleccionar estado civil</option>
                                         <option v-for="(etiqueta, valor) in ESTADOS_CIVILES" :key="valor" :value="valor">{{ etiqueta }}</option>
                                     </select>
@@ -354,7 +375,7 @@ const titulo = computed(() => (editando.value ? `${props.modulo.titulo} · Edita
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="ocupacion">Ocupación</label>
-                                    <input id="ocupacion" v-model="form.ocupacion" maxlength="150" v-mayuscula type="text" class="form-control" :disabled="editando || Boolean(form.id_persona)" placeholder="(opcional)">
+                                    <input id="ocupacion" v-model="form.ocupacion" maxlength="150" v-mayuscula type="text" class="form-control" :class="{ 'is-invalid': form.errors.ocupacion }" :disabled="!editando && Boolean(form.id_persona)" placeholder="(opcional)">
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label" for="rasgos">Rasgos</label>

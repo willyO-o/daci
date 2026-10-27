@@ -1,6 +1,6 @@
 # Estado actual
 
-> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-10-27 13:15 (Bolivia).
+> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-10-27 14:12 (Bolivia).
 
 ## Resumen
 
@@ -20,7 +20,8 @@ nuevas) y permisos (D-023).
 2026-10-27: rol `pol_110` (consulta mandamientos y registra personas, teléfonos, IMEIs y vehículos sin ver los
 listados) con `RolesSeeder` (D-024).
 2026-10-27: rol `conciliacion_ciudadana`; Faltas y Contravenciones sólo para él y los administradores (D-025).
-152 pruebas en verde.
+2026-10-27: al editar un registro se pueden actualizar estado civil y ocupación de la persona (D-026).
+2026-10-27: al registrar se busca la persona por C.I. + complemento con COALESCE y se avisa si existe (D-027). 161 pruebas.
 
 > **Producción es otra base** (más información que la local). No se borra nada; sólo se tocan roles, permisos y sus
 > controles. Su estado de migraciones se verifica allí antes de desplegar.

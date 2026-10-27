@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\Antecedentes\ModuloAntecedente;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -73,6 +74,18 @@ class Persona extends Model implements AuditableContract
     public function registroCriminal()
     {
         return $this->hasMany(RegistroCriminal::class, 'id_persona');
+    }
+
+    /**
+     * Personas con este C.I. y complemento. Compara sin espacios a los lados y trata como iguales NULL y '' (con
+     * COALESCE): `complemento = NULL` nunca es verdadero en SQL y una persona sin complemento quedaría sin encontrar.
+     * El complemento vacío busca a quien no tiene complemento.
+     */
+    public function scopeConCi(Builder $consulta, string $ci, ?string $complemento = null): Builder
+    {
+        return $consulta
+            ->whereRaw("TRIM(COALESCE(ci, '')) = ?", [trim($ci)])
+            ->whereRaw("TRIM(COALESCE(complemento, '')) = ?", [trim((string) $complemento)]);
     }
 
     public function faltasContravenciones()

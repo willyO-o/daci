@@ -334,3 +334,39 @@ principio sólo éste debería tener el permiso de faltas y contravenciones, y l
 registrar, editar, consultar, imprimir la ficha), no sólo dar de alta.
 
 Pruebas: `RolesSeederTest` (+3).
+
+## D-026 · Estado civil y ocupación se actualizan al editar un registro (2026-10-27 14:01)
+
+**Pedido:** «en el formulario de registro criminal al editar no permite modificar el estado civil ni la ocupación;
+son datos que pueden cambiar a lo largo del tiempo».
+
+Al **editar** un registro de Registro Criminal o de Faltas y Contravenciones, el estado civil y la ocupación se
+pueden cambiar y se guardan en la **persona** (son columnas de `persona`; quedan en la Auditoría de cambios). Se
+validan igual que en Personas (`estado_civil` en la lista del `enum`, `ocupacion` hasta 150). Los demás datos
+personales siguen de sólo lectura y se corrigen en Personas. Si la petición no trae esos campos, no se tocan.
+Al **registrar** con una persona ya elegida siguen bloqueados, como antes (el alta no modifica a la persona).
+
+Modifica parcialmente D-015 («un registro criminal no edita los datos personales»). Datos existentes revisados:
+todos los `estado_civil` están en la lista y la ocupación más larga tiene 47 caracteres. Pruebas: +3.
+
+## D-027 · Búsqueda de C.I. + complemento al registrar, con COALESCE (2026-10-27 14:12)
+
+**Pedido:** al crear un registro criminal o una falta, buscar en la base por Nro. C.I. + complemento si la persona ya
+existe, usando COALESCE para evitar errores en las búsquedas.
+
+1. `Persona::scopeConCi($ci, $complemento)`: `TRIM(COALESCE(ci,'')) = ?` y `TRIM(COALESCE(complemento,'')) = ?`. Trata
+   como iguales NULL y '' (en SQL `complemento = NULL` nunca es verdadero) y no depende de espacios; sin complemento
+   busca a quien no lo tiene. `persona.ci` no tiene índice, así que la comparación con funciones no pierde ninguno
+   (≈10–20 ms con 4.095 personas).
+2. `personas.check-ci` usa ese criterio (lo comparten Personas, Registro Criminal y Faltas y Contravenciones), devuelve
+   los datos para completar el formulario y, con `contar` (lista blanca), cuántos registros tiene la persona en el
+   módulo, sólo si el usuario puede registrar en él.
+3. Formularios de alta: `AvisoPersonaExistente` busca mientras se escribe (400 ms, desde 4 caracteres, cancela la
+   búsqueda anterior) y avisa «Ya existe una persona con C.I. …» con «Usar esta persona», o «se registrará una nueva».
+4. **Corrección:** el alta (Registro Criminal y Faltas y Contravenciones) reutilizaba una persona buscando sólo por
+   C.I., sin el complemento (1234567-A quedaba asociado a 1234567). Ahora usa C.I. + complemento.
+5. **Corrección:** el filtro de C.I. del listado de Personas usaba `CONCAT(ci, '-', complemento)`, que da NULL sin
+   complemento; ahora con COALESCE.
+
+**Sin cambiar** (otro alcance, se avisa): las importaciones y la alta rápida de `Persona` siguen buscando sólo por C.I.
+Pruebas: `tests/Feature/Personas/BusquedaCiTest.php` (6).

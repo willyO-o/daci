@@ -124,4 +124,41 @@ class RegistroCriminalTest extends TestCase
 
         $this->getJson(route('registro.vista-previa', $registro))->assertForbidden();
     }
+
+    public function test_al_editar_se_actualizan_el_estado_civil_y_la_ocupacion_de_la_persona(): void
+    {
+        $this->actingAs($this->usuarioConPermisos(['registro_criminal.editar', 'registro_criminal.listar']));
+        $registro = $this->registro();
+        $registro->persona->update(['estado_civil' => 'SOLTERO', 'ocupacion' => 'ESTUDIANTE', 'nombres' => 'PEDRO']);
+
+        $this->put(route('registro-criminal.update', $registro), [
+            'fecha_registro' => '2026-01-10',
+            'id_division' => $registro->id_division,
+            'estado_civil' => 'CASADO',
+            'ocupacion' => 'COMERCIANTE',
+            'nombres' => 'OTRO NOMBRE',
+        ])->assertRedirect(route('registro-criminal.index'));
+
+        $persona = $registro->persona->fresh();
+        $this->assertSame('CASADO', $persona->estado_civil);
+        $this->assertSame('COMERCIANTE', $persona->ocupacion);
+        // El resto de los datos personales sigue corrigiéndose en Personas.
+        $this->assertSame('PEDRO', $persona->nombres);
+    }
+
+    public function test_al_editar_se_rechaza_un_estado_civil_invalido_y_sin_los_campos_no_se_borran(): void
+    {
+        $this->actingAs($this->usuarioConPermisos(['registro_criminal.editar']));
+        $registro = $this->registro();
+        $registro->persona->update(['estado_civil' => 'VIUDO', 'ocupacion' => 'CHOFER']);
+
+        $this->put(route('registro-criminal.update', $registro), [
+            'fecha_registro' => '2026-01-10', 'id_division' => $registro->id_division, 'estado_civil' => 'OTRO',
+        ])->assertSessionHasErrors('estado_civil');
+
+        $this->put(route('registro-criminal.update', $registro), ['fecha_registro' => '2026-01-10', 'id_division' => $registro->id_division]);
+
+        $this->assertSame('VIUDO', $registro->persona->fresh()->estado_civil);
+        $this->assertSame('CHOFER', $registro->persona->fresh()->ocupacion);
+    }
 }
