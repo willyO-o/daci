@@ -13,6 +13,8 @@ import { usePermisos } from '@/Composables/usePermisos';
 import { useVistaGuardada } from '@/Composables/useVistaGuardada';
 import { FILTROS_MANDAMIENTO } from '@/Utils/mandamiento';
 import { http } from '@/Utils/http';
+import { guiaFormularioMandamiento } from '@/Utils/guias';
+import { ESPERA_BUSQUEDA } from '@/Utils/espera';
 
 const props = defineProps({
     estados: { type: Array, default: () => [] },
@@ -30,7 +32,7 @@ const lista = useCargaInfinita(() => route('mandamientos.index'), () => ({ ...fi
 
 onMounted(() => lista.reiniciar());
 
-// La búsqueda espera 500 ms y no se lanza con 1 solo carácter (igual que antes).
+// La búsqueda espera ESPERA_BUSQUEDA (900 ms) y no se lanza con 1 solo carácter (igual que antes).
 let temporizador = null;
 watch(
     () => filtros.search,
@@ -39,7 +41,7 @@ watch(
         if (texto.trim() !== '' && texto.trim().length < 2) {
             return;
         }
-        temporizador = setTimeout(() => lista.reiniciar(), 500);
+        temporizador = setTimeout(() => lista.reiniciar(), ESPERA_BUSQUEDA);
     },
 );
 watch(() => filtros.tipo_filtro, () => filtros.search && lista.reiniciar());
@@ -162,7 +164,7 @@ const verImagenes = (rutas) => {
             />
         </div>
 
-        <BaseModal v-model="modalFormulario" :titulo="editando ? 'Editar Mandamiento' : 'Registrar Mandamiento'" tamano="lg" centrado estatico>
+        <BaseModal v-model="modalFormulario" :titulo="editando ? 'Editar Mandamiento' : 'Registrar Mandamiento'" tamano="lg" centrado estatico :guia="guiaFormularioMandamiento">
             <FormularioMandamiento
                 ref="formulario"
                 :mandamiento="editando"
@@ -174,7 +176,7 @@ const verImagenes = (rutas) => {
             />
             <template #pie="{ cerrar }">
                 <button type="button" class="btn btn-light" @click="cerrar">Cancelar</button>
-                <button type="submit" form="formMandamiento" class="btn btn-primary" :disabled="formulario?.procesando">
+                <button type="submit" form="formMandamiento" class="btn btn-primary" data-tour="f-guardar" :disabled="formulario?.procesando">
                     <i class="align-middle me-1" :class="formulario?.procesando ? 'ri-loader-4-line' : 'ri-save-3-line'" />
                     {{ formulario?.procesando ? 'Guardando…' : 'Guardar' }}
                 </button>

@@ -1,5 +1,6 @@
 import { reactive, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { ESPERA_BUSQUEDA } from '@/Utils/espera';
 
 /**
  * Filtros de un listado paginado en el SERVIDOR, sincronizados con la URL (se pueden recargar y compartir).
@@ -7,7 +8,7 @@ import { router } from '@inertiajs/vue3';
  *
  *   const { filtros, cargando, irAPagina, recargar } = useListado('personas.index', props.filtros, ['personas']);
  *
- * - Escribir en un campo de texto espera 400 ms (igual que antes) y vuelve a la página 1.
+ * - Escribir en un campo de texto espera ESPERA_BUSQUEDA (900 ms) desde la última tecla y vuelve a la página 1.
  * - Cambiar un select filtra al instante.
  * - Sólo se piden de nuevo los props indicados en `soloProps`; el resto de la página no se recarga.
  *
@@ -16,7 +17,7 @@ import { router } from '@inertiajs/vue3';
  * @param {string[]} soloProps props a recargar
  * @param {{ camposTexto?: string[], espera?: number }} opciones
  */
-export function useListado(nombreRuta, iniciales = {}, soloProps = [], { camposTexto = ['search'], espera = 400 } = {}) {
+export function useListado(nombreRuta, iniciales = {}, soloProps = [], { camposTexto = ['search'], espera = ESPERA_BUSQUEDA } = {}) {
     const filtros = reactive({ ...iniciales });
     const cargando = ref(false);
     let temporizador = null;

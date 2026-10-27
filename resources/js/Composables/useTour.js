@@ -38,8 +38,9 @@ export function useTour() {
 
     /**
      * @param {Array<{ elemento?: string, titulo: string, texto: string, lado?: string, alineacion?: string, siNoExiste?: { titulo: string, texto: string } }>} pasos
+     * @param {{ alCerrar?: () => void }} opciones `alCerrar` corre cuando la guía se cierra por cualquier motivo
      */
-    const iniciar = async (pasos) => {
+    const iniciar = async (pasos, { alCerrar } = {}) => {
         const [{ driver }] = await Promise.all([import('driver.js'), import('driver.js/dist/driver.css')]);
 
         guia?.destroy();
@@ -59,12 +60,16 @@ export function useTour() {
             overlayOpacity: 0.55,
             onDestroyed: () => {
                 guia = null;
+                alCerrar?.();
             },
         });
         guia.drive();
     };
 
-    onBeforeUnmount(() => guia?.destroy());
+    /** Cierra la guía si está abierta (p. ej. al cerrar el modal que la contiene). */
+    const cerrar = () => guia?.destroy();
 
-    return { iniciar };
+    onBeforeUnmount(cerrar);
+
+    return { iniciar, cerrar };
 }

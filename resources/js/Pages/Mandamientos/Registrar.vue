@@ -2,6 +2,9 @@
 import { ref } from 'vue';
 import PageHeader from '@/Components/Layout/PageHeader.vue';
 import FormularioMandamiento from '@/Components/Mandamientos/FormularioMandamiento.vue';
+import BotonAyuda from '@/Components/Ui/BotonAyuda.vue';
+import { useTour } from '@/Composables/useTour';
+import { guiaFormularioMandamiento } from '@/Utils/guias';
 
 /**
  * «Registrar Mandamiento» como página propia (el técnico FELCC registra sin ver el listado). Tras guardar, el
@@ -15,11 +18,19 @@ defineProps({
 });
 
 const formulario = ref(null);
+
+// Guía resumida del formulario: sólo con el ícono de ayuda.
+const { iniciar: iniciarGuia } = useTour();
+const abrirGuia = () => iniciarGuia(guiaFormularioMandamiento());
 </script>
 
 <template>
     <div>
-        <PageHeader titulo="Registrar Mandamiento" :migas="[{ etiqueta: 'Registrar Mandamiento' }]" />
+        <PageHeader titulo="Registrar Mandamiento" :migas="[{ etiqueta: 'Registrar Mandamiento' }]">
+            <template #acciones>
+                <BotonAyuda @click="abrirGuia" />
+            </template>
+        </PageHeader>
 
         <div class="row">
             <div class="col-xl-10">
@@ -37,7 +48,7 @@ const formulario = ref(null);
                         />
                     </div>
                     <div class="card-footer text-end">
-                        <button type="submit" form="formMandamiento" class="btn btn-primary" :disabled="formulario?.procesando">
+                        <button type="submit" form="formMandamiento" class="btn btn-primary" data-tour="f-guardar" :disabled="formulario?.procesando">
                             <i class="align-middle me-1" :class="formulario?.procesando ? 'ri-loader-4-line' : 'ri-save-3-line'" />
                             {{ formulario?.procesando ? 'Guardando…' : 'Guardar' }}
                         </button>

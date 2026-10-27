@@ -14,6 +14,7 @@ import { usePermisos } from '@/Composables/usePermisos';
 import { useVistaGuardada } from '@/Composables/useVistaGuardada';
 import { FILTROS_REGISTRO } from '@/Utils/registroCriminal';
 import { http } from '@/Utils/http';
+import { ESPERA_BUSQUEDA } from '@/Utils/espera';
 
 const { puede } = usePermisos();
 const { confirmar, exito, errorDeRespuesta } = useNotificacion();
@@ -24,7 +25,7 @@ const lista = useCargaInfinita(() => route('registro-criminal.index'), () => ({ 
 
 onMounted(() => lista.reiniciar());
 
-// Igual que antes: espera 500 ms y no busca con menos de 3 caracteres.
+// Igual que antes: espera ESPERA_BUSQUEDA (900 ms) y no busca con menos de 3 caracteres.
 let temporizador = null;
 watch(
     () => filtros.search,
@@ -33,7 +34,7 @@ watch(
         if (texto.trim() !== '' && texto.trim().length < 3) {
             return;
         }
-        temporizador = setTimeout(() => lista.reiniciar(), 500);
+        temporizador = setTimeout(() => lista.reiniciar(), ESPERA_BUSQUEDA);
     },
 );
 watch(() => filtros.filtro, () => filtros.search && lista.reiniciar());

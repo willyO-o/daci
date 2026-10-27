@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import PaginaRegistro from '@/Components/Ui/PaginaRegistro.vue';
+import { guiaFormularioVehiculo } from '@/Utils/guias';
 import FormularioVehiculo from '@/Components/Vehiculos/FormularioVehiculo.vue';
 
 /**
@@ -12,7 +13,7 @@ const formulario = ref(null);
 </script>
 
 <template>
-    <PaginaRegistro titulo="Registrar Vehículo" id-formulario="formVehiculo" :procesando="Boolean(formulario?.procesando)" ruta-listado="vehiculos.index" permiso-listado="vehiculos.listar" ancho="col-xl-9">
+    <PaginaRegistro :guia="guiaFormularioVehiculo" titulo="Registrar Vehículo" id-formulario="formVehiculo" :procesando="Boolean(formulario?.procesando)" ruta-listado="vehiculos.index" permiso-listado="vehiculos.listar" ancho="col-xl-9">
         <FormularioVehiculo ref="formulario" />
     </PaginaRegistro>
 </template>

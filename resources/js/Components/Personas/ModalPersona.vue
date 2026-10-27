@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import BaseModal from '@/Components/Ui/BaseModal.vue';
 import FormularioPersona from '@/Components/Personas/FormularioPersona.vue';
+import { guiaFormularioPersona } from '@/Utils/guias';
 
 /**
  * Alta y edición de una persona (el modal «Registrar / Editar Persona» del sistema anterior). El formulario es
@@ -33,7 +34,7 @@ const guardado = ({ registrarOtra }) => {
 </script>
 
 <template>
-    <BaseModal v-model="abierto" :titulo="editando ? 'Editar Persona' : 'Registrar Persona'" tamano="xl" estatico>
+    <BaseModal v-model="abierto" :titulo="editando ? 'Editar Persona' : 'Registrar Persona'" tamano="xl" estatico :guia="guiaFormularioPersona">
         <FormularioPersona ref="formulario" :persona="persona" :paises="paises" @guardado="guardado" @fotos-cambiadas="emit('fotos-cambiadas')" />
 
         <template #pie="{ cerrar }">
@@ -41,7 +42,7 @@ const guardado = ({ registrarOtra }) => {
             <button v-if="!editando" type="button" class="btn btn-info" :disabled="formulario?.procesando" @click="formulario?.guardar(true)">
                 <i class="ri-save-3-line align-middle me-1" /> Guardar y Registrar Nuevo
             </button>
-            <button type="submit" form="formPersona" class="btn btn-primary" :disabled="formulario?.procesando">
+            <button type="submit" form="formPersona" class="btn btn-primary" data-tour="f-guardar" :disabled="formulario?.procesando">
                 <i class="align-middle me-1" :class="formulario?.procesando ? 'ri-loader-4-line' : 'ri-save-3-line'" />
                 {{ formulario?.procesando ? 'Guardando…' : 'Guardar' }}
             </button>

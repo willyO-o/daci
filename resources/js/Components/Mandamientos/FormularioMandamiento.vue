@@ -150,7 +150,7 @@ defineExpose({ procesando: form.procesando, guardar });
 <template>
     <form :id="idFormulario" novalidate @submit.prevent="guardar">
         <div class="row g-3">
-            <div class="col-md-6">
+            <div data-tour="f-documento" class="col-md-6">
                 <label for="hoja_ruta" class="form-label">Hoja de Ruta</label>
                 <input id="hoja_ruta" v-model="form.datos.hoja_ruta" v-mayuscula type="text" class="form-control" :class="{ 'is-invalid': form.errores.value.hoja_ruta }" placeholder="Ingrese Nro. de hoja de ruta">
                 <CampoError :mensaje="form.errores.value.hoja_ruta" />
@@ -167,7 +167,7 @@ defineExpose({ procesando: form.procesando, guardar });
                 </div>
             </div>
 
-            <div class="col-lg-6">
+            <div data-tour="f-persona" class="col-lg-6">
                 <label for="id_persona" class="form-label d-flex align-items-center gap-2">
                     Persona <span class="text-danger">*</span>
                     <button v-if="puede('personas.crear')" type="button" class="btn btn-sm btn-primary py-0" @click="modalPersona = true">+ Añadir</button>
@@ -183,7 +183,7 @@ defineExpose({ procesando: form.procesando, guardar });
                 />
                 <CampoError :mensaje="form.errores.value.id_persona" />
             </div>
-            <div class="col-lg-6">
+            <div data-tour="f-catalogos" class="col-lg-6">
                 <label for="id_juzgado" class="form-label">Juzgado <span class="text-danger">*</span></label>
                 <SelectorCatalogo
                     v-model="form.datos.id_juzgado"
@@ -250,7 +250,7 @@ defineExpose({ procesando: form.procesando, guardar });
                 <label for="vehiculos" class="form-label">Vehículos</label>
                 <textarea id="vehiculos" v-model="form.datos.vehiculos" class="form-control" rows="2" />
             </div>
-            <div class="col-12">
+            <div data-tour="f-archivo" class="col-12">
                 <label for="imagen_mandamiento" class="form-label">Adjuntar Foto/PDF del Mandamiento</label>
                 <input
                     id="imagen_mandamiento"
@@ -266,7 +266,7 @@ defineExpose({ procesando: form.procesando, guardar });
             </div>
         </div>
 
-        <fieldset class="border rounded p-3 mt-3">
+        <fieldset class="border rounded p-3 mt-3" data-tour="f-estado">
             <div class="row g-3">
                 <div class="col-lg-6">
                     <label for="estado" class="form-label">Estado <span class="text-danger">*</span></label>

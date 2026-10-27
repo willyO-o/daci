@@ -74,7 +74,7 @@ defineExpose({ guardar, procesando: computed(() => form.processing) });
 
 <template>
     <form :id="idFormulario" novalidate @submit.prevent="guardar">
-        <div class="mb-3">
+        <div data-tour="f-imei" class="mb-3">
             <label for="imei" class="form-label">IMEI *</label>
             <input id="imei" v-model="form.imei" v-sin-espacios type="text" class="form-control" :class="{ 'is-invalid': form.errors.imei }" placeholder="Ingresa el IMEI">
             <CampoError :mensaje="form.errors.imei" />
@@ -84,7 +84,7 @@ defineExpose({ guardar, procesando: computed(() => form.processing) });
             <textarea id="caracteristicas" v-model="form.caracteristicas" class="form-control" :class="{ 'is-invalid': form.errors.caracteristicas }" rows="3" placeholder="Características del IMEI" />
             <CampoError :mensaje="form.errors.caracteristicas" />
         </div>
-        <div>
+        <div data-tour="f-telefonos">
             <label class="form-label">Vincular Teléfonos</label>
             <BuscadorRemoto
                 v-model="telefonoPorAgregar"

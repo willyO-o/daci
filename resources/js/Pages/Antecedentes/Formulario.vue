@@ -3,11 +3,14 @@ import { computed, onBeforeUnmount, ref } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import PageHeader from '@/Components/Layout/PageHeader.vue';
 import AvisoPersonaExistente from '@/Components/Personas/AvisoPersonaExistente.vue';
+import BotonAyuda from '@/Components/Ui/BotonAyuda.vue';
 import BuscadorRemoto from '@/Components/Ui/BuscadorRemoto.vue';
 import CampoError from '@/Components/Ui/CampoError.vue';
 import SelectorCatalogo from '@/Components/Ui/SelectorCatalogo.vue';
 import { usePermisos } from '@/Composables/usePermisos';
+import { useTour } from '@/Composables/useTour';
 import { ESTADOS_CIVILES, fechaInput, hoyIso, urlArchivo } from '@/Utils/formato';
+import { guiaFormularioRegistro } from '@/Utils/guias';
 
 /**
  * Registrar / editar Faltas y Contravenciones: el mismo formulario de Registro Criminal, con las rutas del módulo
@@ -153,11 +156,19 @@ const erroresSinCampo = computed(() =>
 );
 
 const titulo = computed(() => (editando.value ? `${props.modulo.titulo} · Editar Registro Nro. ${props.registro.nro_registro}` : `${props.modulo.titulo} · Nuevo Registro`));
+
+// Guía resumida del formulario: sólo con el ícono de ayuda.
+const { iniciar: iniciarGuia } = useTour();
+const abrirGuia = () => iniciarGuia(guiaFormularioRegistro(props.modulo.titulo));
 </script>
 
 <template>
     <div>
-        <PageHeader :titulo="titulo" :migas="[{ etiqueta: modulo.titulo, ruta: puede(modulo.permisos.listar) ? modulo.rutas.index : undefined }, { etiqueta: editando ? 'Editar' : 'Nuevo' }]" />
+        <PageHeader :titulo="titulo" :migas="[{ etiqueta: modulo.titulo, ruta: puede(modulo.permisos.listar) ? modulo.rutas.index : undefined }, { etiqueta: editando ? 'Editar' : 'Nuevo' }]">
+            <template #acciones>
+                <BotonAyuda @click="abrirGuia" />
+            </template>
+        </PageHeader>
 
         <form novalidate @submit.prevent="guardar('guardar')">
             <div class="card">
@@ -177,7 +188,7 @@ const titulo = computed(() => (editando.value ? `${props.modulo.titulo} · Edita
             </div>
             <div class="row">
                 <div class="col-lg-6">
-                    <div class="card">
+                    <div data-tour="f-fotos" class="card">
                         <div class="card-header"><h5 class="card-title mb-0">Fotografías</h5></div>
                         <div class="card-body">
                             <div class="row g-3">
@@ -204,7 +215,7 @@ const titulo = computed(() => (editando.value ? `${props.modulo.titulo} · Edita
                     </div>
 
                     <div v-if="!editando" class="card">
-                        <div class="card-body">
+                        <div data-tour="f-buscar-persona" class="card-body">
                             <label class="form-label">Buscar Persona</label>
                             <BuscadorRemoto
                                 v-model="form.id_persona"
@@ -227,7 +238,7 @@ const titulo = computed(() => (editando.value ? `${props.modulo.titulo} · Edita
                                     <input id="fecha_registro" v-model="form.fecha_registro" type="date" class="form-control" :class="{ 'is-invalid': form.errors.fecha_registro }" :max="hoy">
                                     <CampoError :mensaje="form.errors.fecha_registro" />
                                 </div>
-                                <div class="col-md-8">
+                                <div data-tour="f-ci" class="col-md-8">
                                     <label class="form-label" for="ci">Nro. C.I.:</label>
                                     <input id="ci" v-model="form.ci" maxlength="25" v-mayuscula type="text" class="form-control" :disabled="editando || Boolean(form.id_persona)" placeholder="Ingrese número de C.I.">
                                 </div>
@@ -275,7 +286,7 @@ const titulo = computed(() => (editando.value ? `${props.modulo.titulo} · Edita
                         </div>
                     </div>
 
-                    <div class="d-flex gap-2 mb-4">
+                    <div data-tour="f-guardar" class="d-flex gap-2 mb-4">
                         <button type="submit" class="btn btn-primary" :disabled="form.processing">
                             <span v-if="form.processing" class="spinner-border spinner-border-sm me-1" role="status" />
                             <i v-else class="ri-save-3-line align-middle me-1" /> Guardar
@@ -291,7 +302,7 @@ const titulo = computed(() => (editando.value ? `${props.modulo.titulo} · Edita
                     <div class="card">
                         <div class="card-body">
                             <div class="row g-3">
-                                <div class="col-12">
+                                <div data-tour="f-registro" class="col-12">
                                     <label class="form-label" for="especialidad">Especialidad</label>
                                     <input id="especialidad" v-model="form.especialidad" maxlength="250" v-mayuscula type="text" class="form-control">
                                 </div>

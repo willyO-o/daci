@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { ESPERA_BUSQUEDA } from '@/Utils/espera';
 import { esCancelacion, http } from '@/Utils/http';
 
 /**
@@ -100,7 +101,7 @@ const alEscribir = () => {
     }
     // Mientras corre la espera se muestra «Buscando…», no un «Sin resultados» que aún no es cierto.
     buscando.value = true;
-    temporizador = setTimeout(buscar, 250);
+    temporizador = setTimeout(buscar, ESPERA_BUSQUEDA);
 };
 
 const elegir = (opcion) => {

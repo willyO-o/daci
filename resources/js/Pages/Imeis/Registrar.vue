@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import PaginaRegistro from '@/Components/Ui/PaginaRegistro.vue';
+import { guiaFormularioImei } from '@/Utils/guias';
 import FormularioImei from '@/Components/Imeis/FormularioImei.vue';
 
 /**
@@ -12,7 +13,7 @@ const formulario = ref(null);
 </script>
 
 <template>
-    <PaginaRegistro titulo="Registrar IMEI" id-formulario="formImei" :procesando="Boolean(formulario?.procesando)" ruta-listado="imeis.index" permiso-listado="imeis.listar" ancho="col-xl-6 col-lg-8">
+    <PaginaRegistro :guia="guiaFormularioImei" titulo="Registrar IMEI" id-formulario="formImei" :procesando="Boolean(formulario?.procesando)" ruta-listado="imeis.index" permiso-listado="imeis.listar" ancho="col-xl-6 col-lg-8">
         <FormularioImei ref="formulario" />
     </PaginaRegistro>
 </template>

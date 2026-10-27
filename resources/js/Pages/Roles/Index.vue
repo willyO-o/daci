@@ -7,6 +7,7 @@ import CampoError from '@/Components/Ui/CampoError.vue';
 import { useNotificacion } from '@/Composables/useNotificacion';
 import { usePermisos } from '@/Composables/usePermisos';
 import { cifra } from '@/Utils/formato';
+import { guiaFormularioRol } from '@/Utils/guias';
 
 const props = defineProps({
     roles: { type: Array, required: true },
@@ -172,10 +173,10 @@ const eliminar = async (rol) => {
             </div>
         </div>
 
-        <BaseModal v-model="modal" :titulo="editando ? `Editar rol: ${editando.name}` : 'Nuevo Rol'" tamano="xl" estatico desplazable>
+        <BaseModal v-model="modal" :titulo="editando ? `Editar rol: ${editando.name}` : 'Nuevo Rol'" tamano="xl" estatico desplazable :guia="guiaFormularioRol">
             <form id="formRol" novalidate @submit.prevent="guardar">
                 <div class="row g-3 mb-4">
-                    <div class="col-md-4">
+                    <div data-tour="f-rol-datos" class="col-md-4">
                         <label for="nombreRol" class="form-label">Nombre <span class="text-danger">*</span></label>
                         <input
                             id="nombreRol"
@@ -197,7 +198,7 @@ const eliminar = async (rol) => {
                     </div>
                 </div>
 
-                <div class="bg-light rounded p-3 mb-3">
+                <div class="bg-light rounded p-3 mb-3" data-tour="f-copiar">
                     <label for="rolOrigen" class="form-label mb-1">Copiar permisos de otro rol</label>
                     <div class="row g-2 align-items-center">
                         <div class="col-md">
@@ -229,7 +230,7 @@ const eliminar = async (rol) => {
                 </div>
                 <CampoError :mensaje="form.errors.permisos" />
 
-                <div class="row g-3">
+                <div class="row g-3" data-tour="f-permisos">
                     <div v-for="(modulo, clave) in modulos" :key="clave" class="col-lg-4 col-md-6">
                         <div class="border rounded p-3 h-100">
                             <div class="form-check mb-2">
@@ -257,7 +258,7 @@ const eliminar = async (rol) => {
 
             <template #pie="{ cerrar }">
                 <button type="button" class="btn btn-light" @click="cerrar">Cancelar</button>
-                <button type="submit" form="formRol" class="btn btn-primary" :disabled="form.processing">
+                <button type="submit" form="formRol" class="btn btn-primary" data-tour="f-guardar" :disabled="form.processing">
                     <i class="align-middle me-1" :class="form.processing ? 'ri-loader-4-line' : 'ri-save-3-line'" />
                     {{ form.processing ? 'Guardando…' : 'Guardar' }}
                 </button>

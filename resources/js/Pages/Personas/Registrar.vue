@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import PaginaRegistro from '@/Components/Ui/PaginaRegistro.vue';
+import { guiaFormularioPersona } from '@/Utils/guias';
 import FormularioPersona from '@/Components/Personas/FormularioPersona.vue';
 
 /**
@@ -15,7 +16,7 @@ const formulario = ref(null);
 </script>
 
 <template>
-    <PaginaRegistro titulo="Registrar Persona" id-formulario="formPersona" :procesando="Boolean(formulario?.procesando)" ruta-listado="personas.index" permiso-listado="personas.listar">
+    <PaginaRegistro :guia="guiaFormularioPersona" titulo="Registrar Persona" id-formulario="formPersona" :procesando="Boolean(formulario?.procesando)" ruta-listado="personas.index" permiso-listado="personas.listar">
         <FormularioPersona ref="formulario" :paises="paises" />
     </PaginaRegistro>
 </template>

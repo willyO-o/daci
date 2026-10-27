@@ -1,6 +1,6 @@
 # Estado actual
 
-> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-10-27 15:03 (Bolivia).
+> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-10-27 15:30 (Bolivia).
 
 ## Resumen
 
@@ -25,6 +25,8 @@ listados) con `RolesSeeder` (D-024).
 2026-10-27: pantalla «Cargando…» con el logo al navegar entre páginas (D-028).
 2026-10-27: guía paso a paso (driver.js) con el ícono de ayuda en las tres consultas: Mandamientos, Registro Criminal y
 Faltas y Contravenciones (D-029).
+2026-10-27: guía resumida (ícono de ayuda) en todos los formularios de registro, usuarios y roles (D-030).
+2026-10-27: buscadores sin botón esperan 900 ms desde la última tecla antes de consultar (D-031).
 
 > **Producción es otra base** (más información que la local). No se borra nada; sólo se tocan roles, permisos y sus
 > controles. Su estado de migraciones se verifica allí antes de desplegar.

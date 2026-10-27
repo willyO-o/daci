@@ -1,5 +1,6 @@
 <script setup>
 import { onBeforeUnmount, ref, watch } from 'vue';
+import { ESPERA_BUSQUEDA } from '@/Utils/espera';
 import { http } from '@/Utils/http';
 
 /**
@@ -61,7 +62,7 @@ watch(
             return;
         }
         estado.value = 'buscando';
-        temporizador = setTimeout(() => buscar(ci, complemento), 400);
+        temporizador = setTimeout(() => buscar(ci, complemento), ESPERA_BUSQUEDA);
     },
     { immediate: true },
 );

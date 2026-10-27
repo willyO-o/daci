@@ -5,6 +5,7 @@ import CampoError from '@/Components/Ui/CampoError.vue';
 import SubirArchivos from '@/Components/Ui/SubirArchivos.vue';
 import { useNotificacion } from '@/Composables/useNotificacion';
 import { ESTADOS_CIVILES, GENEROS, fechaInput, urlArchivo } from '@/Utils/formato';
+import { ESPERA_BUSQUEDA } from '@/Utils/espera';
 import { http } from '@/Utils/http';
 
 /**
@@ -98,7 +99,7 @@ watch(
             } catch {
                 ciDuplicado.value = null;
             }
-        }, 350);
+        }, ESPERA_BUSQUEDA);
     },
 );
 
@@ -145,7 +146,7 @@ defineExpose({ guardar, procesando: computed(() => form.processing) });
 <template>
     <form :id="idFormulario" novalidate @submit.prevent="guardar(false)">
         <div class="row g-3">
-            <div class="col-md-6">
+            <div data-tour="f-nombres" class="col-md-6">
                 <label for="nombres" class="form-label">Nombres <span class="text-danger">*</span></label>
                 <input id="nombres" v-model="form.nombres" v-mayuscula type="text" class="form-control" :class="{ 'is-invalid': form.errors.nombres }" placeholder="Ingrese nombres">
                 <CampoError :mensaje="form.errors.nombres" />
@@ -155,7 +156,7 @@ defineExpose({ guardar, procesando: computed(() => form.processing) });
                 <input id="apellidos" v-model="form.apellidos" v-mayuscula type="text" class="form-control" :class="{ 'is-invalid': form.errors.apellidos }" placeholder="Ingrese apellidos">
                 <CampoError :mensaje="form.errors.apellidos" />
             </div>
-            <div class="col-md-4">
+            <div data-tour="f-ci" class="col-md-4">
                 <label for="ci" class="form-label">Cédula de Identidad</label>
                 <input id="ci" v-model="form.ci" v-mayuscula type="text" class="form-control" :class="{ 'is-invalid': form.errors.ci || ciDuplicado }" maxlength="25" placeholder="Ej: 1234567">
                 <CampoError :mensaje="form.errors.ci" />
@@ -168,7 +169,7 @@ defineExpose({ guardar, procesando: computed(() => form.processing) });
                 <input id="complemento" v-model="form.complemento" v-mayuscula type="text" class="form-control" :class="{ 'is-invalid': form.errors.complemento }" maxlength="40" placeholder="Ej: A, B, etc">
                 <CampoError :mensaje="form.errors.complemento" />
             </div>
-            <div class="col-md-6">
+            <div data-tour="f-datos" class="col-md-6">
                 <label for="telefono" class="form-label">Teléfono</label>
                 <input id="telefono" v-model="form.telefono" type="tel" class="form-control" :class="{ 'is-invalid': form.errors.telefono }" maxlength="25" placeholder="Ej: +591 1234567">
                 <CampoError :mensaje="form.errors.telefono" />
@@ -258,7 +259,7 @@ defineExpose({ guardar, procesando: computed(() => form.processing) });
                 <CampoError :mensaje="form.errors.url_documento" />
             </div>
 
-            <div class="col-12">
+            <div data-tour="f-fotos" class="col-12">
                 <label class="form-label">Fotos <small class="text-muted">(JPEG, PNG, WebP, JPG - máx 2MB por archivo)</small></label>
                 <SubirArchivos
                     v-model="form.fotos"

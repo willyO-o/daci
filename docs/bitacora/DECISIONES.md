@@ -418,3 +418,40 @@ en un ícono de ayuda».
 7. Tarjeta de mandamiento: lápiz junto al estado que abre el mismo modal «Estado de Ejecución»; sólo aparece con
    `puedeCambiarEstado` (Consultas › Mandamientos y permiso `mandamientos.estado`). El botón verde del encabezado se
    conserva y también lleva el lápiz (antes un círculo con check), para que se entienda que es la misma acción.
+
+## D-030 · Guía resumida en todos los formularios de registro (2026-10-27 15:24)
+
+**Pedido:** un tour resumido en todos los formularios de registro, con un ícono arriba (en el modal si es modal); en
+los formularios largos, resumido: «no quiero los pasos a detalle porque será tedioso».
+
+1. **Un paso por bloque de campos**, no por campo (3 a 6 pasos + Guardar). Textos en `Utils/guias.js`:
+   `guiaFormularioMandamiento`, `guiaFormularioPersona`, `guiaFormularioTelefono`, `guiaFormularioImei`,
+   `guiaFormularioVehiculo` y `guiaFormularioRegistro(modulo)` (Registro Criminal y Faltas y Contravenciones). Dicen qué
+   es obligatorio y explican lo no evidente: «+ Añadir», «(añadir nuevo)», aviso de C.I. existente, EJECUTADO, límites
+   de fotos, «Guardar y Registrar Nuevo».
+2. **Dónde está el ícono:** en los modales de alta/edición de los listados (Mandamientos, Personas, Teléfonos, IMEIs,
+   Vehículos) junto al título, con la prop nueva `BaseModal :guia` (versión `compacto` de `BotonAyuda`); en las páginas
+   «Registrar …» (prop `PaginaRegistro :guia`), «Registrar Mandamiento» y los formularios de Registro Criminal y Faltas
+   y Contravenciones, en el encabezado. Sólo se abre con el ícono.
+3. Marcas `data-tour="f-…"` en las secciones de cada formulario y `f-guardar` en su botón Guardar.
+4. **Modales:** Bootstrap atrapa el foco dentro del modal y los botones de la guía quedan fuera; mientras la guía está
+   abierta se suspende la trampa (`_focustrap.deactivate()`, Bootstrap 5.3.8) y se reactiva al cerrarla si el modal
+   sigue abierto. Al cerrar el modal se cierra también la guía (`useTour().cerrar`, opción `alCerrar`).
+
+5. También en **Usuarios** (nombre y correo, rol, contraseña, guardar) y en **Roles y Permisos** (nombre y
+   descripción, copiar permisos de otro rol, permisos por módulo, guardar): `guiaFormularioUsuario`, `guiaFormularioRol`.
+
+**No incluido:** el alta rápida de persona dentro del formulario de mandamiento (`ModalPersonaRapida`, 4 campos).
+
+## D-031 · Espera de 900 ms en los buscadores sin botón (2026-10-27 15:30)
+
+**Pedido:** en los buscadores de Registro Criminal, Faltas, Personas, Teléfonos, IMEIs y Vehículos, y en los demás
+lugares que buscan sin botón, esperar 900 ms: hacían peticiones muy seguidas.
+
+Constante única `ESPERA_BUSQUEDA = 900` (`Utils/espera.js`), contada desde la última tecla, en: `useListado` (Personas,
+Teléfonos, IMEIs, Vehículos, Usuarios, Auditoría de consultas y de cambios), los listados con scroll infinito
+(Registro Criminal, Faltas y Contravenciones, Mandamientos; antes 500 ms), `BuscadorRemoto` (buscadores de los
+formularios; antes 250 ms), el aviso de C.I. existente (antes 400 ms) y el aviso de C.I. duplicado del formulario de
+Personas (antes 350 ms). Cada búsqueda nueva sigue cancelando la anterior. Los selects y el rango de fechas filtran
+al instante, y `SelectorCatalogo` filtra su lista en el navegador (no consulta al servidor). Las consultas con botón
+«Buscar» no cambian.

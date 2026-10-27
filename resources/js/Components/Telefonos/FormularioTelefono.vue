@@ -72,7 +72,7 @@ defineExpose({ guardar, procesando: computed(() => form.processing) });
 <template>
     <form :id="idFormulario" novalidate @submit.prevent="guardar">
         <div class="row g-3">
-            <div class="col-md-6">
+            <div data-tour="f-numero" class="col-md-6">
                 <label for="numero_celular" class="form-label">Número Celular <span class="text-danger">*</span></label>
                 <input id="numero_celular" v-model="form.numero_celular" v-solo-numeros type="text" class="form-control" :class="{ 'is-invalid': form.errors.numero_celular }" placeholder="Ej: 71234567">
                 <CampoError :mensaje="form.errors.numero_celular" />
@@ -92,7 +92,7 @@ defineExpose({ guardar, procesando: computed(() => form.processing) });
                 <input id="caso" v-model="form.caso" v-mayuscula type="text" class="form-control" :class="{ 'is-invalid': form.errors.caso }" placeholder="Referencia del caso">
                 <CampoError :mensaje="form.errors.caso" />
             </div>
-            <div class="col-md-6">
+            <div data-tour="f-persona" class="col-md-6">
                 <label class="form-label">Relacionar con Persona (opcional)</label>
                 <BuscadorRemoto
                     :key="versionBuscador"
@@ -115,7 +115,7 @@ defineExpose({ guardar, procesando: computed(() => form.processing) });
                 <input id="informacion" v-model="form.informacion" type="text" class="form-control" :class="{ 'is-invalid': form.errors.informacion }" placeholder="Información adicional sobre el teléfono">
                 <CampoError :mensaje="form.errors.informacion" />
             </div>
-            <div class="col-md-6">
+            <div data-tour="f-extra" class="col-md-6">
                 <label for="callapp" class="form-label">CallApp</label>
                 <input id="callapp" v-model="form.callapp" type="text" class="form-control" :class="{ 'is-invalid': form.errors.callapp }" placeholder="Información CallApp">
             </div>

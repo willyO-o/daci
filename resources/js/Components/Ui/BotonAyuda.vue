@@ -8,13 +8,15 @@
  */
 defineProps({
     texto: { type: String, default: '¿Necesita ayuda? Ver la guía' },
+    /** Más bajo, para la cabecera de un modal. */
+    compacto: { type: Boolean, default: false },
 });
 
 defineEmits(['click']);
 </script>
 
 <template>
-    <button type="button" class="boton-ayuda btn btn-soft-info" data-tour="ayuda" :aria-label="texto" @click="$emit('click')">
+    <button type="button" class="boton-ayuda btn btn-soft-info" :class="{ 'boton-ayuda--compacto': compacto }" data-tour="ayuda" :aria-label="texto" @click="$emit('click')">
         <i class="ri-question-line boton-ayuda__icono" aria-hidden="true" />
         <span class="boton-ayuda__texto" aria-hidden="true">{{ texto }}</span>
     </button>
@@ -28,6 +30,12 @@ defineEmits(['click']);
     padding: 0 0.6rem;
     overflow: hidden;
     white-space: nowrap;
+}
+
+.boton-ayuda--compacto {
+    height: 1.9rem;
+    padding: 0 0.45rem;
+    font-size: 0.8125rem;
 }
 
 .boton-ayuda__icono {

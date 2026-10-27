@@ -14,6 +14,7 @@ import { useNotificacion } from '@/Composables/useNotificacion';
 import { usePermisos } from '@/Composables/usePermisos';
 import { fecha, fechaHora, guion, nombreCompleto } from '@/Utils/formato';
 import { http } from '@/Utils/http';
+import { guiaFormularioTelefono } from '@/Utils/guias';
 
 const props = defineProps({
     telefonos: { type: Object, required: true },
@@ -180,11 +181,11 @@ const urlPersona = computed(() => (detalle.value?.persona && route().has('person
             </div>
         </div>
 
-        <BaseModal v-model="modalFormulario" :titulo="editando ? 'Editar Teléfono' : 'Nuevo Teléfono'" tamano="lg" estatico>
+        <BaseModal v-model="modalFormulario" :titulo="editando ? 'Editar Teléfono' : 'Nuevo Teléfono'" tamano="lg" estatico :guia="guiaFormularioTelefono">
             <FormularioTelefono ref="formulario" :telefono="editando" @guardado="modalFormulario = false" />
             <template #pie="{ cerrar }">
                 <button type="button" class="btn btn-secondary" @click="cerrar"><i class="ri-close-line align-middle me-1" /> Cancelar</button>
-                <button type="submit" form="formTelefono" class="btn btn-primary" :disabled="formulario?.procesando">
+                <button type="submit" form="formTelefono" class="btn btn-primary" data-tour="f-guardar" :disabled="formulario?.procesando">
                     <i class="align-middle me-1" :class="formulario?.procesando ? 'ri-loader-4-line' : 'ri-save-3-line'" /> {{ formulario?.procesando ? 'Guardando…' : 'Guardar' }}
                 </button>
             </template>

@@ -11,6 +11,7 @@ import { useListado } from '@/Composables/useListado';
 import { useNotificacion } from '@/Composables/useNotificacion';
 import { usePermisos } from '@/Composables/usePermisos';
 import { fecha } from '@/Utils/formato';
+import { guiaFormularioUsuario } from '@/Utils/guias';
 
 const props = defineProps({
     usuarios: { type: Object, required: true },
@@ -205,10 +206,10 @@ const eliminar = async (usuario) => {
             </div>
         </div>
 
-        <BaseModal v-model="modal" :titulo="tituloModal" centrado estatico>
+        <BaseModal v-model="modal" :titulo="tituloModal" centrado estatico :guia="guiaFormularioUsuario">
             <form id="formUsuario" novalidate @submit.prevent="guardar">
                 <div class="row g-3">
-                    <div class="col-md-12">
+                    <div data-tour="f-cuenta" class="col-md-12">
                         <label for="name" class="form-label">Nombre Completo <span class="text-danger">*</span></label>
                         <input id="name" v-model="form.name" type="text" class="form-control" :class="{ 'is-invalid': form.errors.name }" placeholder="Ingrese nombre completo">
                         <CampoError :mensaje="form.errors.name" />
@@ -218,7 +219,7 @@ const eliminar = async (usuario) => {
                         <input id="email" v-model="form.email" type="email" class="form-control" :class="{ 'is-invalid': form.errors.email }" placeholder="Ingrese correo electrónico" autocomplete="off">
                         <CampoError :mensaje="form.errors.email" />
                     </div>
-                    <div class="col-md-12">
+                    <div data-tour="f-rol" class="col-md-12">
                         <label for="role_id" class="form-label">Rol <span class="text-danger">*</span></label>
                         <select id="role_id" v-model="form.role_id" class="form-select text-capitalize" :class="{ 'is-invalid': form.errors.role_id }">
                             <option value="">Seleccione un rol</option>
@@ -226,7 +227,7 @@ const eliminar = async (usuario) => {
                         </select>
                         <CampoError :mensaje="form.errors.role_id" />
                     </div>
-                    <div class="col-md-6">
+                    <div data-tour="f-clave" class="col-md-6">
                         <label for="password" class="form-label">Contraseña <span v-if="!editando" class="text-danger">*</span></label>
                         <div class="position-relative">
                             <input
@@ -265,7 +266,7 @@ const eliminar = async (usuario) => {
 
             <template #pie="{ cerrar }">
                 <button type="button" class="btn btn-light" @click="cerrar">Cancelar</button>
-                <button type="submit" form="formUsuario" class="btn btn-primary" :disabled="form.processing">
+                <button type="submit" form="formUsuario" class="btn btn-primary" data-tour="f-guardar" :disabled="form.processing">
                     <i class="align-middle me-1" :class="form.processing ? 'ri-loader-4-line' : 'ri-save-3-line'" />
                     {{ form.processing ? 'Guardando…' : 'Guardar' }}
                 </button>

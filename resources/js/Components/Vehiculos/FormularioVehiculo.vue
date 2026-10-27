@@ -138,7 +138,7 @@ defineExpose({ guardar, procesando: computed(() => form.processing) });
 <template>
     <form :id="idFormulario" novalidate @submit.prevent="guardar">
         <div class="row g-3">
-            <div class="col-md-6">
+            <div data-tour="f-placa" class="col-md-6">
                 <label for="placa" class="form-label">Placa *</label>
                 <input id="placa" v-model="form.placa" v-mayuscula v-sin-espacios type="text" class="form-control" :class="{ 'is-invalid': form.errors.placa }" placeholder="Ej: LAB-123">
                 <CampoError :mensaje="form.errors.placa" />
@@ -162,7 +162,7 @@ defineExpose({ guardar, procesando: computed(() => form.processing) });
 
         <hr>
         <h6 class="mb-3">Personas Asociadas</h6>
-        <div class="mb-3">
+        <div data-tour="f-personas" class="mb-3">
             <label class="form-label">Buscar Persona</label>
             <BuscadorRemoto :key="versionBuscador" v-model="personaElegida" :url="route('personas.search')" placeholder="Nombre, apellido o CI" :mapear="(p) => ({ id: p.id, texto: textoPersona(p) })" @seleccionado="(p) => (personaElegidaDatos = p)" />
         </div>
@@ -192,7 +192,7 @@ defineExpose({ guardar, procesando: computed(() => form.processing) });
 
         <hr>
         <h6 class="mb-3">Fotos del Vehículo <small class="text-muted fw-normal">(JPEG, PNG, WebP, JPG - máx 2MB por archivo)</small></h6>
-        <SubirArchivos v-model="form.fotosVehiculos" :maximo="10" :tamano-maximo-mb="2" acepta="image/jpeg,image/png,image/webp,image/jpg" texto="Arrastra o sube las fotos del vehículo" :error="form.errors['fotosVehiculos.0']" />
+        <SubirArchivos v-model="form.fotosVehiculos" data-tour="f-fotos" :maximo="10" :tamano-maximo-mb="2" acepta="image/jpeg,image/png,image/webp,image/jpg" texto="Arrastra o sube las fotos del vehículo" :error="form.errors['fotosVehiculos.0']" />
         <div v-if="fotosActuales.length" class="mt-3">
             <label class="form-label">Fotos Actuales:</label>
             <div class="d-flex flex-wrap gap-2">
