@@ -78,6 +78,15 @@ Leyenda: ✅ migrado igual · 🔧 migrado con corrección · ➖ no se migra (c
 | — | `vehiculos.create` | `Vehiculos/Registrar` (`FormularioVehiculo`) | `vehiculos.crear` | nuevo (D-022) |
 | Botón «Nuevo Mandamiento» del dashboard | Tarjetas «Registro rápido» (mandamiento, persona, teléfono, IMEI, vehículo) | `*.crear` | 🔧 una tarjeta por módulo |
 
+## Faltas y Contravenciones (nuevo, 2026-10-26)
+
+| Registro Criminal | Faltas y Contravenciones | Permiso | Estado |
+|---|---|---|---|
+| `registro-criminal.index/create/store/show/edit/update/destroy` | `faltas-contravenciones.*` (mismas acciones) | `faltas_contravenciones.listar…eliminar` | nuevo (D-023) |
+| `registro-criminal.showByCodigo` (`/registro/{codigo}`) | `faltas-contravenciones.showByCodigo` (`/faltas-contravenciones/codigo/{codigo}`) | `faltas_contravenciones.ver` | nuevo |
+| `registro.vista-previa`, `ficha-registro.store`, `ficha-registro.pdf` | `faltas-contravenciones.vista-previa`, `.ficha.store`, `.ficha.pdf` | `faltas_contravenciones.ficha` | nuevo |
+| `consultas.registro-criminal` (auditada `consulta_registros`) | `consultas.faltas-contravenciones` (auditada `consulta_faltas_contravenciones`) | `consultas.faltas_contravenciones` | nuevo |
+
 ## Importaciones y reportes
 
 | Ruta anterior | Nombre | DACI | Permiso | Estado |

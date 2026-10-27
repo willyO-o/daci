@@ -3,13 +3,16 @@ import { computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { fechaNum, guion, urlArchivo } from '@/Utils/formato';
 
-/** Tarjeta de un registro criminal en el listado y en la consulta (cuadrícula o lista). */
+/** Tarjeta de un registro criminal en el listado y en la consulta (cuadrícula o lista). La usan también Faltas y
+ * Contravenciones, que pasan su ruta de edición. */
 const props = defineProps({
     registro: { type: Object, required: true },
     vista: { type: String, default: 'grid' },
     puedeEditar: { type: Boolean, default: false },
     puedeEliminar: { type: Boolean, default: false },
     puedeFicha: { type: Boolean, default: false },
+    /** Ruta de edición del módulo (por defecto, Registro Criminal). */
+    rutaEditar: { type: String, default: 'registro-criminal.edit' },
 });
 
 defineEmits(['ver', 'eliminar', 'ficha', 'ver-imagenes']);
@@ -27,7 +30,7 @@ const ci = computed(() => `${persona.value.ci ?? '-'}${persona.value.complemento
                 <div class="d-flex gap-1 mt-2 mt-sm-0">
                     <button type="button" class="btn btn-soft-secondary btn-sm" title="Ver Detalles" @click="$emit('ver', registro)"><i class="ri-eye-line" /></button>
                     <button v-if="puedeFicha" type="button" class="btn btn-soft-secondary btn-sm" title="Imprimir Ficha de Registro" @click="$emit('ficha', registro)"><i class="ri-file-pdf-line" /></button>
-                    <Link v-if="puedeEditar" :href="route('registro-criminal.edit', registro.id)" class="btn btn-soft-secondary btn-sm" title="Editar Registro"><i class="ri-pencil-line" /></Link>
+                    <Link v-if="puedeEditar" :href="route(rutaEditar, registro.id)" class="btn btn-soft-secondary btn-sm" title="Editar Registro"><i class="ri-pencil-line" /></Link>
                     <button v-if="puedeEliminar" type="button" class="btn btn-soft-secondary btn-sm" title="Eliminar Registro" @click="$emit('eliminar', registro)"><i class="ri-delete-bin-2-line" /></button>
                 </div>
             </div>

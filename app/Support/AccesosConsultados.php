@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\Mandamiento;
 use App\Models\Persona;
+use App\Models\RegistroAntecedente;
 use App\Models\RegistroCriminal;
 use Illuminate\Database\Eloquent\Model;
 use Throwable;
@@ -64,6 +65,7 @@ class AccesosConsultados
 
         return match (true) {
             $registro instanceof RegistroCriminal => [$persona($registro->persona), route('registro-criminal.showByCodigo', md5((string) $registro->id))],
+            $registro instanceof RegistroAntecedente => [$persona($registro->persona), route($registro::modulo()->ruta('showByCodigo'), md5((string) $registro->id))],
             $registro instanceof Mandamiento => [$persona($registro->persona), route('mandamientos.showByCodigo', md5((string) $registro->id))],
             $registro instanceof Persona => [trim("{$registro->nombres} {$registro->apellidos}"), null],
             default => [class_basename($registro).' #'.$registro->getKey(), null],

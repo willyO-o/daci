@@ -5,6 +5,7 @@ use App\Http\Controllers\AuditoriaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DelitoController;
 use App\Http\Controllers\DivisionController;
+use App\Http\Controllers\FaltaContravencionController;
 use App\Http\Controllers\FichaRegistroController;
 use App\Http\Controllers\ImeiController;
 use App\Http\Controllers\ImportacionController;
@@ -52,7 +53,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/tipos-mandamientos', [TipoMandamientoController::class, 'index'])->name('tipos-mandamientos.index');
     Route::post('/tipos-mandamientos', [TipoMandamientoController::class, 'store'])->name('tipos-mandamientos.store')->middleware('permission:mandamientos.crear|mandamientos.editar');
     Route::get('/divisiones', [DivisionController::class, 'index'])->name('divisiones.index');
-    Route::post('/divisiones', [DivisionController::class, 'store'])->name('divisiones.store')->middleware('permission:registro_criminal.crear|registro_criminal.editar');
+    Route::post('/divisiones', [DivisionController::class, 'store'])->name('divisiones.store')->middleware('permission:registro_criminal.crear|registro_criminal.editar|faltas_contravenciones.crear|faltas_contravenciones.editar');
     Route::get('/paises', [PaisController::class, 'index'])->name('paises.index');
 
     // Mandamientos
@@ -82,6 +83,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/registro-vista-previa/{registroCriminal}', [RegistroCriminalController::class, 'vistaPrevia'])->whereNumber('registroCriminal')->name('registro.vista-previa')->middleware('permission:registro_criminal.ficha');
     Route::post('/ficha-registro', [FichaRegistroController::class, 'store'])->name('ficha-registro.store')->middleware('permission:registro_criminal.ficha');
     Route::get('/ficha-registro/pdf/{codigo}', [FichaRegistroController::class, 'pdf'])->name('ficha-registro.pdf')->middleware('permission:registro_criminal.ficha');
+
+    // EREBOR › Faltas y Contravenciones (mismo funcionamiento que Registro Criminal, con sus propias tablas y permisos)
+    Route::get('/faltas-contravenciones', [FaltaContravencionController::class, 'index'])->name('faltas-contravenciones.index')->middleware('permission:faltas_contravenciones.listar');
+    Route::get('/faltas-contravenciones/create', [FaltaContravencionController::class, 'create'])->name('faltas-contravenciones.create')->middleware('permission:faltas_contravenciones.crear');
+    Route::post('/faltas-contravenciones', [FaltaContravencionController::class, 'store'])->name('faltas-contravenciones.store')->middleware('permission:faltas_contravenciones.crear');
+    Route::get('/faltas-contravenciones/{registro}', [FaltaContravencionController::class, 'show'])->whereNumber('registro')->name('faltas-contravenciones.show')->middleware('permission:faltas_contravenciones.ver');
+    Route::get('/faltas-contravenciones/{registro}/edit', [FaltaContravencionController::class, 'edit'])->whereNumber('registro')->name('faltas-contravenciones.edit')->middleware('permission:faltas_contravenciones.editar');
+    Route::match(['put', 'patch'], '/faltas-contravenciones/{registro}', [FaltaContravencionController::class, 'update'])->whereNumber('registro')->name('faltas-contravenciones.update')->middleware('permission:faltas_contravenciones.editar');
+    Route::delete('/faltas-contravenciones/{registro}', [FaltaContravencionController::class, 'destroy'])->whereNumber('registro')->name('faltas-contravenciones.destroy')->middleware('permission:faltas_contravenciones.eliminar');
+    Route::get('/faltas-contravenciones/codigo/{codigo}', [FaltaContravencionController::class, 'showByCodigo'])->name('faltas-contravenciones.showByCodigo')->middleware('permission:faltas_contravenciones.ver');
+    Route::get('/faltas-contravenciones/{registro}/vista-previa', [FaltaContravencionController::class, 'vistaPrevia'])->whereNumber('registro')->name('faltas-contravenciones.vista-previa')->middleware('permission:faltas_contravenciones.ficha');
+    Route::post('/faltas-contravenciones/ficha', [FaltaContravencionController::class, 'guardarFicha'])->name('faltas-contravenciones.ficha.store')->middleware('permission:faltas_contravenciones.ficha');
+    Route::get('/faltas-contravenciones/ficha/pdf/{codigo}', [FaltaContravencionController::class, 'pdf'])->name('faltas-contravenciones.ficha.pdf')->middleware('permission:faltas_contravenciones.ficha');
+    Route::get('/consultas/faltas-contravenciones', [FaltaContravencionController::class, 'consultar'])->name('consultas.faltas-contravenciones')->middleware('permission:consultas.faltas_contravenciones');
 
     // EREBOR › Personas
     Route::get('/personas', [PersonaController::class, 'index'])->name('personas.index')->middleware('permission:personas.listar');

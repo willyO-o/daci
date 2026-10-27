@@ -22,6 +22,11 @@ description: Convenciones OBLIGATORIAS de base de datos, persistencia y consulta
 1. **No se crean, renombran ni borran tablas o columnas existentes, ni se agregan índices.** La única migración que
    tocó el esquema es `2026_10_22_120000_migrar_roles_a_spatie_permission` (roles y permisos, autorizada por el
    usuario). Si una funcionalidad parece pedir una columna nueva, **se pregunta antes**.
+   Tablas NUEVAS autorizadas (sólo se crearon, no alteran nada existente): `2026_10_26_210000_crear_tablas_faltas_y_contravenciones`
+   — `falta_contravencion`, `foto_falta_contravencion`, `ficha_falta_contravencion`, `ficha_falta_contravencion_plantilla`. Copian columnas y
+   nombres de `registro_criminal` y sus tablas (por eso usan `id_persona`, `id_usuario`, `id_division`), excepto el
+   tipo de la foto, que es `string` y no `enum`. Toda migración que cree tablas: se detiene sin cambios si alguna ya
+   existe, deshace lo creado si falla y su `down()` borra sólo lo suyo.
 2. **Las 36 migraciones del sistema anterior** están copiadas en `database/migrations` sólo como registro. **No se
    editan.** Una base puede no tenerlas todas ejecutadas (la copia local `felcc` tenía 34: le faltaban
    `remove_unique_from_ci_in_persona_table` y `create_audits_table`); `migrate` las correría junto con la de roles.

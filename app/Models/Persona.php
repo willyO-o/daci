@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Antecedentes\ModuloAntecedente;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -72,6 +73,11 @@ class Persona extends Model implements AuditableContract
     public function registroCriminal()
     {
         return $this->hasMany(RegistroCriminal::class, 'id_persona');
+    }
+
+    public function faltasContravenciones()
+    {
+        return $this->hasMany(FaltaContravencion::class, 'id_persona');
     }
 
     public function telefonos()
@@ -149,6 +155,7 @@ class Persona extends Model implements AuditableContract
         $resumen = [
             'mandamientos' => $this->mandamientos()->count(),
             'registros_criminales' => $this->registroCriminal()->count(),
+            'faltas_contravenciones' => $this->faltasContravenciones()->withTrashed()->count(),
             'telefonos' => $this->telefonos()->count(),
             'multimedia' => $this->multimedia()->count(),
             'vehiculos' => $this->vehiculos()->count(),
@@ -173,6 +180,7 @@ class Persona extends Model implements AuditableContract
                 // 'documento' => 'id_persona',
                 'mandamiento' => 'id_persona',
                 'registro_criminal' => 'id_persona',
+                'falta_contravencion' => 'id_persona',
                 'telefono' => 'persona_id',
                 'multimedia' => 'id_persona',
                 'vehiculo_caso' => 'persona_id',
@@ -213,6 +221,16 @@ class Persona extends Model implements AuditableContract
             ->filter()
             ->values()
             ->all();
+
+        // Faltas y Contravenciones (tablas propias del módulo): sus fotos, fichas y registros.
+        foreach (ModuloAntecedente::cases() as $modulo) {
+            $tabla = $modulo->tabla();
+            $ids = DB::table($tabla)->where('id_persona', $this->id)->pluck('id');
+            $archivos = [...$archivos, ...DB::table("foto_{$tabla}")->whereIn($modulo->claveFoto(), $ids)->pluck('ruta_archivo')->filter()->all()];
+            DB::table("foto_{$tabla}")->whereIn($modulo->claveFoto(), $ids)->delete();
+            DB::table("ficha_{$tabla}")->whereIn($modulo->claveFicha(), $ids)->delete();
+            DB::table($tabla)->whereIn('id', $ids)->delete();
+        }
 
         DB::table('vehiculo_caso')->where('persona_id', $this->id)->orWhereIn('registro_criminal_id', $registros)->delete();
         DB::table('inspeccion_tecnica')->where('persona_id', $this->id)->delete();

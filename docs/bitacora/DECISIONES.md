@@ -255,3 +255,46 @@ formularios, con botones en forma de tarjetas en el Dashboard. El usuario eligi�
 `tecnico_felcc` (tiene `personas.crear` sin listar) ve ahora «Registrar Persona» en el menú y en el Dashboard.
 
 Pruebas: `tests/Feature/Acceso/RegistroDirectoTest.php` (10) y 4 pantallas nuevas en `PaginasTest`.
+
+## D-023 · Módulo Faltas y Contravenciones (2026-10-26 20:35)
+
+**Pedido:** un módulo para registrar personas por faltas y contravenciones, «lo mismo que registro criminal, con
+todos sus permisos», separado de Registro Criminal, con **otra tabla** de **los mismos campos, nada más**, sin
+**afectar las otras tablas** ni los datos de producción. Un solo módulo: «Faltas y Contravenciones».
+
+1. **Base:** `2026_10_26_210000_crear_tablas_faltas_y_contravenciones` sólo CREA 4 tablas, copia exacta de las de
+   Registro Criminal: `falta_contravencion` (← `registro_criminal`), `foto_falta_contravencion` (← `fotos_registro`),
+   `ficha_falta_contravencion` (← `ficha_registro`) y `ficha_falta_contravencion_plantilla`. No altera ninguna tabla
+   existente (`migrate --pretend`: todo el SQL es sobre las 4 nuevas). Se detiene sin cambios si alguna ya existe;
+   si falla a mitad borra lo creado; `down()` borra sólo esas 4. Las claves foráneas viven en las tablas nuevas. La
+   plantilla de la ficha se copia de la activa de Registro Criminal (sólo se lee) cambiando «REGISTRO CRIMINAL» por
+   «REGISTRO DE FALTAS Y CONTRAVENCIONES».
+2. **Código:** `ModuloAntecedente` (enum, un caso) define tablas, modelos, rutas (`faltas-contravenciones.*`),
+   permisos (`faltas_contravenciones.*`) y carpeta de fotos; `AntecedenteController` tiene la lógica (copiada de
+   Registro Criminal) y `FaltaContravencionController` elige el módulo. Los registros se buscan sólo en sus tablas: un
+   id de Registro Criminal da 404 (probado en ver, editar, eliminar, ficha y código). La ficha que se corrige debe ser
+   del mismo registro.
+3. **Registro Criminal no cambia:** sus tablas, controlador y páginas siguen igual; a `TarjetaRegistro`,
+   `DetalleRegistro`, `FichaRegistro` e `InformacionAdicional` sólo se les agregaron props opcionales cuyo valor por
+   defecto es el de Registro Criminal. `divisiones.store` acepta también `faltas_contravenciones.crear|editar`.
+4. **Permisos** (`faltas_contravenciones.listar/ver/crear/editar/eliminar/ficha` y `consultas.faltas_contravenciones`,
+   asignación inicial igual a Registro Criminal): administrador todo; técnico DACI todo menos eliminar; consultor
+   DACI consultar y ver.
+5. **Eliminaciones:** eliminar borra el registro con sus fotos y fichas en una transacción, y los archivos sólo tras
+   confirmar. Eliminar o unir una persona (`deleteRelationsData`, `migrateRelationsTo`, `personas:eliminar-duplicados`)
+   incluye sus faltas y contravenciones; el modal de eliminar persona las cuenta.
+6. Diferencias menores con Registro Criminal, para no romper: el número correlativo cuenta también los eliminados
+   (no se repite); tras guardar, quien no ve el listado vuelve al formulario en vez de recibir un 403.
+7. **Menú:** «Faltas y Contravenciones» en EREBOR, junto a Registro Criminal, y «Consultar Faltas y Contravenciones»
+   en Consultas.
+
+**Corrección en la misma ronda:** primero se entendió «dos módulos» como Faltas y Contravenciones por separado (8
+tablas, 14 permisos). El usuario aclaró que los dos módulos son Registro Criminal y Faltas y Contravenciones. En la
+base local se revirtió aquella migración (tablas vacías, sola en su lote), se borraron sus 14 permisos (sin
+asignaciones directas a usuarios) y se aplicó la definitiva; en producción nunca existió.
+
+**Descartado:** columna `tipo` en `registro_criminal` (modificaría una tabla de producción).
+**No incluido** (el usuario pidió no agregar más): totales en el Dashboard, reporte CSV y pestañas en el detalle de
+la persona.
+
+Pruebas: `tests/Feature/Antecedentes/AntecedentesTest.php` (11) y `MigracionAntecedentesTest.php` (3).

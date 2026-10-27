@@ -9,6 +9,10 @@ import { http } from '@/Utils/http';
  */
 const props = defineProps({
     registroId: { type: Number, required: true },
+    /** Rutas y campo del módulo (por defecto, Registro Criminal; Faltas y Contravenciones pasan los suyos). */
+    rutaVistaPrevia: { type: String, default: 'registro.vista-previa' },
+    rutaGuardar: { type: String, default: 'ficha-registro.store' },
+    campoRegistro: { type: String, default: 'registro_criminal_id' },
 });
 
 const { errorDeRespuesta } = useNotificacion();
@@ -24,7 +28,7 @@ const CAMPOS = ['caso_cud', 'introduccion', 'requerimiento', 'persona', 'resulta
 
 onMounted(async () => {
     try {
-        datos.value = (await http.get(route('registro.vista-previa', props.registroId))).data;
+        datos.value = (await http.get(route(props.rutaVistaPrevia, props.registroId))).data;
     } catch (err) {
         errorDeRespuesta(err);
     } finally {
@@ -43,9 +47,9 @@ const generar = async () => {
     try {
         // Texto plano (con saltos de línea): el sistema anterior enviaba HTML y quedaban restos como «br».
         const campos = Object.fromEntries(CAMPOS.map((campo) => [campo, bloques.value[campo]?.innerText ?? '']));
-        const { data } = await http.post(route('ficha-registro.store'), {
+        const { data } = await http.post(route(props.rutaGuardar), {
             ...campos,
-            registro_criminal_id: props.registroId,
+            [props.campoRegistro]: props.registroId,
             codigo: codigo.value,
         });
         codigo.value = data.data.codigo;

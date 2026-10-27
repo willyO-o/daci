@@ -35,6 +35,7 @@ const eliminarCompleto = ref(false);
 const ETIQUETAS = {
     mandamientos: 'Mandamientos',
     registros_criminales: 'Registros criminales',
+    faltas_contravenciones: 'Faltas y contravenciones',
     telefonos: 'Teléfonos',
     multimedia: 'Multimedia',
     vehiculos: 'Vehículos',

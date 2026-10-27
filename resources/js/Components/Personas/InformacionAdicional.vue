@@ -15,12 +15,15 @@ const props = defineProps({
     identificador: { type: String, default: null },
     /** Abrir las fichas en otra pestaña (cuando se ve dentro de un modal). */
     nuevaPestana: { type: Boolean, default: true },
+    /** Ruta por código de los registros y título de su pestaña (Faltas y Contravenciones pasan los suyos). */
+    rutaRegistros: { type: String, default: 'registro-criminal.showByCodigo' },
+    tituloRegistros: { type: String, default: 'Otros Registros' },
 });
 
 const pestana = ref('registros');
 
 const pestanas = computed(() => [
-    { clave: 'registros', titulo: 'Otros Registros', cantidad: props.registros.length },
+    { clave: 'registros', titulo: props.tituloRegistros, cantidad: props.registros.length },
     { clave: 'mandamientos', titulo: 'Mandamientos', cantidad: props.mandamientos.length },
     { clave: 'vehiculos', titulo: 'Vehiculos', cantidad: props.vehiculos.length },
     { clave: 'telefonos', titulo: 'Telefonos', cantidad: props.telefonos.length },
@@ -51,7 +54,7 @@ const enlace = (nombreRuta, codigo) =>
                             <td>{{ guion(registro.edad_aproximada) }}</td>
                             <td>{{ guion(registro.especialidad) }}</td>
                             <td class="text-end">
-                                <a v-if="enlace('registro-criminal.showByCodigo', registro.codigo)" :href="enlace('registro-criminal.showByCodigo', registro.codigo)" :target="nuevaPestana ? '_blank' : undefined" class="btn btn-sm btn-primary">Ver Detalles</a>
+                                <a v-if="enlace(rutaRegistros, registro.codigo)" :href="enlace(rutaRegistros, registro.codigo)" :target="nuevaPestana ? '_blank' : undefined" class="btn btn-sm btn-primary">Ver Detalles</a>
                             </td>
                         </tr>
                         <tr v-if="!registros.length"><td colspan="5" class="text-center text-muted py-4">No se encontraron más registros.</td></tr>

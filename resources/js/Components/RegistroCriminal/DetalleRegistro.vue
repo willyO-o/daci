@@ -12,6 +12,9 @@ const props = defineProps({
     registro: { type: Object, required: true },
     identificador: { type: String, default: null },
     nuevaPestana: { type: Boolean, default: true },
+    /** Ruta por código de los «otros registros» de la persona y título de esa pestaña (Faltas, Contravenciones). */
+    rutaRegistros: { type: String, default: 'registro-criminal.showByCodigo' },
+    tituloRegistros: { type: String, default: 'Otros Registros' },
 });
 
 const persona = computed(() => props.registro.persona);
@@ -89,6 +92,8 @@ const filas = computed(() => [
                     :telefonos="registro.telefonos ?? []"
                     :identificador="identificador"
                     :nueva-pestana="nuevaPestana"
+                    :ruta-registros="rutaRegistros"
+                    :titulo-registros="tituloRegistros"
                 />
             </div>
         </div>

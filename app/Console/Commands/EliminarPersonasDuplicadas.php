@@ -29,6 +29,7 @@ class EliminarPersonasDuplicadas extends Command
      * @var array<string, string>
      */
     private const RELACIONES = [
+        'falta_contravencion' => 'id_persona',
         'inspeccion_tecnica' => 'persona_id',
         'mandamiento' => 'id_persona',
         'multimedia' => 'id_persona',

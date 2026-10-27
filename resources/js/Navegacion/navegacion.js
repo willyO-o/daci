@@ -55,6 +55,13 @@ export const navegacion = [
                 activo: ['consultas.registro-criminal', 'registro-criminal.showByCodigo'],
                 permiso: 'consultas.registro_criminal',
             },
+            {
+                etiqueta: 'Consultar Faltas y Contravenciones',
+                icono: 'mdi mdi-account-search-outline',
+                ruta: 'consultas.faltas-contravenciones',
+                activo: ['consultas.faltas-contravenciones', 'faltas-contravenciones.showByCodigo'],
+                permiso: 'consultas.faltas_contravenciones',
+            },
         ],
     },
     {
@@ -67,6 +74,13 @@ export const navegacion = [
                 ruta: 'registro-criminal.index',
                 activo: ['registro-criminal.index', 'registro-criminal.create', 'registro-criminal.edit'],
                 permiso: 'registro_criminal.listar',
+            },
+            {
+                etiqueta: 'Faltas y Contravenciones',
+                icono: 'mdi mdi-alert-circle-outline',
+                ruta: 'faltas-contravenciones.index',
+                activo: ['faltas-contravenciones.index', 'faltas-contravenciones.create', 'faltas-contravenciones.edit'],
+                permiso: 'faltas_contravenciones.listar',
             },
             {
                 etiqueta: 'Personas',

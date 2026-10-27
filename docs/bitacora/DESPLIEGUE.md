@@ -39,7 +39,8 @@ Las rutas guardadas en `multimedia.ruta` y `fotos_registro.ruta_archivo` son rel
 php artisan migrate:status     # revisar qué figura como «Pending» (sólo lee)
 ```
 
-Lo esperado es una sola pendiente: `2026_10_22_120000_migrar_roles_a_spatie_permission`. Si además figuran
+Lo esperado son las pendientes de DACI: `2026_10_22_120000_migrar_roles_a_spatie_permission` y
+`2026_10_26_210000_crear_tablas_faltas_y_contravenciones` (sólo CREA 4 tablas nuevas; no toca ninguna existente). Si además figuran
 migraciones del propio FELCC (la copia local `felcc` tenía pendientes `remove_unique_from_ci_in_persona_table` y
 `create_audits_table`), **detenerse y revisar** antes de seguir:
 

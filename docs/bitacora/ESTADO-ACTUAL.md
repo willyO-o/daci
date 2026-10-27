@@ -1,6 +1,6 @@
 # Estado actual
 
-> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-10-26 18:42 (Bolivia).
+> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-10-26 20:35 (Bolivia).
 
 ## Resumen
 
@@ -14,7 +14,9 @@ carga y las páginas de error de la plantilla (D-019). 103 pruebas en verde.
 2026-10-26: `PermisosSeeder` para actualizar permisos cada vez que se agregan, sin afectar el resto de la base (D-020).
 2026-10-26: botón «Estado de ejecución» en Consultas › Mandamientos, permiso `mandamientos.estado` (D-021).
 2026-10-26: páginas «Registrar Persona / Teléfono / IMEI / Vehículo» con el permiso «Registrar» y tarjetas de
-registro rápido en el Dashboard (D-022). 130 pruebas en verde.
+registro rápido en el Dashboard (D-022).
+2026-10-26: módulo **Faltas y Contravenciones**, igual a Registro Criminal, con sus propias tablas (sólo tablas
+nuevas) y permisos (D-023). 144 pruebas en verde.
 
 > **Producción es otra base** (más información que la local). No se borra nada; sólo se tocan roles, permisos y sus
 > controles. Su estado de migraciones se verifica allí antes de desplegar.
@@ -30,6 +32,7 @@ registro rápido en el Dashboard (D-022). 130 pruebas en verde.
 | Personas | ✅ |
 | Mandamientos · Registrar · Consulta auditada · Vista por código | ✅ |
 | Registro criminal · Consulta auditada · Vista por código · Ficha + PDF | ✅ |
+| Faltas y Contravenciones (nuevo: mismo funcionamiento que Registro criminal) | ✅ (migrado en local; falta prueba manual y producción) |
 | Teléfonos · IMEIs · Vehículos (carguíos, ITV) | ✅ |
 | Importaciones (mandamientos, personas, teléfonos, IMEIs, vehículos, carguíos, ITV) | ✅ |
 | Reportes CSV | ✅ |

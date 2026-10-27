@@ -56,6 +56,7 @@ final class CatalogoPermisos
                 'permisos' => [
                     'consultas.mandamientos' => 'Consultar mandamientos',
                     'consultas.registro_criminal' => 'Consultar registro criminal',
+                    'consultas.faltas_contravenciones' => 'Consultar faltas y contravenciones',
                 ],
             ],
             'registro_criminal' => [
@@ -67,6 +68,17 @@ final class CatalogoPermisos
                     'registro_criminal.editar' => 'Editar',
                     'registro_criminal.eliminar' => 'Eliminar',
                     'registro_criminal.ficha' => 'Imprimir ficha de registro',
+                ],
+            ],
+            'faltas_contravenciones' => [
+                'etiqueta' => 'Faltas y Contravenciones',
+                'permisos' => [
+                    'faltas_contravenciones.listar' => 'Ver el listado',
+                    'faltas_contravenciones.ver' => 'Ver el detalle',
+                    'faltas_contravenciones.crear' => 'Registrar',
+                    'faltas_contravenciones.editar' => 'Editar',
+                    'faltas_contravenciones.eliminar' => 'Eliminar',
+                    'faltas_contravenciones.ficha' => 'Imprimir ficha de registro',
                 ],
             ],
             'personas' => [
@@ -187,6 +199,31 @@ final class CatalogoPermisos
 
             // 2026-10-26: los roles que ya podían editar mandamientos (incluido el estado) y consultarlos.
             'mandamientos.estado' => [self::ROL_ADMINISTRADOR, self::ROL_TECNICO_FELCC, self::ROL_TECNICO_DACI],
+
+            // 2026-10-26: Faltas y Contravenciones, con el mismo acceso que cada rol tiene en Registro Criminal.
+            ...self::comoRegistroCriminal('faltas_contravenciones'),
+        ];
+    }
+
+    /**
+     * Asignación de un módulo copiada de Registro Criminal: administrador todo; técnico DACI todo menos eliminar;
+     * consultor DACI consultar y ver el detalle.
+     *
+     * @return array<string, list<string>>
+     */
+    private static function comoRegistroCriminal(string $modulo): array
+    {
+        $administrador = [self::ROL_ADMINISTRADOR];
+        $tecnico = [self::ROL_ADMINISTRADOR, self::ROL_TECNICO_DACI];
+
+        return [
+            "{$modulo}.listar" => $tecnico,
+            "{$modulo}.ver" => [...$tecnico, self::ROL_CONSULTOR_DACI],
+            "{$modulo}.crear" => $tecnico,
+            "{$modulo}.editar" => $tecnico,
+            "{$modulo}.eliminar" => $administrador,
+            "{$modulo}.ficha" => $tecnico,
+            "consultas.{$modulo}" => [...$tecnico, self::ROL_CONSULTOR_DACI],
         ];
     }
 
