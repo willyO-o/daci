@@ -63,7 +63,7 @@ permisos y se agregan las tablas de Faltas y Contravenciones; la vuelta atrás d
 2. Importación de teléfonos: ¿debe actualizar un número existente en lugar de crear otro? (D-015).
 3. Reportes PDF y filtros: el anterior los anunciaba pero no existían. ¿Se implementan?
 4. Validar con usuarios reales los permisos de los roles base (traducción en la migración de roles).
-5. Despliegue: seguir `DESPLIEGUE.md` (ZIP, sin git ni internet; **PHP 8.3+** en el servidor). **Antes**, `php artisan migrate:status` en producción: si hay migraciones de
+5. Despliegue: seguir `DESPLIEGUE.md` (ZIP sin `vendor/` ni `node_modules/` + `build/` aparte; el servidor descarga dependencias con `composer install --no-dev`; sin git; **PHP 8.3+**). **Antes**, `php artisan migrate:status` en producción: si hay migraciones de
    FELCC pendientes (la copia local no tenía `create_audits_table` ni `remove_unique_from_ci_in_persona_table`),
    decidir con el usuario. Sin la tabla `audits`, DACI no puede guardar.
 6. `.env` local: apunta a `felcc` (no `felcc1`) y `APP_NAME=Laravel`.
