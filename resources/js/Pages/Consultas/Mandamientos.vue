@@ -2,6 +2,7 @@
 import { computed, reactive, ref } from 'vue';
 import PageHeader from '@/Components/Layout/PageHeader.vue';
 import BaseModal from '@/Components/Ui/BaseModal.vue';
+import BotonAyuda from '@/Components/Ui/BotonAyuda.vue';
 import RangoFechas from '@/Components/Ui/RangoFechas.vue';
 import VisorImagenes from '@/Components/Ui/VisorImagenes.vue';
 import DetalleMandamiento from '@/Components/Mandamientos/DetalleMandamiento.vue';
@@ -10,6 +11,7 @@ import ModalEstadoMandamiento from '@/Components/Mandamientos/ModalEstadoMandami
 import { useCargaInfinita } from '@/Composables/useCargaInfinita';
 import { useNotificacion } from '@/Composables/useNotificacion';
 import { usePermisos } from '@/Composables/usePermisos';
+import { useTour } from '@/Composables/useTour';
 import { useVistaGuardada } from '@/Composables/useVistaGuardada';
 import { FILTROS_MANDAMIENTO } from '@/Utils/mandamiento';
 import { http } from '@/Utils/http';
@@ -26,6 +28,32 @@ defineProps({
 
 const { errorDeRespuesta } = useNotificacion();
 const { puede } = usePermisos();
+
+// Guía de la pantalla: sólo se abre con el ícono de ayuda. Los pasos de los resultados aparecen si ya hay resultados
+// y los botones que dependen de un permiso, sólo si el usuario los ve.
+const { iniciar: iniciarGuia } = useTour();
+const SIN_RESULTADOS = {
+    titulo: 'Resultados',
+    texto: 'Aquí aparecerán los mandamientos encontrados. Haga una búsqueda y vuelva a abrir la guía para conocer qué puede hacer con cada resultado.',
+};
+const abrirGuia = () =>
+    iniciarGuia([
+        {
+            titulo: 'Consultar Mandamientos',
+            texto: 'Desde esta pantalla busca mandamientos por un dato de la persona o del mandamiento. Cada búsqueda nueva y cada detalle que abra quedan registrados en la Auditoría de consultas.',
+        },
+        { elemento: '[data-tour="filtro"]', titulo: '1. Filtrar por', texto: 'Elija primero en qué dato buscar: C.I., nombre completo, apellidos, hoja de ruta, estado, delito, juzgado…' },
+        { elemento: '[data-tour="texto"]', titulo: '2. Texto a buscar', texto: 'Escriba lo que busca: al menos 4 caracteres. Para el C.I. puede incluir el complemento.' },
+        { elemento: '[data-tour="fechas"]', titulo: '3. Rango de fechas (opcional)', texto: 'Limita la búsqueda a los mandamientos registrados entre esas fechas.' },
+        { elemento: '[data-tour="buscar"]', titulo: '4. Buscar', texto: 'Se habilita cuando eligió un filtro y escribió 4 caracteres o más. También puede presionar Enter.' },
+        { elemento: '[data-tour="vista"]', titulo: 'Vista', texto: 'Muestra los resultados en cuadrícula o en lista. El sistema recuerda su elección.', lado: 'left' },
+        { elemento: '[data-tour="resultados"] [data-tour="tarjeta"]', titulo: 'Resultados', texto: 'Cada tarjeta es un mandamiento encontrado, con la persona, el delito, el tipo, el estado y el juzgado. Al bajar se cargan más.', lado: 'top', siNoExiste: SIN_RESULTADOS },
+        { elemento: '[data-tour="tarjeta-ver"]', titulo: 'Ver detalles', texto: 'Abre el detalle completo: datos del mandamiento, de la persona y del estado de ejecución.' },
+        { elemento: '[data-tour="tarjeta-estado"]', titulo: 'Estado de ejecución', texto: 'Cambia el estado del mandamiento (también con el lápiz junto al estado). Si escribe EJECUTADO, pide la fecha, quién lo ejecutó y el acta.' },
+        { elemento: '[data-tour="tarjeta-archivo"]', titulo: 'Archivo del mandamiento', texto: 'Abre el PDF o la imagen del mandamiento original.' },
+        { elemento: '[data-tour="tarjeta-foto"]', titulo: 'Fotos de la persona', texto: 'Haga clic en la foto para verla ampliada, con las demás fotos de la persona.', lado: 'right' },
+        { elemento: '[data-tour="ayuda"]', titulo: 'Guía', texto: 'Puede volver a ver esta guía cuando quiera con este botón.', lado: 'left' },
+    ]);
 
 const FILTROS = [
     FILTROS_MANDAMIENTO[0],
@@ -99,33 +127,32 @@ const verImagenes = (rutas) => {
 
 <template>
     <div>
-        <PageHeader titulo="Consultar Mandamientos" :migas="[{ etiqueta: 'Consultas' }, { etiqueta: 'Mandamientos' }]" />
-
-        <p class="mb-2">
-            Para realizar una búsqueda, seleccione un filtro y escriba al menos 4 caracteres en el campo de búsqueda, luego
-            haga clic en el botón de búsqueda.
-        </p>
+        <PageHeader titulo="Consultar Mandamientos" :migas="[{ etiqueta: 'Consultas' }, { etiqueta: 'Mandamientos' }]">
+            <template #acciones>
+                <BotonAyuda @click="abrirGuia" />
+            </template>
+        </PageHeader>
 
         <div class="card">
             <div class="card-header">
                 <form class="row g-2 align-items-center" @submit.prevent="buscar">
                     <div class="col-lg-4">
                         <div class="input-group">
-                            <input v-model="filtros.search" type="search" class="form-control" placeholder="Buscar mandamiento..." aria-label="Buscar mandamiento">
-                            <button type="submit" class="btn btn-primary" :disabled="!valido"><i class="ri-search-line" /> Buscar</button>
+                            <input v-model="filtros.search" type="search" class="form-control" placeholder="Buscar mandamiento..." aria-label="Buscar mandamiento" data-tour="texto">
+                            <button type="submit" class="btn btn-primary" :disabled="!valido" data-tour="buscar"><i class="ri-search-line" /> Buscar</button>
                         </div>
                     </div>
                     <div class="col-lg-2">
-                        <select v-model="filtros.tipo_filtro" class="form-select" aria-label="Filtrar por">
+                        <select v-model="filtros.tipo_filtro" class="form-select" aria-label="Filtrar por" data-tour="filtro">
                             <option value="">Filtrar por</option>
                             <option v-for="filtro in FILTROS" :key="filtro.valor" :value="filtro.valor">{{ filtro.etiqueta }}</option>
                         </select>
                     </div>
-                    <div class="col-lg">
+                    <div class="col-lg" data-tour="fechas">
                         <RangoFechas v-model:inicio="filtros.fecha_inicio" v-model:fin="filtros.fecha_fin" />
                     </div>
                     <div class="col-lg-auto">
-                        <div class="btn-group" role="group" aria-label="Vista">
+                        <div class="btn-group" role="group" aria-label="Vista" data-tour="vista">
                             <button type="button" class="btn btn-outline-primary" :class="{ active: vista === 'grid' }" title="Cuadrícula" @click="vista = 'grid'"><i class="ri-grid-fill" /></button>
                             <button type="button" class="btn btn-outline-primary" :class="{ active: vista === 'list' }" title="Lista" @click="vista = 'list'"><i class="ri-list-check" /></button>
                         </div>
@@ -135,6 +162,7 @@ const verImagenes = (rutas) => {
 
             <ListadoMandamientos
                 v-if="buscado"
+                data-tour="resultados"
                 :lista="lista"
                 :vista="vista"
                 ayuda-vacio="Revise el texto buscado o pruebe con otro filtro."

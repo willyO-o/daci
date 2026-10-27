@@ -24,11 +24,11 @@ const ci = computed(() => `${persona.value.ci ?? '-'}${persona.value.complemento
 
 <template>
     <div :class="vista === 'grid' ? 'col-xxl-4 col-md-6 mb-3' : 'col-12 mb-2'">
-        <div class="card h-100 mb-0 border">
+        <div class="card h-100 mb-0 border" data-tour="tarjeta">
             <div class="card-header border-0 pb-0 pt-3 d-sm-flex align-items-center">
                 <h4 class="card-title mb-0 flex-grow-1">NRO: <span class="cifra">{{ guion(registro.nro_registro) }}</span></h4>
                 <div class="d-flex gap-1 mt-2 mt-sm-0">
-                    <button type="button" class="btn btn-soft-secondary btn-sm" title="Ver Detalles" @click="$emit('ver', registro)"><i class="ri-eye-line" /></button>
+                    <button type="button" class="btn btn-soft-secondary btn-sm" title="Ver Detalles" data-tour="tarjeta-ver" @click="$emit('ver', registro)"><i class="ri-eye-line" /></button>
                     <button v-if="puedeFicha" type="button" class="btn btn-soft-secondary btn-sm" title="Imprimir Ficha de Registro" @click="$emit('ficha', registro)"><i class="ri-file-pdf-line" /></button>
                     <Link v-if="puedeEditar" :href="route(rutaEditar, registro.id)" class="btn btn-soft-secondary btn-sm" title="Editar Registro"><i class="ri-pencil-line" /></Link>
                     <button v-if="puedeEliminar" type="button" class="btn btn-soft-secondary btn-sm" title="Eliminar Registro" @click="$emit('eliminar', registro)"><i class="ri-delete-bin-2-line" /></button>
@@ -37,7 +37,7 @@ const ci = computed(() => `${persona.value.ci ?? '-'}${persona.value.complemento
             <div class="card-body">
                 <div :class="vista === 'grid' ? 'd-sm-flex align-items-center' : 'd-md-flex align-items-center gap-3'">
                     <div class="flex-shrink-0">
-                        <button type="button" class="btn p-0 border-0" :disabled="!registro.fotos?.length" :aria-label="registro.fotos?.length ? 'Ver fotos' : 'Sin fotos'" @click="$emit('ver-imagenes', registro.fotos)">
+                        <button type="button" class="btn p-0 border-0" :disabled="!registro.fotos?.length" :aria-label="registro.fotos?.length ? 'Ver fotos' : 'Sin fotos'" data-tour="tarjeta-foto" @click="$emit('ver-imagenes', registro.fotos)">
                             <img :src="foto" alt="Foto de la persona" :class="vista === 'grid' ? 'avatar-xl' : 'avatar-lg'" class="rounded" style="object-fit: cover">
                         </button>
                     </div>

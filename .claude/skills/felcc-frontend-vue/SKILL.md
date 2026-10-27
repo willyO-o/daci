@@ -105,6 +105,11 @@ Catálogos cortos (países, divisiones, juzgados…) llegan como prop y van en u
 
 **Archivos** (reemplaza FilePond): `SubirArchivos v-model="form.fotos" :maximo :tamano-maximo-mb acepta`.
 
+**Guía paso a paso** (driver.js 1.9.0): `useTour().iniciar([{ elemento: '[data-tour="x"]', titulo, texto, lado?,
+siNoExiste? }])`, abierta SÓLO desde `<BotonAyuda @click="…" />` (ícono que al pasar el mouse muestra «¿Necesita ayuda? Ver la
+guía») en las acciones del `PageHeader`. Marcar los elementos con `data-tour`, no con clases; los pasos sin elemento visible se saltan.
+Estilos `.guia-felcc` en `app.css`.
+
 **Fotos ampliadas** (FsLightbox, igual que antes): `VisorImagenes v-model="visor" :rutas="[...]"` — usa `fslightbox@3.4.0-2`
 (la misma versión del sistema anterior), cargado sólo al abrir.
 

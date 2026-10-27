@@ -390,3 +390,31 @@ router de Inertia:
 
 Verificado con una simulación de la misma lógica (5 casos: rápida sin parpadeo, lenta ≥ 400 ms, interrumpida, visitas
 que no deben abrirla, `finish` ajeno). El proyecto no tiene pruebas de JS.
+
+## D-029 · Guía paso a paso en Consultas › Mandamientos con driver.js (2026-10-27 15:03)
+
+**Pedido:** un tour para Consultar Mandamientos; el usuario usaba driver.js. Luego: «sólo debe activarse al hacer clic
+en un ícono de ayuda».
+
+1. **driver.js 1.9.0** (MIT, sin dependencias), versión fija. Se eligió sobre Shepherd.js (más pesado, licencia a
+   revisar), Intro.js (AGPL o comercial) y vue-tour / vue3-tour (Vue 2 o poco mantenido). Se tomó la 1.9.0 y no la
+   1.10.2 porque ésta tenía días de publicada.
+2. `Composables/useTour.js`: carga driver.js y su CSS **sólo al abrir la guía** (archivo aparte en el build), textos
+   en español («Siguiente», «Anterior», «Finalizar», «Paso n de N»), salta los pasos cuyo elemento no existe o no se ve
+   (o muestra su texto alternativo `siNoExiste`) y se cierra al salir de la pantalla. Reutilizable en otras pantallas.
+3. Consultas › Mandamientos: ícono de ayuda (?) en el encabezado — **única forma de abrirla**, no se abre sola ni
+   guarda nada. Pasos: presentación y auditoría, filtro, texto, fechas, Buscar, vista, resultados (o «aquí
+   aparecerán…» si no buscó), ver detalle, estado de ejecución (sólo con permiso), archivo, fotos y el propio botón.
+   Los elementos se marcan con `data-tour="…"` (no con clases), así un cambio de diseño no rompe la guía.
+4. Estilos en `resources/css/app.css` (`.guia-felcc`) con las variables `--vz-*` (modo oscuro).
+   Corrección: el `:hover`/`:focus` de driver.css (fondo `#f7f7f7`, mismo peso y cargado después) dejaba «Siguiente»
+   blanco sobre blanco; los estados hover/foco usan selectores `.driver-popover.guia-felcc …`, que pesan más.
+5. `Components/Ui/BotonAyuda.vue`: ícono de ayuda que, al pasar el mouse o enfocarlo con el teclado, se ensancha y
+   muestra «¿Necesita ayuda? Ver la guía» de izquierda a derecha (`clip-path` + ancho, ~250 ms, curva suave). Sin hover
+   (táctil) queda el ícono; el texto va en `aria-label`; respeta `prefers-reduced-motion`.
+6. La misma guía en **Consultar Registro Criminal** y **Consultar Faltas y Contravenciones** (pasos compartidos en
+   `Utils/guias.js` → `guiaConsultaRegistros(modulo)`; marcas `data-tour` en `TarjetaRegistro`). En las tres consultas se
+   quitó el párrafo de instrucciones (ocupaba espacio; lo explican la guía y el estado vacío).
+7. Tarjeta de mandamiento: lápiz junto al estado que abre el mismo modal «Estado de Ejecución»; sólo aparece con
+   `puedeCambiarEstado` (Consultas › Mandamientos y permiso `mandamientos.estado`). El botón verde del encabezado se
+   conserva y también lleva el lápiz (antes un círculo con check), para que se entienda que es la misma acción.

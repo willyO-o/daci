@@ -106,6 +106,93 @@ img.avatar-lg {
     font-weight: 500;
 }
 
+/* Guía paso a paso (driver.js, `useTour`): colores y tipografía de la plantilla, también en modo oscuro. Los
+   selectores llevan dos clases porque el CSS de driver.js se carga después, al abrir la guía. */
+.driver-popover.guia-felcc {
+    --guia-fondo: var(--vz-card-bg-custom, var(--vz-card-bg, #fff));
+    font-family: inherit;
+    color: var(--vz-body-color, #212529);
+    background-color: var(--guia-fondo);
+    border-radius: 0.5rem;
+    max-width: 340px;
+    padding: 1rem 1.1rem;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.18);
+}
+
+.guia-felcc .driver-popover-title {
+    font-size: 1rem;
+    font-weight: 600;
+    padding-right: 1.5rem;
+}
+
+.guia-felcc .driver-popover-description {
+    font-size: 0.875rem;
+    color: var(--vz-secondary-color, var(--vz-body-color, #495057));
+}
+
+.guia-felcc .driver-popover-progress-text {
+    font-size: 0.75rem;
+    color: var(--vz-secondary-color, #878a99);
+}
+
+.guia-felcc .driver-popover-close-btn {
+    color: var(--vz-secondary-color, #878a99);
+}
+
+.guia-felcc .driver-popover-footer-btn {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    padding: 0.3rem 0.75rem;
+    border-radius: 0.25rem;
+    color: var(--vz-body-color, #212529);
+    background-color: transparent;
+    border: 1px solid var(--vz-border-color, #e9ebec);
+    text-shadow: none;
+}
+
+.guia-felcc .driver-popover-next-btn {
+    color: #fff;
+    background-color: var(--vz-primary, #405189);
+    border-color: var(--vz-primary, #405189);
+}
+
+/* driver.css pone `:hover/:focus { background-color: #f7f7f7 }` con el mismo peso y se carga después: sin esto el
+   botón «Siguiente» queda blanco sobre blanco. Estos selectores pesan más. */
+.driver-popover.guia-felcc .driver-popover-footer-btn:hover,
+.driver-popover.guia-felcc .driver-popover-footer-btn:focus {
+    color: var(--vz-body-color, #212529);
+    background-color: var(--vz-light, #f3f6f9);
+    border-color: var(--vz-border-color, #e9ebec);
+}
+
+.driver-popover.guia-felcc .driver-popover-next-btn:hover,
+.driver-popover.guia-felcc .driver-popover-next-btn:focus {
+    color: #fff;
+    background-color: color-mix(in srgb, var(--vz-primary, #405189) 85%, #000);
+    border-color: color-mix(in srgb, var(--vz-primary, #405189) 85%, #000);
+}
+
+.driver-popover.guia-felcc .driver-popover-footer-btn:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--vz-primary, #405189) 45%, transparent);
+    outline-offset: 2px;
+}
+
+.guia-felcc .driver-popover-arrow-side-left {
+    border-left-color: var(--guia-fondo);
+}
+
+.guia-felcc .driver-popover-arrow-side-right {
+    border-right-color: var(--guia-fondo);
+}
+
+.guia-felcc .driver-popover-arrow-side-top {
+    border-top-color: var(--guia-fondo);
+}
+
+.guia-felcc .driver-popover-arrow-side-bottom {
+    border-bottom-color: var(--guia-fondo);
+}
+
 /* Hoja de detalle impresa en una pestaña aparte (vista por código). */
 @media print {
     .no-imprimir {

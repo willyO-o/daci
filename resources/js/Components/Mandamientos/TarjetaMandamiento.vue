@@ -27,15 +27,15 @@ const badge = computed(() => `bg-soft-${colorEstado(props.mandamiento.estado)} t
 
 <template>
     <div :class="vista === 'grid' ? 'col-xxl-4 col-md-6 mb-3' : 'col-12 mb-2'">
-        <div class="card h-100 mb-0 border">
+        <div class="card h-100 mb-0 border" data-tour="tarjeta">
             <div class="card-header border-0 pb-0 pt-3 d-sm-flex align-items-center">
                 <h4 class="card-title mb-0 flex-grow-1">HR: {{ guion(mandamiento.hoja_ruta) }}</h4>
                 <div class="d-flex gap-1 mt-2 mt-sm-0">
-                    <button type="button" class="btn btn-soft-secondary btn-sm" title="Ver Detalles" @click="$emit('ver', mandamiento)">
+                    <button type="button" class="btn btn-soft-secondary btn-sm" title="Ver Detalles" data-tour="tarjeta-ver" @click="$emit('ver', mandamiento)">
                         <i class="ri-eye-line" />
                     </button>
-                    <button v-if="puedeCambiarEstado" type="button" class="btn btn-soft-success btn-sm" title="Estado de Ejecución" aria-label="Cambiar estado de ejecución" @click="$emit('cambiar-estado', mandamiento)">
-                        <i class="ri-checkbox-circle-line" />
+                    <button v-if="puedeCambiarEstado" type="button" class="btn btn-soft-success btn-sm" title="Editar estado de ejecución" aria-label="Editar estado de ejecución" data-tour="tarjeta-estado" @click="$emit('cambiar-estado', mandamiento)">
+                        <i class="ri-pencil-line" />
                     </button>
                     <button v-if="puedeEditar" type="button" class="btn btn-soft-secondary btn-sm" title="Editar Mandamiento" @click="$emit('editar', mandamiento)">
                         <i class="ri-pencil-line" />
@@ -44,10 +44,10 @@ const badge = computed(() => `bg-soft-${colorEstado(props.mandamiento.estado)} t
                         <i class="ri-delete-bin-2-line" />
                     </button>
                     <template v-if="archivo">
-                        <a v-if="esPdf" :href="urlArchivo(archivo.ruta)" target="_blank" rel="noopener" class="btn btn-soft-secondary btn-sm" title="Ver PDF del mandamiento">
+                        <a v-if="esPdf" :href="urlArchivo(archivo.ruta)" target="_blank" rel="noopener" class="btn btn-soft-secondary btn-sm" title="Ver PDF del mandamiento" data-tour="tarjeta-archivo">
                             <i class="ri-file-pdf-line" />
                         </a>
-                        <button v-else type="button" class="btn btn-soft-secondary btn-sm" title="Ver imagen mandamiento" @click="$emit('ver-imagenes', [archivo.ruta])">
+                        <button v-else type="button" class="btn btn-soft-secondary btn-sm" title="Ver imagen mandamiento" data-tour="tarjeta-archivo" @click="$emit('ver-imagenes', [archivo.ruta])">
                             <i class="ri-image-line" />
                         </button>
                     </template>
@@ -57,7 +57,7 @@ const badge = computed(() => `bg-soft-${colorEstado(props.mandamiento.estado)} t
             <div class="card-body">
                 <div v-if="vista === 'grid'" class="d-sm-flex align-items-center">
                     <div class="flex-shrink-0">
-                        <button type="button" class="btn p-0 border-0" :disabled="!tieneFotos" :aria-label="tieneFotos ? 'Ver fotos de la persona' : 'Sin fotos'" @click="$emit('ver-imagenes', mandamiento.imagenes_persona)">
+                        <button type="button" class="btn p-0 border-0" :disabled="!tieneFotos" :aria-label="tieneFotos ? 'Ver fotos de la persona' : 'Sin fotos'" data-tour="tarjeta-foto" @click="$emit('ver-imagenes', mandamiento.imagenes_persona)">
                             <img :src="foto" alt="Foto de la persona" class="avatar-xl rounded" style="object-fit: cover">
                         </button>
                     </div>
@@ -68,6 +68,7 @@ const badge = computed(() => `bg-soft-${colorEstado(props.mandamiento.estado)} t
                         <p class="text-muted mb-2"><strong>{{ guion(mandamiento.tipo_mandamiento) }}</strong></p>
                         <div class="d-flex flex-wrap gap-2 align-items-center">
                             Estado: <span class="badge" :class="badge">{{ guion(mandamiento.estado) }}</span>
+                            <button v-if="puedeCambiarEstado" type="button" class="btn btn-link btn-sm p-0 ms-1 lapiz-estado" title="Editar estado" :aria-label="`Editar estado: ${guion(mandamiento.estado)}`" @click="$emit('cambiar-estado', mandamiento)"><i class="ri-pencil-line" /></button>
                         </div>
                         <div class="mt-2 text-muted"><i class="ri-scales-line text-primary me-1 align-bottom" /> {{ mandamiento.nombre_juzgado }}</div>
                     </div>
@@ -75,7 +76,7 @@ const badge = computed(() => `bg-soft-${colorEstado(props.mandamiento.estado)} t
 
                 <div v-else class="d-md-flex align-items-center gap-3">
                     <div class="flex-shrink-0">
-                        <button type="button" class="btn p-0 border-0" :disabled="!tieneFotos" :aria-label="tieneFotos ? 'Ver fotos de la persona' : 'Sin fotos'" @click="$emit('ver-imagenes', mandamiento.imagenes_persona)">
+                        <button type="button" class="btn p-0 border-0" :disabled="!tieneFotos" :aria-label="tieneFotos ? 'Ver fotos de la persona' : 'Sin fotos'" data-tour="tarjeta-foto" @click="$emit('ver-imagenes', mandamiento.imagenes_persona)">
                             <img :src="foto" alt="Foto de la persona" class="avatar-lg rounded" style="object-fit: cover">
                         </button>
                     </div>
@@ -86,9 +87,24 @@ const badge = computed(() => `bg-soft-${colorEstado(props.mandamiento.estado)} t
                     </div>
                     <div class="text-muted"><i class="ri-auction-line text-primary me-1 align-bottom" /> {{ guion(mandamiento.tipo_mandamiento) }}</div>
                     <div class="text-muted"><i class="ri-scales-line text-primary me-1 align-bottom" /> {{ mandamiento.nombre_juzgado }}</div>
-                    <div class="text-nowrap">Estado: <span class="badge" :class="badge">{{ guion(mandamiento.estado) }}</span></div>
+                    <div class="text-nowrap">Estado: <span class="badge" :class="badge">{{ guion(mandamiento.estado) }}</span><button v-if="puedeCambiarEstado" type="button" class="btn btn-link btn-sm p-0 ms-1 lapiz-estado" title="Editar estado" :aria-label="`Editar estado: ${guion(mandamiento.estado)}`" @click="$emit('cambiar-estado', mandamiento)"><i class="ri-pencil-line" /></button></div>
                 </div>
             </div>
         </div>
     </div>
 </template>
+
+<style scoped>
+/* Lápiz junto al estado (sólo con permiso de cambiarlo): pequeño y discreto, se resalta al pasar el mouse. */
+.lapiz-estado {
+    line-height: 1;
+    color: var(--vz-secondary-color, #878a99);
+    transition: color 150ms ease-out, transform 150ms ease-out;
+}
+
+.lapiz-estado:hover,
+.lapiz-estado:focus-visible {
+    color: var(--vz-primary, #405189);
+    transform: scale(1.15);
+}
+</style>
