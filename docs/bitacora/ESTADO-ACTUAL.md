@@ -1,6 +1,6 @@
 # Estado actual
 
-> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-10-27 16:00 (Bolivia).
+> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-10-27 16:20 (Bolivia).
 
 ## Resumen
 
@@ -32,6 +32,8 @@ Faltas y Contravenciones (D-029).
 2026-10-27: la Auditoría de consultas registra búsquedas, detalles abiertos y exportaciones de todos los módulos
 (D-034).
 2026-10-27: sin «¿Olvidó su contraseña?»: la restablece el administrador (D-035). 177 pruebas.
+2026-10-27: revisión final y ensayo del despliegue sobre una copia en estado de producción: sólo cambian roles y
+permisos y se agregan las tablas de Faltas y Contravenciones; la vuelta atrás deja la base idéntica (D-036).
 
 > **Producción es otra base** (más información que la local). No se borra nada; sólo se tocan roles, permisos y sus
 > controles. Su estado de migraciones se verifica allí antes de desplegar.
@@ -61,7 +63,7 @@ Faltas y Contravenciones (D-029).
 2. Importación de teléfonos: ¿debe actualizar un número existente en lugar de crear otro? (D-015).
 3. Reportes PDF y filtros: el anterior los anunciaba pero no existían. ¿Se implementan?
 4. Validar con usuarios reales los permisos de los roles base (traducción en la migración de roles).
-5. Despliegue: seguir `DESPLIEGUE.md`. **Antes**, `php artisan migrate:status` en producción: si hay migraciones de
+5. Despliegue: seguir `DESPLIEGUE.md` (ZIP, sin git ni internet; **PHP 8.3+** en el servidor). **Antes**, `php artisan migrate:status` en producción: si hay migraciones de
    FELCC pendientes (la copia local no tenía `create_audits_table` ni `remove_unique_from_ci_in_persona_table`),
    decidir con el usuario. Sin la tabla `audits`, DACI no puede guardar.
 6. `.env` local: apunta a `felcc` (no `felcc1`) y `APP_NAME=Laravel`.

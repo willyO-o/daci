@@ -530,3 +530,22 @@ Perfil. Se conservan `password.confirm` y `perfil.password`. La tabla `password_
 quitados quedan en el historial de git.
 
 Pruebas: `tests/Feature/Auth/RecuperarClaveDeshabilitadaTest.php` (3).
+
+## D-036 · Revisión final y ensayo del despliegue sobre una copia de producción (2026-10-27 16:20)
+
+**Pedido:** verificar que nada rompa la base de producción (sólo deben cambiar roles y permisos y las tablas nuevas de
+Faltas y Contravenciones) e indicar el proceso de migración y reemplazo. Producción está en una red privada sin git:
+se lleva en ZIP y se instala a mano.
+
+1. **Migraciones:** las 36 de FELCC están idénticas en DACI; sólo hay 2 nuevas (roles y Faltas y Contravenciones).
+2. **Ensayo:** copia de la base local (sin `ciudadano`) en `felcc_ensayo`, llevada al estado de producción (36 de
+   FELCC, nada de DACI); suma de verificación de todas las tablas; `migrate --force` + `db:seed --class=RolesSeeder`.
+   Resultado: sólo cambiaron `migrations` y `roles`; 9 tablas nuevas; ninguna desaparecida; `roles_legado` con las
+   filas originales; 15/15 usuarios con su rol; `users.role_id` sin cambios. `migrate:rollback --step=2` dejó la base
+   **idéntica** al estado original. La base de ensayo se borró.
+3. **Hallazgos para el servidor:** DACI exige **PHP 8.3+** (FELCC 8.2); sin internet el ZIP debe llevar `vendor/` (sin
+   dev) y `public/build/`; ningún código de la aplicación usa paquetes de desarrollo; FELCC no guarda datos cifrados
+   (se puede generar `APP_KEY` nueva); `config:cache`, `route:cache` y `view:cache` funcionan; el respaldo `db:backup`
+   es el mismo de FELCC. **FELCC no puede volver a encenderse** sobre la base migrada (salvo revirtiendo).
+4. `DESPLIEGUE.md` reescrita para instalación manual con ZIP, con el resultado del ensayo, la vuelta atrás y lo que
+   DACI escribe en la base durante el uso normal.
