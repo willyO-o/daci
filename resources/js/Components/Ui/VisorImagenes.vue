@@ -12,7 +12,7 @@ import { urlArchivo } from '@/Utils/formato';
  */
 const props = defineProps({
     modelValue: { type: Boolean, default: false },
-    /** Rutas del disco `public`. */
+    /** Rutas del disco `public`, o URLs completas (`/evidencias/archivos/12`, archivos privados servidos por permiso). */
     rutas: { type: Array, default: () => [] },
     inicial: { type: Number, default: 0 },
 });
@@ -22,7 +22,7 @@ const emit = defineEmits(['update:modelValue']);
 let visor = null;
 
 const abrir = async () => {
-    const fuentes = props.rutas.map(urlArchivo).filter(Boolean);
+    const fuentes = props.rutas.map((ruta) => (/^(\/|https?:)/.test(ruta ?? '') ? ruta : urlArchivo(ruta))).filter(Boolean);
     if (!fuentes.length) {
         emit('update:modelValue', false);
 
@@ -35,6 +35,8 @@ const abrir = async () => {
     // Una instancia nueva por apertura (como antes): así nunca muestra las fotos de la tarjeta anterior.
     visor = new window.FsLightbox();
     visor.props.sources = fuentes;
+    // Todas son imágenes: así no depende de la extensión (las URLs protegidas no la tienen).
+    visor.props.types = fuentes.map(() => 'image');
     visor.props.onClose = () => {
         visor = null;
         emit('update:modelValue', false);

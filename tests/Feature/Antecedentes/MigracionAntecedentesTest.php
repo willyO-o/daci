@@ -26,6 +26,9 @@ class MigracionAntecedentesTest extends TestCase
     /** La fase 1 de casos (D-037) agrega `id_caso` a `falta_contravencion`: se quita antes y se repone al final. */
     private Migration $migracionCasos;
 
+    /** Evidencias (D-038) apunta a `caso`: se quita antes y se repone al final. */
+    private Migration $migracionEvidencias;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -34,6 +37,8 @@ class MigracionAntecedentesTest extends TestCase
         $this->artisan('migrate:fresh', ['--force' => true]);
         $this->migracion = require database_path('migrations/2026_10_26_210000_crear_tablas_faltas_y_contravenciones.php');
         $this->migracionCasos = require database_path('migrations/2026_11_01_100000_crear_tabla_caso_y_agregar_id_caso.php');
+        $this->migracionEvidencias = require database_path('migrations/2026_11_02_120000_crear_tablas_evidencias.php');
+        $this->migracionEvidencias->down();
         $this->migracionCasos->down();
         $this->migracion->down();
     }
@@ -105,6 +110,9 @@ class MigracionAntecedentesTest extends TestCase
         }
         if (! Schema::hasTable('caso')) {
             $this->migracionCasos->up();
+        }
+        if (! Schema::hasTable('evidencia')) {
+            $this->migracionEvidencias->up();
         }
 
         parent::tearDown();

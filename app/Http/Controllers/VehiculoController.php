@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AuditarConsultas;
+use App\Models\Caso;
 use App\Models\Multimedia;
 use App\Models\Persona;
 use App\Models\Vehiculo;
@@ -12,6 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -23,11 +25,12 @@ class VehiculoController extends Controller
     public function index(Request $request): Response
     {
         $vehiculos = Vehiculo::query()
-            ->with(['personas:persona.id,nombres,apellidos,ci', 'multimedia:id,id_vehiculo,ruta'])
+            ->with(['personas:persona.id,nombres,apellidos,ci', 'multimedia:id,id_vehiculo,ruta', 'casoVinculado:id,codigo'])
             ->when($request->filled('search'), fn (Builder $q) => $this->buscar($q, $request->input('filtro'), (string) $request->input('search')))
             ->orderByDesc('id')
             ->paginate($this->tamanoPagina($request))
             ->withQueryString();
+        $this->agregarCodigosDeCaso($vehiculos->getCollection());
 
         $this->auditarBusqueda($request, 'listado_vehiculos', ['tipo_filtro' => $request->input('filtro'), 'busqueda' => $request->input('search')], $vehiculos->total());
 
@@ -50,7 +53,7 @@ class VehiculoController extends Controller
         $datos = $this->validar($request);
 
         DB::transaction(function () use ($request, $datos) {
-            $vehiculo = Vehiculo::create($datos);
+            $vehiculo = Vehiculo::create([...$datos, ...Caso::columnas($request->input('id_caso'), 'caso_relacionado')]);
             $this->sincronizarPersonas($vehiculo, $request->input('personas_asociadas', []));
             $this->guardarFotos($vehiculo, $request->file('fotosVehiculos', []));
         });
@@ -66,11 +69,13 @@ class VehiculoController extends Controller
         AuditarConsultas::registrarAcceso($request->input('identificador'), $vehiculo, 'detalle_vehiculo');
 
         $vehiculo->load([
+            'casoVinculado:id,codigo',
             'multimedia:id,id_vehiculo,ruta',
             'personas:persona.id,nombres,apellidos,ci,telefono',
             'cargios.estacionServicio:id,eess',
             'inspecciones' => fn ($q) => $q->with('persona:id,nombres,apellidos,ci,telefono')->orderByDesc('anio')->orderByDesc('id'),
         ]);
+        $this->agregarCodigosDeCaso(collect([$vehiculo]));
 
         return response()->json([
             ...$vehiculo->toArray(),
@@ -83,7 +88,7 @@ class VehiculoController extends Controller
         $datos = $this->validar($request, $vehiculo);
 
         DB::transaction(function () use ($request, $vehiculo, $datos) {
-            $vehiculo->update($datos);
+            $vehiculo->update([...$datos, ...Caso::columnas($request->input('id_caso'), 'caso_relacionado', $vehiculo)]);
             $this->sincronizarPersonas($vehiculo, $request->input('personas_asociadas', []), true);
             $this->guardarFotos($vehiculo, $request->file('fotosVehiculos', []));
         });
@@ -113,8 +118,8 @@ class VehiculoController extends Controller
         $datos = $request->validate([
             'persona_id' => ['required', 'exists:persona,id'],
             'tipo' => ['required', 'string', 'max:255'],
-            'caso' => ['nullable', 'string', 'max:140'],
-        ], ['persona_id.required' => 'Seleccione una persona.', 'tipo.required' => 'Indique el tipo de información.']);
+            'id_caso' => Caso::reglaId(),
+        ], ['persona_id.required' => 'Seleccione una persona.', 'tipo.required' => 'Indique el tipo de información.', 'id_caso.exists' => 'El caso elegido ya no existe.']);
 
         $existe = VehiculoCaso::where('vehiculo_id', $vehiculo->id)
             ->where('persona_id', $datos['persona_id'])
@@ -125,12 +130,12 @@ class VehiculoController extends Controller
             return back()->withErrors(['persona_id' => 'Esta persona ya está vinculada con este tipo']);
         }
 
-        // El sistema anterior guardaba el caso en una columna inexistente y se perdía: va en `numero_informacion`.
+        // El caso del vínculo: `id_caso` y su código en `numero_informacion` (el sistema anterior lo perdía).
         VehiculoCaso::create([
             'vehiculo_id' => $vehiculo->id,
             'persona_id' => $datos['persona_id'],
             'tipo' => campoDB($datos['tipo']),
-            'numero_informacion' => campoDB($datos['caso'] ?? null),
+            ...Caso::columnas($datos['id_caso'] ?? null, 'numero_informacion', null, 140),
         ]);
 
         return back()->with('success', 'Persona vinculada correctamente');
@@ -144,7 +149,9 @@ class VehiculoController extends Controller
     }
 
     /**
-     * @return array{placa: string, descripcion: ?string, responsable: ?string, caso_relacionado: ?string}
+     * El caso (`id_caso`) se guarda aparte con `Caso::columnas`.
+     *
+     * @return array{placa: string, descripcion: ?string, responsable: ?string}
      */
     private function validar(Request $request, ?Vehiculo $vehiculo = null): array
     {
@@ -152,40 +159,39 @@ class VehiculoController extends Controller
             'placa' => ['required', 'string', 'min:3', 'max:20', Rule::unique('vehiculo', 'placa')->ignore($vehiculo)],
             'descripcion' => ['nullable', 'string', 'max:255'],
             'responsable' => ['nullable', 'string', 'max:255'],
-            'caso_relacionado' => ['nullable', 'string', 'max:255'],
+            'id_caso' => Caso::reglaId(),
             'personas_asociadas' => ['nullable', 'array'],
             'personas_asociadas.*.persona_id' => ['required', 'exists:persona,id'],
             'personas_asociadas.*.tipo' => ['required', 'string', 'max:255'],
-            'personas_asociadas.*.caso' => ['nullable', 'string', 'max:140'],
+            'personas_asociadas.*.id_caso' => Caso::reglaId(),
             'fotosVehiculos' => ['nullable', 'array', 'max:10'],
             'fotosVehiculos.*' => ['file', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ], [
             'placa.unique' => 'Ya existe un vehículo con esta placa.',
+            'id_caso.exists' => 'El caso elegido ya no existe.',
+            'personas_asociadas.*.id_caso.exists' => 'El caso elegido ya no existe.',
         ]);
 
         return [
             'placa' => $datos['placa'],
             'descripcion' => $datos['descripcion'] ?? null,
             'responsable' => $datos['responsable'] ?? null,
-            'caso_relacionado' => $datos['caso_relacionado'] ?? null,
         ];
     }
 
     /**
-     * Personas asociadas del formulario (`[{persona_id, tipo, caso}]`). Al editar, las que ya no vienen se quitan.
+     * Personas asociadas del formulario (`[{persona_id, tipo, id_caso}]`). Al editar, las que ya no vienen se quitan.
      *
-     * @param  array<int, array{persona_id: int, tipo: string, caso?: ?string}>  $personas
+     * @param  array<int, array{persona_id: int, tipo: string, id_caso?: ?int}>  $personas
      */
     private function sincronizarPersonas(Vehiculo $vehiculo, array $personas, bool $quitarAusentes = false): void
     {
         $conservados = [];
 
         foreach ($personas as $persona) {
-            $caso = VehiculoCaso::updateOrCreate(
-                ['vehiculo_id' => $vehiculo->id, 'persona_id' => $persona['persona_id'], 'tipo' => campoDB($persona['tipo'])],
-                ['numero_informacion' => campoDB($persona['caso'] ?? null)],
-            );
-            $conservados[] = $caso->id;
+            $vinculo = VehiculoCaso::firstOrNew(['vehiculo_id' => $vehiculo->id, 'persona_id' => $persona['persona_id'], 'tipo' => campoDB($persona['tipo'])]);
+            $vinculo->fill(Caso::columnas($persona['id_caso'] ?? null, 'numero_informacion', $vinculo->exists ? $vinculo : null, 140))->save();
+            $conservados[] = $vinculo->id;
         }
 
         // Sólo se quitan vínculos que el formulario mostraba: los de personas eliminadas (recuperables) o sin persona
@@ -196,6 +202,21 @@ class VehiculoController extends Controller
                 ->whereIn('persona_id', Persona::query()->select('id'))
                 ->delete();
         }
+    }
+
+    /**
+     * Código del caso de cada vínculo vehículo–persona (`pivot.caso_codigo`), para mostrarlo y para el formulario.
+     *
+     * @param  Collection<int, Vehiculo>  $vehiculos
+     */
+    private function agregarCodigosDeCaso($vehiculos): void
+    {
+        $ids = $vehiculos->flatMap(fn (Vehiculo $v) => $v->personas->pluck('pivot.id_caso'))->filter()->unique()->values();
+        $codigos = $ids->isEmpty() ? collect() : Caso::query()->whereIn('id', $ids)->pluck('codigo', 'id');
+
+        $vehiculos->each(fn (Vehiculo $v) => $v->personas->each(
+            fn ($p) => $p->pivot->setAttribute('caso_codigo', $codigos[$p->pivot->id_caso] ?? null),
+        ));
     }
 
     /**

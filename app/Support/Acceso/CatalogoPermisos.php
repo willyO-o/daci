@@ -137,6 +137,19 @@ final class CatalogoPermisos
                     'casos.eliminar' => 'Eliminar',
                 ],
             ],
+            'evidencias' => [
+                'etiqueta' => 'Evidencias',
+                'permisos' => [
+                    'evidencias.listar' => 'Ver el listado',
+                    'evidencias.ver' => 'Ver el detalle y sus fotografías',
+                    'evidencias.crear' => 'Registrar',
+                    'evidencias.editar' => 'Editar',
+                    'evidencias.eliminar' => 'Eliminar',
+                    'evidencias.documentos' => 'Ver actas, comprobantes y documentos internos',
+                    'evidencias.publicar' => 'Aprobar, rechazar y retirar publicaciones del portal',
+                    'evidencias.tipos' => 'Administrar los tipos de artículo',
+                ],
+            ],
             'importar' => [
                 'etiqueta' => 'Importación',
                 'permisos' => [
@@ -224,6 +237,9 @@ final class CatalogoPermisos
             // 2026-11-01: Casos (D-037), por ahora sólo el administrador (el superadmin tiene todo). A otros roles se les
             // da desde Seguridad › Roles y permisos.
             ...array_fill_keys(self::permisosDe('casos'), [self::ROL_ADMINISTRADOR]),
+
+            // 2026-11-02: Evidencias (D-038), por ahora sólo el administrador.
+            ...array_fill_keys(self::permisosDe('evidencias'), [self::ROL_ADMINISTRADOR]),
         ];
     }
 

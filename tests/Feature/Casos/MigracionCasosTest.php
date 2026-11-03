@@ -17,6 +17,9 @@ class MigracionCasosTest extends TestCase
 
     private Migration $migracion;
 
+    /** Evidencias (D-038) apunta a `caso`: se quita antes y se repone al final. */
+    private Migration $migracionEvidencias;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -24,6 +27,8 @@ class MigracionCasosTest extends TestCase
         // Crea y altera tablas (en MariaDB eso confirma cualquier transacción): se reconstruye la base de pruebas.
         $this->artisan('migrate:fresh', ['--force' => true]);
         $this->migracion = require database_path('migrations/2026_11_01_100000_crear_tabla_caso_y_agregar_id_caso.php');
+        $this->migracionEvidencias = require database_path('migrations/2026_11_02_120000_crear_tablas_evidencias.php');
+        $this->migracionEvidencias->down();
         $this->migracion->down();
     }
 
@@ -77,6 +82,9 @@ class MigracionCasosTest extends TestCase
         if (! Schema::hasTable('caso')) {
             $this->migracion->up();
         }
+        if (! Schema::hasTable('evidencia')) {
+            $this->migracionEvidencias->up();
+        }
 
         parent::tearDown();
     }
@@ -91,7 +99,7 @@ class MigracionCasosTest extends TestCase
         $huella = [];
 
         foreach (Schema::getTableListing(schema: DB::getDatabaseName(), schemaQualified: false) as $tabla) {
-            if (in_array($tabla, ['caso', 'migrations'], true)) {
+            if (in_array($tabla, ['caso', 'migrations', 'tipo_articulo', 'evidencia', 'evidencia_articulo', 'evidencia_archivo'], true)) {
                 continue;
             }
             $columnas = array_values(array_diff(Schema::getColumnListing($tabla), ['id_caso']));

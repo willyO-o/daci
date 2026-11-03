@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount, ref } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
+import SelectorCaso from '@/Components/Casos/SelectorCaso.vue';
 import PageHeader from '@/Components/Layout/PageHeader.vue';
 import AvisoPersonaExistente from '@/Components/Personas/AvisoPersonaExistente.vue';
 import BotonAyuda from '@/Components/Ui/BotonAyuda.vue';
@@ -40,7 +41,7 @@ const valoresIniciales = () => ({
     nombre_supuesto: props.registro?.nombre_supuesto ?? '',
     alias: props.registro?.alias ?? '',
     telefono: props.registro?.telefono ?? '',
-    cud: props.registro?.cud ?? '',
+    id_caso: props.registro?.id_caso ?? null,
     especialidad: props.registro?.especialidad ?? '',
     id_pais: persona.id_pais ?? '',
     lugar_nacimiento: persona.lugar_nacimiento ?? '',
@@ -279,8 +280,14 @@ const abrirGuia = () => iniciarGuia(guiaFormularioRegistro(props.modulo.titulo))
                                     <input id="telefono" v-model="form.telefono" maxlength="25" type="text" class="form-control" placeholder="(opcional)">
                                 </div>
                                 <div class="col-12">
-                                    <label class="form-label" for="cud">CUD</label>
-                                    <input id="cud" v-model="form.cud" maxlength="255" v-mayuscula type="text" class="form-control" placeholder="(opcional)">
+                                    <label class="form-label" for="id_caso">CUD / Caso</label>
+                                    <SelectorCaso
+                                        v-model="form.id_caso"
+                                        id-campo="id_caso"
+                                        :codigo="registro?.caso_codigo ?? ''"
+                                        :texto-anterior="registro && !registro.id_caso ? (registro.cud || null) : null"
+                                        :error="form.errors.id_caso"
+                                    />
                                 </div>
                             </div>
                         </div>

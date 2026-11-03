@@ -568,3 +568,20 @@ ni vuelta atrás). **No incluido:** `ficha_*.caso_cud` (texto de una ficha impre
 
 Detalle, riesgos y ensayo: `PROPUESTA-CASOS.md`. Pruebas: `tests/Feature/Casos/` (13).
 
+## D-038 · Módulo Evidencias (2026-11-02)
+
+**Pedido:** registrar objetos secuestrados o recuperados (evidencia → artículos → archivos) y preparar su publicación
+individual para un portal ciudadano que será otro proyecto (leerá la base; aquí no hay API).
+
+**Decisión:** 4 tablas nuevas (`tipo_articulo`, `evidencia`, `evidencia_articulo`, `evidencia_archivo`) relacionadas con
+`caso` (el CUD es el caso, `id_caso`), `division` (`id_division`) y `users`; nombres en singular como el resto de la base.
+Funcionarios como texto (no hay tabla de funcionarios; así trabajan `mandamiento.ejecutado_por` y `vehiculo.responsable`).
+Un solo campo de publicación (`estado_publicacion`) en lugar de «disponible Sí/No» + estado, que podían contradecirse.
+Archivos en el disco privado (los del disco `public` tienen URL directa). Permisos sólo para el administrador.
+
+**Descartado:** reutilizar `multimedia` (alterar una tabla existente); escribir el IMEI en la tabla `imei` de las
+investigaciones (mezclaría datos; se avisa la coincidencia); una API REST (la hará el usuario en otro proyecto);
+código de evidencia automático (lo escribe el usuario); ubicación de almacenamiento (no necesaria).
+
+Detalle: `2026-11-02-modulo-evidencias.md`. Pruebas: `tests/Feature/Evidencias/` (14).
+

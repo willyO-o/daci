@@ -31,6 +31,9 @@ description: Convenciones OBLIGATORIAS de base de datos, persistencia y consulta
    crea `caso` y agrega `id_caso` (nula, FK) a `telefono`, `registro_criminal`, `falta_contravencion`, `vehiculo` y
    `vehiculo_caso`; la llena `casos:migrar`. La eliminación de las columnas de texto (`casos-fase-4`) está fuera de
    `database/migrations` y se corre a mano. Relación `casoVinculado()` (no `caso()`: choca con `telefono.caso`).
+   **Tablas nuevas de Evidencias (D-038):** `2026_11_02_120000_crear_tablas_evidencias` — `tipo_articulo`, `evidencia`,
+   `evidencia_articulo`, `evidencia_archivo` (apuntan a `caso`, `division`, `users`). Sus archivos van al disco
+   PRIVADO (`local`), nunca a `public`.
 2. **Las 36 migraciones del sistema anterior** están copiadas en `database/migrations` sólo como registro. **No se
    editan.** Una base puede no tenerlas todas ejecutadas (la copia local `felcc` tenía 34: le faltaban
    `remove_unique_from_ci_in_persona_table` y `create_audits_table`); `migrate` las correría junto con la de roles.

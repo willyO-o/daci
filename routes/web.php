@@ -6,6 +6,8 @@ use App\Http\Controllers\CasoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DelitoController;
 use App\Http\Controllers\DivisionController;
+use App\Http\Controllers\EvidenciaArchivoController;
+use App\Http\Controllers\EvidenciaController;
 use App\Http\Controllers\FaltaContravencionController;
 use App\Http\Controllers\FichaRegistroController;
 use App\Http\Controllers\ImeiController;
@@ -17,10 +19,12 @@ use App\Http\Controllers\PaisController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\PlantillaFichaController;
+use App\Http\Controllers\PublicacionEvidenciaController;
 use App\Http\Controllers\RegistroCriminalController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\TelefonoController;
+use App\Http\Controllers\TipoArticuloController;
 use App\Http\Controllers\TipoMandamientoController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VehiculoController;
@@ -135,6 +139,34 @@ Route::middleware('auth')->group(function () {
     Route::get('/casos/{caso}', [CasoController::class, 'show'])->whereNumber('caso')->name('casos.show')->middleware('permission:casos.ver');
     Route::match(['put', 'patch'], '/casos/{caso}', [CasoController::class, 'update'])->whereNumber('caso')->name('casos.update')->middleware('permission:casos.editar');
     Route::delete('/casos/{caso}', [CasoController::class, 'destroy'])->whereNumber('caso')->name('casos.destroy')->middleware('permission:casos.eliminar');
+    // Selector de caso de los formularios: lo usa quien registra o edita en esos módulos (registrar el CUD no pide
+    // permiso de casos; si el caso no existe, se crea).
+    Route::get('/casos-buscar', [CasoController::class, 'buscar'])->name('casos.buscar')
+        ->middleware('permission:telefonos.crear|telefonos.editar|vehiculos.crear|vehiculos.editar|vehiculos.vincular|registro_criminal.crear|registro_criminal.editar|faltas_contravenciones.crear|faltas_contravenciones.editar|casos.crear|casos.editar');
+    Route::post('/casos-rapido', [CasoController::class, 'storeRapido'])->name('casos.store-rapido')
+        ->middleware('permission:telefonos.crear|telefonos.editar|vehiculos.crear|vehiculos.editar|vehiculos.vincular|registro_criminal.crear|registro_criminal.editar|faltas_contravenciones.crear|faltas_contravenciones.editar|casos.crear|casos.editar');
+
+    // Evidencias (D-038)
+    Route::get('/evidencias', [EvidenciaController::class, 'index'])->name('evidencias.index')->middleware('permission:evidencias.listar');
+    Route::get('/evidencias/create', [EvidenciaController::class, 'create'])->name('evidencias.create')->middleware('permission:evidencias.crear');
+    Route::post('/evidencias', [EvidenciaController::class, 'store'])->name('evidencias.store')->middleware('permission:evidencias.crear');
+    Route::get('/evidencias/{evidencia}', [EvidenciaController::class, 'show'])->whereNumber('evidencia')->name('evidencias.show')->middleware('permission:evidencias.ver');
+    Route::get('/evidencias/{evidencia}/edit', [EvidenciaController::class, 'edit'])->whereNumber('evidencia')->name('evidencias.edit')->middleware('permission:evidencias.editar');
+    Route::match(['put', 'patch'], '/evidencias/{evidencia}', [EvidenciaController::class, 'update'])->whereNumber('evidencia')->name('evidencias.update')->middleware('permission:evidencias.editar');
+    Route::delete('/evidencias/{evidencia}', [EvidenciaController::class, 'destroy'])->whereNumber('evidencia')->name('evidencias.destroy')->middleware('permission:evidencias.eliminar');
+    // Archivos: sólo desde el disco privado (los documentos internos piden además `evidencias.documentos`).
+    Route::get('/evidencias/archivos/{archivo}', [EvidenciaArchivoController::class, 'show'])->whereNumber('archivo')->name('evidencias.archivos.show')->middleware('permission:evidencias.ver');
+    Route::delete('/evidencias/archivos/{archivo}', [EvidenciaArchivoController::class, 'destroy'])->whereNumber('archivo')->name('evidencias.archivos.destroy')->middleware('permission:evidencias.editar');
+    Route::patch('/evidencias/archivos/{archivo}/publico', [EvidenciaArchivoController::class, 'publico'])->whereNumber('archivo')->name('evidencias.archivos.publico')->middleware('permission:evidencias.publicar');
+    // Revisión de publicaciones para el portal ciudadano.
+    Route::get('/evidencias-publicacion', [PublicacionEvidenciaController::class, 'index'])->name('evidencias.publicacion.index')->middleware('permission:evidencias.publicar');
+    Route::post('/evidencias-publicacion/{articulo}/aprobar', [PublicacionEvidenciaController::class, 'aprobar'])->whereNumber('articulo')->name('evidencias.publicacion.aprobar')->middleware('permission:evidencias.publicar');
+    Route::post('/evidencias-publicacion/{articulo}/rechazar', [PublicacionEvidenciaController::class, 'rechazar'])->whereNumber('articulo')->name('evidencias.publicacion.rechazar')->middleware('permission:evidencias.publicar');
+    Route::post('/evidencias-publicacion/{articulo}/retirar', [PublicacionEvidenciaController::class, 'retirar'])->whereNumber('articulo')->name('evidencias.publicacion.retirar')->middleware('permission:evidencias.publicar');
+    // Catálogo de tipos de artículo.
+    Route::get('/tipos-articulo', [TipoArticuloController::class, 'index'])->name('tipos-articulo.index')->middleware('permission:evidencias.tipos');
+    Route::post('/tipos-articulo', [TipoArticuloController::class, 'store'])->name('tipos-articulo.store')->middleware('permission:evidencias.tipos');
+    Route::match(['put', 'patch'], '/tipos-articulo/{tipo}', [TipoArticuloController::class, 'update'])->whereNumber('tipo')->name('tipos-articulo.update')->middleware('permission:evidencias.tipos');
 
     // EREBOR › IMEIs
     Route::get('/imeis', [ImeiController::class, 'index'])->name('imeis.index')->middleware('permission:imeis.listar');

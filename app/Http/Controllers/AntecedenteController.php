@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\GuardarAntecedenteRequest;
 use App\Lib\ReportesPdf;
 use App\Models\AuditarConsultas;
+use App\Models\Caso;
 use App\Models\Division;
 use App\Models\FichaAntecedente;
 use App\Models\FichaRegistroPlantilla;
@@ -46,7 +47,7 @@ abstract class AntecedenteController extends Controller
      */
     private const CAMPOS = [
         'fecha_registro', 'nombre_supuesto', 'alias', 'especialidad', 'edad_aproximada', 'nombre_conyuge', 'domicilio',
-        'rasgos', 'modus_operandi', 'zonas_opera', 'observaciones', 'id_division', 'telefono', 'estatura', 'peso', 'cud',
+        'rasgos', 'modus_operandi', 'zonas_opera', 'observaciones', 'id_division', 'telefono', 'estatura', 'peso',
         'caracteristicas_particulares', 'hijos',
     ];
 
@@ -107,7 +108,11 @@ abstract class AntecedenteController extends Controller
                 }
 
                 $modelo = $this->modulo()->modelo();
-                $registro = $modelo::create([...$request->only(self::CAMPOS), 'id_persona' => $persona->id]);
+                $registro = $modelo::create([
+                    ...$request->only(self::CAMPOS),
+                    ...Caso::columnas($request->input('id_caso'), 'cud'),
+                    'id_persona' => $persona->id,
+                ]);
 
                 $archivos[] = $this->guardarFoto($registro, $request->file('foto_frente'), 'FRONTAL');
                 $archivos[] = $this->guardarFoto($registro, $request->file('foto_perfil'), 'LATERAL');
@@ -158,12 +163,13 @@ abstract class AntecedenteController extends Controller
     public function edit(int $registro): Response
     {
         $registro = $this->registro($registro);
-        $registro->load(['persona', 'fotos']);
+        $registro->load(['persona', 'fotos', 'casoVinculado:id,codigo']);
 
         return Inertia::render('Antecedentes/Formulario', [
             'modulo' => $this->modulo()->paraVista(),
             'registro' => [
-                ...$registro->only([...self::CAMPOS, 'id', 'nro_registro', 'id_persona']),
+                ...$registro->only([...self::CAMPOS, 'cud', 'id_caso', 'id', 'nro_registro', 'id_persona']),
+                'caso_codigo' => $registro->casoVinculado?->codigo,
                 'fecha_registro' => $registro->fecha_registro?->toDateString(),
                 'foto_frente' => $registro->fotos->firstWhere('tipo', 'FRONTAL')?->ruta_archivo,
                 'foto_perfil' => $registro->fotos->firstWhere('tipo', 'LATERAL')?->ruta_archivo,
@@ -196,7 +202,7 @@ abstract class AntecedenteController extends Controller
             'telefono' => ['nullable', 'string', 'max:255'],
             'estatura' => ['nullable', 'string', 'max:255'],
             'peso' => ['nullable', 'string', 'max:255'],
-            'cud' => ['nullable', 'string', 'max:255'],
+            'id_caso' => Caso::reglaId(),
             // Datos de la persona que cambian con el tiempo: se actualizan en su ficha de Personas.
             'estado_civil' => ['nullable', 'in:SOLTERO,CASADO,DIVORCIADO,VIUDO,CONYUGUE'],
             'ocupacion' => ['nullable', 'string', 'max:150'],
@@ -208,7 +214,7 @@ abstract class AntecedenteController extends Controller
 
         try {
             $reemplazadas = DB::transaction(function () use ($request, $registro, &$nuevas) {
-                $registro->update($request->only(self::CAMPOS));
+                $registro->update([...$request->only(self::CAMPOS), ...Caso::columnas($request->input('id_caso'), 'cud', $registro)]);
 
                 // Estado civil y ocupación son de la persona: se corrigen aquí porque cambian con el tiempo.
                 $registro->persona?->update($request->only(['estado_civil', 'ocupacion']));
@@ -457,12 +463,14 @@ abstract class AntecedenteController extends Controller
             'division:id,division',
             'usuario:id,name',
             'fotos',
+            'casoVinculado:id,codigo',
         ]);
         $persona = $registro->persona;
         $modelo = $this->modulo()->modelo();
 
         return [
-            ...$registro->only([...self::CAMPOS, 'id', 'nro_registro']),
+            ...$registro->only([...self::CAMPOS, 'id', 'nro_registro', 'id_caso']),
+            'cud' => $registro->casoVinculado?->codigo ?? $registro->cud,
             'codigo' => md5((string) $registro->id),
             'fecha_registro' => $registro->fecha_registro?->toDateString(),
             'division' => $registro->division?->division,

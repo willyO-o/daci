@@ -52,3 +52,26 @@ el usuario: 24 casos, 1.336 teléfonos y 4 registros con `id_caso`).
 
 **Aún no (resto de la fase 3):** los formularios de teléfono, vehículo, registro criminal y faltas siguen guardando el
 texto (`caso`, `cud`…) y no el `id_caso`; un registro nuevo aparece en Casos recién al correr `php artisan casos:migrar`.
+
+## 2026-11-02 · Selector de caso en todos los formularios (resto de la fase 3)
+
+**Pedido:** un select en todos los formularios donde se agrega o vincula un caso, con un botón para crear casos nuevos
+con un formulario reutilizable, evitando bugs.
+
+- `Components/Casos/SelectorCaso.vue` (buscador de casos + botón «Nuevo») en: Teléfono (`caso`), Vehículo (caso
+  relacionado), persona asociada al vehículo y «Vincular persona» del listado de vehículos (`numero_informacion`),
+  Registro Criminal y Faltas y Contravenciones (`cud`). v-model = `id_caso`.
+- `FormularioCaso` es el mismo del módulo Casos con modo `rapido`: no es un `<form>` (va dentro del formulario de
+  afuera), guarda por JSON (`casos.store-rapido`) y deja el caso seleccionado; Enter crea el caso sin enviar el
+  formulario de afuera. Se abre debajo del campo, **no en un modal**: dos modales de Bootstrap abiertos a la vez se
+  pelean el foco.
+- Rutas `casos.buscar` y `casos.store-rapido` con los permisos de registrar/editar de esos módulos (registrar el CUD no
+  pide permiso de casos). Si el código ya existe, el alta rápida devuelve ese caso en vez de duplicarlo.
+- Servidor: `Caso::reglaId()` (el caso debe existir), `Caso::columnas()` (guarda `id_caso` y copia el código en la
+  columna de texto —doble escritura de la fase 3—, recortado al largo de la columna: `numero_informacion` es de 140) y
+  `Caso::resolver()` (importaciones de teléfonos y vehículos: busca o crea el caso del texto).
+- **Sin pérdida de datos:** quitar el caso deja la columna de texto vacía, pero una fila con texto heredado y sin caso
+  vinculado (p. ej. «S/N») lo conserva al editarla; el formulario lo avisa.
+- Listados y detalles muestran el código del caso vinculado (o el texto heredado si no tiene).
+- Pruebas: `tests/Feature/Casos/FormulariosCasoTest.php` (8); `VehiculosTest` adaptado a `id_caso`. 204 en verde;
+  `npm run build` OK. No probado en el navegador desde esta sesión.

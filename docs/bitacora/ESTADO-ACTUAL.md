@@ -1,6 +1,6 @@
 # Estado actual
 
-> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-11-01 (Bolivia).
+> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-11-02 (Bolivia).
 
 ## Resumen
 
@@ -40,6 +40,9 @@ permisos y se agregan las tablas de Faltas y Contravenciones; la vuelta atrás d
 
 > **Producción es otra base** (más información que la local). No se borra nada; sólo se tocan roles, permisos y sus
 > controles. Su estado de migraciones se verifica allí antes de desplegar.
+
+2026-11-02: módulo **Evidencias** (D-038): 4 tablas nuevas, publicación individual revisada, archivos privados,
+permisos sólo del administrador. Ensayado en una copia de `felcc1`; **no aplicado en ninguna base**.
 
 ## Módulos
 

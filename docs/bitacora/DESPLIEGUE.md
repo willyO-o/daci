@@ -500,6 +500,28 @@ columnas con sus valores). Después de la fase 4, FELCC ya no puede volver a enc
 
 ---
 
+## F. Actualización: módulo Evidencias (D-038)
+
+Sólo crea 4 tablas (`tipo_articulo`, `evidencia`, `evidencia_articulo`, `evidencia_archivo`); necesita antes la de casos
+(§ E, fase 1). Ensayado el 2026-11-02: las tablas existentes quedan idénticas.
+
+```bash
+php artisan down && php artisan db:backup
+php artisan migrate:status | grep Pending             # debe salir SÓLO 2026_11_02_120000_crear_tablas_evidencias
+php artisan migrate --pretend                         # sólo create/alter de las 4 tablas nuevas
+php artisan migrate --force
+php artisan db:seed --class=RolesSeeder --force       # 8 permisos evidencias.* sólo para el administrador
+php artisan optimize && php artisan up
+```
+
+- **PHP (`php.ini`)**, para subir fotos y actas: `upload_max_filesize = 10M`, `post_max_size = 64M`,
+  `max_file_uploads = 20` (o más). Con los valores por defecto (2M / 8M) los archivos grandes se pierden.
+- **Respaldo de archivos:** las fotos y actas están en `storage/app/private/evidencias/` (no en `public`). `db:backup`
+  respalda sólo la base: incluir esa carpeta en el respaldo de archivos.
+- Vuelta atrás: `php artisan migrate:rollback --step=1 --force` (borra sólo las 4 tablas; los permisos quedan).
+
+---
+
 ## Anexo 1 · Qué cambia en la base (ensayo del 2026-10-27)
 
 Ensayo sobre una copia de la base en el estado de producción (36 migraciones de FELCC, nada de DACI): suma de

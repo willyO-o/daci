@@ -144,7 +144,7 @@ const urlPersona = computed(() => (detalle.value?.persona && route().has('person
                                         <small v-if="telefono.empresa" class="d-block text-muted">{{ telefono.empresa }}</small>
                                     </td>
                                     <td>{{ guion(telefono.persona_caso) }}</td>
-                                    <td>{{ guion(telefono.caso) }}</td>
+                                    <td>{{ guion(telefono.caso_vinculado?.codigo ?? telefono.caso) }}</td>
                                     <td>
                                         <template v-if="telefono.persona">
                                             <div class="fw-bold cifra">{{ guion(telefono.persona.ci) }}</div>
@@ -197,7 +197,7 @@ const urlPersona = computed(() => (detalle.value?.persona && route().has('person
                 <div class="col-md-6 mb-3"><h6 class="text-muted">Número Celular</h6><p class="fw-bold cifra mb-0">{{ detalle.numero_celular }}</p></div>
                 <div class="col-md-6 mb-3"><h6 class="text-muted">Empresa</h6><p class="fw-bold mb-0">{{ guion(detalle.empresa) }}</p></div>
                 <div class="col-md-6 mb-3"><h6 class="text-muted">Persona/Caso</h6><p class="fw-bold mb-0">{{ guion(detalle.persona_caso) }}</p></div>
-                <div class="col-md-6 mb-3"><h6 class="text-muted">Caso</h6><p class="fw-bold mb-0">{{ guion(detalle.caso) }}</p></div>
+                <div class="col-md-6 mb-3"><h6 class="text-muted">Caso</h6><p class="fw-bold mb-0">{{ guion(detalle.caso_vinculado?.codigo ?? detalle.caso) }}</p></div>
                 <div v-if="detalle.persona" class="col-md-6 mb-3">
                     <h6 class="text-muted">Relacionado con</h6>
                     <p class="fw-bold mb-0">

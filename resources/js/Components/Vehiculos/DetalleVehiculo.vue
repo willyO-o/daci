@@ -61,7 +61,7 @@ const inspecciones = computed(() => props.vehiculo.inspecciones ?? []);
         <div class="row g-3 mb-4 pb-3 border-bottom">
             <div class="col-md-6">
                 <h5 class="fs-13 bg-soft-success text-body rounded px-2 py-2 mb-2">Caso Relacionado</h5>
-                <div class="bg-light rounded px-3 py-2 fw-semibold">{{ guion(vehiculo.caso_relacionado) }}</div>
+                <div class="bg-light rounded px-3 py-2 fw-semibold">{{ guion(vehiculo.caso_vinculado?.codigo ?? vehiculo.caso_relacionado) }}</div>
             </div>
             <div class="col-md-6">
                 <h5 class="fs-13 bg-soft-success text-body rounded px-2 py-2 mb-2">Responsable</h5>

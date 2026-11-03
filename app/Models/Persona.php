@@ -111,7 +111,7 @@ class Persona extends Model implements AuditableContract
     public function vehiculos()
     {
         return $this->belongsToMany(Vehiculo::class, 'vehiculo_caso', 'persona_id', 'vehiculo_id')
-            ->withPivot('registro_criminal_id', 'tipo', 'numero_informacion')
+            ->withPivot('registro_criminal_id', 'tipo', 'numero_informacion', 'id_caso')
             ->withTimestamps();
     }
 

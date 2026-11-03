@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
+import SelectorCaso from '@/Components/Casos/SelectorCaso.vue';
 import PageHeader from '@/Components/Layout/PageHeader.vue';
 import BaseModal from '@/Components/Ui/BaseModal.vue';
 import BuscadorRemoto from '@/Components/Ui/BuscadorRemoto.vue';
@@ -62,7 +63,7 @@ const verDetalle = async (vehiculo) => {
 // Vincular persona
 const modalVincular = ref(false);
 const vehiculoVincular = ref(null);
-const formVincular = useForm({ persona_id: null, tipo: '', caso: '' });
+const formVincular = useForm({ persona_id: null, tipo: '', id_caso: null });
 const abrirVincular = (vehiculo) => {
     vehiculoVincular.value = vehiculo;
     formVincular.reset();
@@ -133,13 +134,13 @@ const eliminar = async (vehiculo) => {
                                                 <div class="fw-bold cifra">{{ guion(persona.ci) }}</div>
                                                 <small>{{ nombreCompleto(persona) }}</small><br>
                                                 <span class="badge badge-outline-secondary">{{ persona.pivot?.tipo }}</span>
-                                                <span v-if="persona.pivot?.numero_informacion" class="badge badge-outline-info ms-1">{{ persona.pivot.numero_informacion }}</span>
+                                                <span v-if="persona.pivot?.caso_codigo || persona.pivot?.numero_informacion" class="badge badge-outline-info ms-1">{{ persona.pivot.caso_codigo ?? persona.pivot.numero_informacion }}</span>
                                             </div>
                                         </div>
                                         <small v-else class="text-muted">Sin personas vinculadas</small>
                                     </td>
                                     <td>{{ guion(vehiculo.responsable) }}</td>
-                                    <td>{{ guion(vehiculo.caso_relacionado) }}</td>
+                                    <td>{{ guion(vehiculo.caso_vinculado?.codigo ?? vehiculo.caso_relacionado) }}</td>
                                     <td class="cifra text-nowrap">{{ fecha(vehiculo.created_at) }}</td>
                                     <td class="text-center">
                                         <div class="d-flex gap-2 justify-content-center">
@@ -193,7 +194,7 @@ const eliminar = async (vehiculo) => {
                     </div>
                     <div class="col-md-6">
                         <label for="vincularCaso" class="form-label">Caso (Opcional)</label>
-                        <input id="vincularCaso" v-model="formVincular.caso" v-mayuscula type="text" class="form-control" placeholder="Ingresa el caso si aplica">
+                        <SelectorCaso v-model="formVincular.id_caso" id-campo="vincularCaso" :error="formVincular.errors.id_caso" />
                     </div>
                 </div>
             </form>

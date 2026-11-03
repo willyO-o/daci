@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Vehiculos;
 
+use App\Models\Caso;
 use App\Models\Multimedia;
 use App\Models\Persona;
 use App\Models\Vehiculo;
@@ -20,15 +21,16 @@ class VehiculosTest extends TestCase
         Storage::fake('public');
         $this->actingAs($this->usuarioConPermisos(['vehiculos.crear']));
         $persona = Persona::factory()->create();
+        $caso = Caso::create(['codigo' => 'CASO-9']);
 
         $this->post(route('vehiculos.store'), [
             'placa' => '1234ABC',
-            'personas_asociadas' => [['persona_id' => $persona->id, 'tipo' => 'ruat', 'caso' => 'caso-9']],
+            'personas_asociadas' => [['persona_id' => $persona->id, 'tipo' => 'ruat', 'id_caso' => $caso->id]],
             'fotosVehiculos' => [UploadedFile::fake()->image('frente.jpg')],
         ])->assertSessionHas('success', 'Vehículo creado correctamente');
 
         $vehiculo = Vehiculo::where('placa', '1234ABC')->firstOrFail();
-        $this->assertDatabaseHas('vehiculo_caso', ['vehiculo_id' => $vehiculo->id, 'persona_id' => $persona->id, 'tipo' => 'RUAT', 'numero_informacion' => 'CASO-9']);
+        $this->assertDatabaseHas('vehiculo_caso', ['vehiculo_id' => $vehiculo->id, 'persona_id' => $persona->id, 'tipo' => 'RUAT', 'id_caso' => $caso->id, 'numero_informacion' => 'CASO-9']);
         $foto = Multimedia::where('id_vehiculo', $vehiculo->id)->firstOrFail();
         $this->assertStringStartsWith('vehiculos/', $foto->ruta);
     }
@@ -38,13 +40,16 @@ class VehiculosTest extends TestCase
         $this->actingAs($this->usuarioConPermisos(['vehiculos.vincular']));
         $vehiculo = Vehiculo::create(['placa' => '5555XYZ']);
         $persona = Persona::factory()->create();
+        $caso = Caso::create(['codigo' => '77']);
 
-        $this->post(route('vehiculos.vincular-persona', $vehiculo), ['persona_id' => $persona->id, 'tipo' => 'SOAT', 'caso' => '77'])
+        $this->post(route('vehiculos.vincular-persona', $vehiculo), ['persona_id' => $persona->id, 'tipo' => 'SOAT', 'id_caso' => $caso->id])
             ->assertSessionHas('success');
         $this->post(route('vehiculos.vincular-persona', $vehiculo), ['persona_id' => $persona->id, 'tipo' => 'SOAT'])
             ->assertSessionHasErrors(['persona_id' => 'Esta persona ya está vinculada con este tipo']);
 
-        $this->assertSame('77', VehiculoCaso::where('vehiculo_id', $vehiculo->id)->sole()->numero_informacion);
+        $vinculo = VehiculoCaso::where('vehiculo_id', $vehiculo->id)->sole();
+        $this->assertSame($caso->id, (int) $vinculo->id_caso);
+        $this->assertSame('77', $vinculo->numero_informacion);
     }
 
     public function test_la_placa_no_se_repite(): void

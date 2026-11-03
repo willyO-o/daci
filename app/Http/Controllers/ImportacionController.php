@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cargio;
+use App\Models\Caso;
 use App\Models\Delito;
 use App\Models\EstacionServicio;
 use App\Models\Imei;
@@ -196,6 +197,7 @@ class ImportacionController extends Controller
                     'numero_celular' => $numero,
                     'persona_caso' => campoDB($fila['PERSONA_DEL_CASO'] ?? null),
                     'caso' => campoDB($fila['CASO'] ?? null),
+                    'id_caso' => Caso::resolver($fila['CASO'] ?? null),
                     'empresa' => campoDB($fila['EMPRESA'] ?? null),
                     'respuesta_requerimiento' => campoDB($fila['RESP_A_REQ'] ?? null),
                     'persona_id' => Persona::idPersonaDatos(['nombres' => $nombre['nombres'], 'apellidos' => $nombre['apellidos'], 'ci' => limpiarCI($fila['CI'] ?? null)]),
@@ -263,11 +265,13 @@ class ImportacionController extends Controller
                     continue;
                 }
 
-                $vehiculo = Vehiculo::firstOrCreate(['placa' => $placa], [
+                // Un vehículo que ya existe no se toca (como antes); el caso sólo se crea para uno nuevo.
+                $vehiculo = Vehiculo::where('placa', $placa)->first() ?? Vehiculo::create([
                     'placa' => $placa,
                     'descripcion' => campoDB($fila['CARACTERISTICAS'] ?? null),
                     'responsable' => campoDB($fila['RESPONSABLE'] ?? null),
                     'caso_relacionado' => campoDB($fila['CASO_RELACIONADO'] ?? null),
+                    'id_caso' => Caso::resolver($fila['CASO_RELACIONADO'] ?? null),
                 ]);
 
                 foreach (['RUAT', 'BSISA', 'SOAT'] as $tipo) {

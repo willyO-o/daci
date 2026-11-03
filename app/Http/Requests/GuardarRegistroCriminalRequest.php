@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Caso;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -47,7 +48,7 @@ class GuardarRegistroCriminalRequest extends FormRequest
             'telefono' => 'nullable|string|max:25',
             'estatura' => 'nullable|string|max:255',
             'peso' => 'nullable|string|max:255',
-            'cud' => 'nullable|string|max:255',
+            'id_caso' => Caso::reglaId(),
             'id_division' => 'required|exists:division,id',
             'modus_operandi' => 'nullable|string',
             'zonas_opera' => 'nullable|string',

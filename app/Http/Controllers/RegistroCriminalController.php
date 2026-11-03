@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\GuardarRegistroCriminalRequest;
 use App\Models\AuditarConsultas;
+use App\Models\Caso;
 use App\Models\Division;
 use App\Models\FichaRegistro;
 use App\Models\FichaRegistroPlantilla;
@@ -33,13 +34,14 @@ use Intervention\Image\ImageManager;
 class RegistroCriminalController extends Controller
 {
     /**
-     * Campos del registro que se escriben desde el formulario.
+     * Campos del registro que se escriben desde el formulario. El CUD va aparte: `id_caso` + su código en `cud`
+     * (`Caso::columnas`, D-037).
      *
      * @var list<string>
      */
     private const CAMPOS = [
         'fecha_registro', 'nombre_supuesto', 'alias', 'especialidad', 'edad_aproximada', 'nombre_conyuge', 'domicilio',
-        'rasgos', 'modus_operandi', 'zonas_opera', 'observaciones', 'id_division', 'telefono', 'estatura', 'peso', 'cud',
+        'rasgos', 'modus_operandi', 'zonas_opera', 'observaciones', 'id_division', 'telefono', 'estatura', 'peso',
         'caracteristicas_particulares', 'hijos',
     ];
 
@@ -83,7 +85,11 @@ class RegistroCriminalController extends Controller
                 $this->vincularTelefono($persona, trim($request->input('telefono')));
             }
 
-            $registro = RegistroCriminal::create([...$request->only(self::CAMPOS), 'id_persona' => $persona->id]);
+            $registro = RegistroCriminal::create([
+                ...$request->only(self::CAMPOS),
+                ...Caso::columnas($request->input('id_caso'), 'cud'),
+                'id_persona' => $persona->id,
+            ]);
 
             $this->guardarFoto($registro, $request->file('foto_frente'), 'FRONTAL');
             $this->guardarFoto($registro, $request->file('foto_perfil'), 'LATERAL');
@@ -121,11 +127,12 @@ class RegistroCriminalController extends Controller
 
     public function edit(RegistroCriminal $registroCriminal): Response
     {
-        $registroCriminal->load(['persona', 'fotos']);
+        $registroCriminal->load(['persona', 'fotos', 'casoVinculado:id,codigo']);
 
         return Inertia::render('RegistroCriminal/Formulario', [
             'registro' => [
-                ...$registroCriminal->only([...self::CAMPOS, 'id', 'nro_registro', 'id_persona', 'foto_frente', 'foto_perfil']),
+                ...$registroCriminal->only([...self::CAMPOS, 'cud', 'id_caso', 'id', 'nro_registro', 'id_persona', 'foto_frente', 'foto_perfil']),
+                'caso_codigo' => $registroCriminal->casoVinculado?->codigo,
                 'fecha_registro' => $registroCriminal->fecha_registro?->toDateString(),
                 'persona' => $registroCriminal->persona ? [
                     ...$registroCriminal->persona->toArray(),
@@ -154,7 +161,7 @@ class RegistroCriminalController extends Controller
             'telefono' => ['nullable', 'string', 'max:255'],
             'estatura' => ['nullable', 'string', 'max:255'],
             'peso' => ['nullable', 'string', 'max:255'],
-            'cud' => ['nullable', 'string', 'max:255'],
+            'id_caso' => Caso::reglaId(),
             // Datos de la persona que cambian con el tiempo: se actualizan en su ficha de Personas.
             'estado_civil' => ['nullable', 'in:SOLTERO,CASADO,DIVORCIADO,VIUDO,CONYUGUE'],
             'ocupacion' => ['nullable', 'string', 'max:150'],
@@ -163,7 +170,7 @@ class RegistroCriminalController extends Controller
         ]);
 
         $reemplazadas = DB::transaction(function () use ($request, $registroCriminal) {
-            $registroCriminal->update($request->only(self::CAMPOS));
+            $registroCriminal->update([...$request->only(self::CAMPOS), ...Caso::columnas($request->input('id_caso'), 'cud', $registroCriminal)]);
 
             // Estado civil y ocupación son de la persona: se corrigen aquí porque cambian con el tiempo.
             $registroCriminal->persona?->update($request->only(['estado_civil', 'ocupacion']));
@@ -328,11 +335,13 @@ class RegistroCriminalController extends Controller
             'division:id,division',
             'usuario:id,name',
             'fotos:id,id_registro_criminal,tipo,ruta_archivo',
+            'casoVinculado:id,codigo',
         ]);
         $persona = $registro->persona;
 
         return [
-            ...$registro->only([...self::CAMPOS, 'id', 'nro_registro']),
+            ...$registro->only([...self::CAMPOS, 'id', 'nro_registro', 'id_caso']),
+            'cud' => $registro->casoVinculado?->codigo ?? $registro->cud,
             'codigo' => md5((string) $registro->id),
             'fecha_registro' => $registro->fecha_registro?->toDateString(),
             'division' => $registro->division?->division,

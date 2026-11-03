@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
+import SelectorCaso from '@/Components/Casos/SelectorCaso.vue';
 import BuscadorRemoto from '@/Components/Ui/BuscadorRemoto.vue';
 import CampoError from '@/Components/Ui/CampoError.vue';
 
@@ -20,7 +21,7 @@ const VACIO = {
     numero_celular: '',
     empresa: '',
     persona_caso: '',
-    caso: '',
+    id_caso: null,
     persona_id: null,
     respuesta_requerimiento: '',
     informacion: '',
@@ -31,6 +32,9 @@ const VACIO = {
 
 const form = useForm({ ...VACIO });
 const textoPersonaInicial = ref('');
+// Caso ya vinculado (al editar) y texto heredado si la fila tiene caso escrito pero sin vincular.
+const codigoCaso = ref('');
+const textoAnteriorCaso = ref(null);
 // Al limpiar tras registrar, se vuelve a montar el buscador para que no quede la persona anterior escrita.
 const versionBuscador = ref(0);
 
@@ -43,6 +47,8 @@ const cargar = () => {
     form.reset();
     form.clearErrors();
     textoPersonaInicial.value = editando.value && t.persona ? textoPersona(t.persona) : '';
+    codigoCaso.value = editando.value ? (t.caso_vinculado?.codigo ?? '') : '';
+    textoAnteriorCaso.value = editando.value && !t.id_caso ? (t.caso || null) : null;
     versionBuscador.value++;
 };
 
@@ -88,9 +94,8 @@ defineExpose({ guardar, procesando: computed(() => form.processing) });
                 <CampoError :mensaje="form.errors.persona_caso" />
             </div>
             <div class="col-md-6">
-                <label for="caso" class="form-label">Caso</label>
-                <input id="caso" v-model="form.caso" v-mayuscula type="text" class="form-control" :class="{ 'is-invalid': form.errors.caso }" placeholder="Referencia del caso">
-                <CampoError :mensaje="form.errors.caso" />
+                <label :for="`${idFormulario}_caso`" class="form-label">Caso / CUD</label>
+                <SelectorCaso :key="versionBuscador" v-model="form.id_caso" :id-campo="`${idFormulario}_caso`" :codigo="codigoCaso" :texto-anterior="textoAnteriorCaso" :error="form.errors.id_caso" />
             </div>
             <div data-tour="f-persona" class="col-md-6">
                 <label class="form-label">Relacionar con Persona (opcional)</label>

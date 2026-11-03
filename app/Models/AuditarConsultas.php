@@ -123,6 +123,7 @@ class AuditarConsultas extends Model
         'listado_vehiculos' => 'Búsqueda en Vehículos',
         'listado_usuarios' => 'Búsqueda en Usuarios',
         'listado_casos' => 'Búsqueda en Casos',
+        'listado_evidencias' => 'Búsqueda en Evidencias',
         'detalle_mandamiento' => 'Detalle de mandamiento',
         'detalle_registro_criminal' => 'Detalle de registro criminal',
         'detalle_faltas_contravenciones' => 'Detalle de faltas y contravenciones',
@@ -131,6 +132,7 @@ class AuditarConsultas extends Model
         'detalle_imei' => 'Detalle de IMEI',
         'detalle_vehiculo' => 'Detalle de vehículo',
         'detalle_caso' => 'Detalle de caso',
+        'detalle_evidencia' => 'Detalle de evidencia',
         'exportar_reporte' => 'Exportación de reporte',
     ];
 

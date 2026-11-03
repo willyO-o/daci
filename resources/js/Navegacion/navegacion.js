@@ -150,6 +150,36 @@ export const navegacion = [
         ],
     },
     {
+        titulo: 'Evidencias',
+        items: [
+            {
+                etiqueta: 'Evidencias',
+                icono: 'mdi mdi-archive-search-outline',
+                ruta: 'evidencias.index',
+                activo: ['evidencias.index', 'evidencias.show', 'evidencias.edit'],
+                permiso: 'evidencias.listar',
+            },
+            {
+                etiqueta: 'Registrar Evidencia',
+                icono: 'mdi mdi-archive-plus-outline',
+                ruta: 'evidencias.create',
+                permiso: (puede) => puede('evidencias.crear') && !puede('evidencias.listar'),
+            },
+            {
+                etiqueta: 'Publicación',
+                icono: 'mdi mdi-earth',
+                ruta: 'evidencias.publicacion.index',
+                permiso: 'evidencias.publicar',
+            },
+            {
+                etiqueta: 'Tipos de Artículo',
+                icono: 'mdi mdi-shape-outline',
+                ruta: 'tipos-articulo.index',
+                permiso: 'evidencias.tipos',
+            },
+        ],
+    },
+    {
         titulo: 'Importar',
         items: [
             {

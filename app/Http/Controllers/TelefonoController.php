@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AuditarConsultas;
+use App\Models\Caso;
 use App\Models\Telefono;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -18,14 +19,14 @@ class TelefonoController extends Controller
      * @var list<string>
      */
     private const CAMPOS = [
-        'numero_celular', 'persona_caso', 'caso', 'empresa', 'respuesta_requerimiento', 'persona_id', 'informacion',
+        'numero_celular', 'persona_caso', 'empresa', 'respuesta_requerimiento', 'persona_id', 'informacion',
         'callapp', 'truecall', 'uninet',
     ];
 
     public function index(Request $request): Response
     {
         $telefonos = Telefono::query()
-            ->with(['persona:id,nombres,apellidos,ci', 'imeis:imei.id,imei'])
+            ->with(['persona:id,nombres,apellidos,ci', 'imeis:imei.id,imei', 'casoVinculado:id,codigo'])
             ->when($request->filled('search'), fn (Builder $q) => $this->buscar($q, $request->input('filtro'), (string) $request->input('search')))
             ->orderByDesc('id')
             ->paginate($this->tamanoPagina($request))
@@ -49,7 +50,7 @@ class TelefonoController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        Telefono::create($this->validar($request));
+        Telefono::create([...$this->validar($request), ...Caso::columnas($request->input('id_caso'), 'caso')]);
 
         return back()->with('success', 'Teléfono registrado correctamente.');
     }
@@ -58,12 +59,12 @@ class TelefonoController extends Controller
     {
         AuditarConsultas::registrarAcceso($request->input('identificador'), $telefono, 'detalle_telefono');
 
-        return response()->json($telefono->load(['persona:id,nombres,apellidos,ci', 'imeis:imei.id,imei']));
+        return response()->json($telefono->load(['persona:id,nombres,apellidos,ci', 'imeis:imei.id,imei', 'casoVinculado:id,codigo']));
     }
 
     public function update(Request $request, Telefono $telefono): RedirectResponse
     {
-        $telefono->update($this->validar($request, $telefono));
+        $telefono->update([...$this->validar($request, $telefono), ...Caso::columnas($request->input('id_caso'), 'caso', $telefono)]);
 
         return back()->with('success', 'Teléfono actualizado correctamente.');
     }
@@ -117,7 +118,7 @@ class TelefonoController extends Controller
         return $request->validate([
             'numero_celular' => ['required', 'string', 'max:25', Rule::unique('telefono', 'numero_celular')->ignore($telefono)],
             'persona_caso' => ['nullable', 'string', 'max:255'],
-            'caso' => ['nullable', 'string', 'max:255'],
+            'id_caso' => Caso::reglaId(),
             'empresa' => ['nullable', 'string', 'max:150'],
             'respuesta_requerimiento' => ['nullable', 'string', 'max:255'],
             'persona_id' => ['nullable', 'exists:persona,id'],
@@ -127,6 +128,7 @@ class TelefonoController extends Controller
             'uninet' => ['nullable', 'string', 'max:150'],
         ], [
             'numero_celular.unique' => 'Este número ya está registrado.',
+            'id_caso.exists' => 'El caso elegido ya no existe.',
         ], [
             'numero_celular' => 'número celular',
         ]) + array_fill_keys(self::CAMPOS, null);

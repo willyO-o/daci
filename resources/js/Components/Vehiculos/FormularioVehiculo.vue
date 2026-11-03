@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
+import SelectorCaso from '@/Components/Casos/SelectorCaso.vue';
 import BuscadorRemoto from '@/Components/Ui/BuscadorRemoto.vue';
 import CampoError from '@/Components/Ui/CampoError.vue';
 import SubirArchivos from '@/Components/Ui/SubirArchivos.vue';
@@ -29,13 +30,18 @@ const { confirmar, exito, errorDeRespuesta, aviso } = useNotificacion();
 
 const textoPersona = (p) => `${p.nombres} ${p.apellidos ?? ''} - CI: ${p.ci ?? ''}`;
 
-const VACIO = { placa: '', responsable: '', descripcion: '', caso_relacionado: '', personas_asociadas: [], fotosVehiculos: [] };
+const VACIO = { placa: '', responsable: '', descripcion: '', id_caso: null, personas_asociadas: [], fotosVehiculos: [] };
 
 const fotosActuales = ref([]);
 const personaElegida = ref(null);
 const personaElegidaDatos = ref(null);
 const tipoPersona = ref('');
-const casoPersona = ref('');
+// Caso del vínculo con la persona que se está por agregar (opcional).
+const casoPersona = ref(null);
+const casoPersonaCodigo = ref('');
+// Caso del vehículo ya vinculado (al editar) y texto heredado si tiene caso escrito pero sin vincular.
+const codigoCaso = ref('');
+const textoAnteriorCaso = ref(null);
 // Al limpiar tras registrar, se vuelve a montar el buscador para que no quede la persona anterior escrita.
 const versionBuscador = ref(0);
 const form = useForm({ ...VACIO });
@@ -51,12 +57,14 @@ const cargar = () => {
                 placa: v.placa,
                 responsable: v.responsable ?? '',
                 descripcion: v.descripcion ?? '',
-                caso_relacionado: v.caso_relacionado ?? '',
+                id_caso: v.id_caso ?? null,
                 personas_asociadas: (v.personas ?? []).map((p) => ({
                     persona_id: p.id,
                     nombre: nombreCompleto(p),
                     tipo: p.pivot?.tipo ?? '',
-                    caso: p.pivot?.numero_informacion ?? '',
+                    // Sin `id_caso` y con texto heredado: se muestra el texto y el servidor lo conserva.
+                    id_caso: p.pivot?.id_caso ?? null,
+                    caso: p.pivot?.caso_codigo ?? p.pivot?.numero_informacion ?? '',
                 })),
                 fotosVehiculos: [],
             }
@@ -67,7 +75,10 @@ const cargar = () => {
     personaElegida.value = null;
     personaElegidaDatos.value = null;
     tipoPersona.value = '';
-    casoPersona.value = '';
+    casoPersona.value = null;
+    casoPersonaCodigo.value = '';
+    codigoCaso.value = editando.value ? (v.caso_vinculado?.codigo ?? '') : '';
+    textoAnteriorCaso.value = editando.value && !v.id_caso ? (v.caso_relacionado || null) : null;
     versionBuscador.value++;
 };
 
@@ -89,12 +100,16 @@ const agregarPersona = () => {
         persona_id: personaElegida.value,
         nombre: personaElegidaDatos.value ? nombreCompleto(personaElegidaDatos.value) : '',
         tipo,
-        caso: casoPersona.value.trim().toUpperCase(),
+        id_caso: casoPersona.value,
+        caso: casoPersona.value ? casoPersonaCodigo.value : '',
     });
     personaElegida.value = null;
     personaElegidaDatos.value = null;
     tipoPersona.value = '';
-    casoPersona.value = '';
+    // Al quedar en null, el selector de caso de la persona se vacía solo (no se vuelve a montar: el del vehículo
+    // comparte la versión y perdería el caso recién elegido).
+    casoPersona.value = null;
+    casoPersonaCodigo.value = '';
 };
 const quitarPersona = (indice) => form.personas_asociadas.splice(indice, 1);
 
@@ -110,7 +125,7 @@ const guardar = () => {
             emit('guardado');
         },
     };
-    const limpiar = (datos) => ({ ...datos, personas_asociadas: datos.personas_asociadas.map(({ persona_id, tipo, caso }) => ({ persona_id, tipo, caso })) });
+    const limpiar = (datos) => ({ ...datos, personas_asociadas: datos.personas_asociadas.map(({ persona_id, tipo, id_caso }) => ({ persona_id, tipo, id_caso })) });
     if (editando.value) {
         form.transform((datos) => ({ ...limpiar(datos), _method: 'put' })).post(route('vehiculos.update', props.vehiculo.id), opciones);
     } else {
@@ -154,9 +169,8 @@ defineExpose({ guardar, procesando: computed(() => form.processing) });
                 <CampoError :mensaje="form.errors.descripcion" />
             </div>
             <div class="col-12">
-                <label for="caso_relacionado" class="form-label">Caso Relacionado</label>
-                <input id="caso_relacionado" v-model="form.caso_relacionado" v-mayuscula type="text" class="form-control" :class="{ 'is-invalid': form.errors.caso_relacionado }" placeholder="Caso relacionado">
-                <CampoError :mensaje="form.errors.caso_relacionado" />
+                <label :for="`${idFormulario}_caso`" class="form-label">Caso Relacionado</label>
+                <SelectorCaso :key="`v${versionBuscador}`" v-model="form.id_caso" :id-campo="`${idFormulario}_caso`" :codigo="codigoCaso" :texto-anterior="textoAnteriorCaso" :error="form.errors.id_caso" />
             </div>
         </div>
 
@@ -173,8 +187,8 @@ defineExpose({ guardar, procesando: computed(() => form.processing) });
                 <datalist id="tiposPersona"><option v-for="tipo in TIPOS" :key="tipo" :value="tipo" /></datalist>
             </div>
             <div class="col-md-6">
-                <label for="casoPersona" class="form-label">Caso (Opcional)</label>
-                <input id="casoPersona" v-model="casoPersona" v-mayuscula type="text" class="form-control" placeholder="Ingresa el caso si aplica">
+                <label :for="`${idFormulario}_casoPersona`" class="form-label">Caso (Opcional)</label>
+                <SelectorCaso :key="`p${versionBuscador}`" v-model="casoPersona" :id-campo="`${idFormulario}_casoPersona`" @seleccionado="(c) => (casoPersonaCodigo = c?.codigo ?? '')" />
             </div>
         </div>
         <button type="button" class="btn btn-sm btn-secondary my-3" @click="agregarPersona"><i class="ri-add-line align-middle me-1" /> Agregar Persona</button>
@@ -188,7 +202,7 @@ defineExpose({ guardar, procesando: computed(() => form.processing) });
                 <button type="button" class="btn btn-sm btn-soft-danger" title="Quitar" @click="quitarPersona(indice)"><i class="ri-close-line align-bottom" /></button>
             </div>
         </div>
-        <CampoError :mensaje="form.errors['personas_asociadas.0.persona_id'] || form.errors['personas_asociadas.0.tipo']" />
+        <CampoError :mensaje="form.errors['personas_asociadas.0.persona_id'] || form.errors['personas_asociadas.0.tipo'] || Object.entries(form.errors).find(([campo]) => /^personas_asociadas\.\d+\.id_caso$/.test(campo))?.[1]" />
 
         <hr>
         <h6 class="mb-3">Fotos del Vehículo <small class="text-muted fw-normal">(JPEG, PNG, WebP, JPG - máx 2MB por archivo)</small></h6>

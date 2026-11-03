@@ -6,6 +6,7 @@ use App\Models\AuditarConsultas;
 use App\Models\Caso;
 use App\Support\Casos\MigradorCasos;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -112,6 +113,47 @@ class CasoController extends Controller
         $caso->update($this->validar($request, $caso));
 
         return back()->with('success', 'Caso actualizado correctamente.');
+    }
+
+    /**
+     * Buscador del selector de caso de los formularios (máximo 30); primero el que coincide exacto.
+     */
+    public function buscar(Request $request): JsonResponse
+    {
+        $texto = trim((string) preg_replace('/\s+/u', ' ', (string) $request->input('q', '')));
+
+        $casos = Caso::query()
+            ->select(['id', 'codigo', 'descripcion', 'estado'])
+            ->when($texto !== '', fn (Builder $q) => $q->where('codigo', 'like', '%'.str_replace('%', ' ', $texto).'%'))
+            ->orderByRaw('codigo = ? DESC', [$texto])
+            ->orderBy('codigo')
+            ->limit(30)
+            ->get();
+
+        return response()->json($casos);
+    }
+
+    /**
+     * Alta desde el selector de un formulario (JSON). Si ya hay un caso con ese código (limpio), devuelve ése en lugar
+     * de dar error: quien registra un teléfono sólo quiere que quede con su caso.
+     */
+    public function storeRapido(Request $request): JsonResponse
+    {
+        $codigo = MigradorCasos::normalizar($request->input('codigo'));
+        $existente = $codigo === null ? null : Caso::withTrashed()->where('codigo', $codigo)->first();
+
+        if ($existente) {
+            if ($existente->trashed()) {
+                $existente->restore();
+            }
+
+            return response()->json([...$existente->only(['id', 'codigo', 'descripcion', 'estado']), 'existente' => true]);
+        }
+
+        $request->mergeIfMissing(['estado' => 'ACTIVO']);
+        $caso = Caso::create($this->validar($request) + ['user_id' => $request->user()->id]);
+
+        return response()->json([...$caso->only(['id', 'codigo', 'descripcion', 'estado']), 'existente' => false], 201);
     }
 
     /**
