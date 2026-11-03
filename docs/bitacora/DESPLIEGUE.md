@@ -462,6 +462,44 @@ php artisan up
 
 ---
 
+## E. Actualización: casos con `id_caso` (D-037, ver `PROPUESTA-CASOS.md`)
+
+**Fases 1 y 2** (crea `caso`, agrega `id_caso` a 5 tablas y la llena; las columnas de texto no se tocan):
+
+```bash
+cd /var/www/daci
+# 0. Código nuevo como en D («Actualizaciones futuras»): ZIP, build/, composer install --no-dev --optimize-autoloader
+php artisan down
+php artisan db:backup
+php artisan migrate:status | grep Pending             # debe salir SÓLO 2026_11_01_100000_crear_tabla_caso_y_agregar_id_caso
+php artisan migrate --pretend                         # sólo create table `caso` y alter table … add `id_caso`
+php artisan migrate --force                           # se detiene sin cambios si la base no calza
+php artisan casos:migrar --simular                    # informe sin guardar nada
+php artisan casos:migrar                              # o tabla por tabla: --tabla=telefono, --tabla=registro_criminal, …
+php artisan db:seed --class=RolesSeeder --force       # permisos casos.* sólo para el administrador (sólo agrega)
+php artisan optimize
+php artisan up
+```
+
+- Vuelta atrás: `php artisan migrate:rollback --step=1 --force` (quita `id_caso` y `caso`; nada más cambió).
+- `casos:migrar` se puede repetir: sólo llena `id_caso` donde está nulo.
+
+**Fase 4** (semanas después, con la fase 3 en uso). Borra las columnas de texto tras respaldarlas en
+`caso_texto_respaldo`; se niega si queda algo sin migrar o si el código todavía las usa:
+
+```bash
+php artisan down && php artisan db:backup
+php artisan casos:migrar                              # debe dar 0 asignadas
+php artisan migrate --path=database/migrations/casos-fase-4 --pretend
+php artisan migrate --path=database/migrations/casos-fase-4 --force
+php artisan up
+```
+
+Vuelta atrás de la fase 4: `php artisan migrate:rollback --path=database/migrations/casos-fase-4 --force` (repone las
+columnas con sus valores). Después de la fase 4, FELCC ya no puede volver a encenderse.
+
+---
+
 ## Anexo 1 · Qué cambia en la base (ensayo del 2026-10-27)
 
 Ensayo sobre una copia de la base en el estado de producción (36 migraciones de FELCC, nada de DACI): suma de

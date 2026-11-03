@@ -19,6 +19,7 @@ class Vehiculo extends Model implements AuditableContract
         'descripcion',
         'responsable',
         'caso_relacionado',
+        'id_caso',
 
     ];
 
@@ -38,6 +39,14 @@ class Vehiculo extends Model implements AuditableContract
         return $this->belongsToMany(Persona::class, 'vehiculo_caso', 'vehiculo_id', 'persona_id')
             ->withPivot('tipo', 'numero_informacion', 'registro_criminal_id')
             ->withTimestamps();
+    }
+
+    /**
+     * Caso o CUD (`id_caso`, D-037). Nulo si la fila no tiene caso. No se llama `caso()` porque `telefono` ya tiene esa columna.
+     */
+    public function casoVinculado()
+    {
+        return $this->belongsTo(Caso::class, 'id_caso');
     }
 
     public function inspecciones()

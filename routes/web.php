@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuditarConsultasController;
 use App\Http\Controllers\AuditoriaController;
+use App\Http\Controllers\CasoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DelitoController;
 use App\Http\Controllers\DivisionController;
@@ -127,6 +128,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/telefonos/{telefono}', [TelefonoController::class, 'destroy'])->whereNumber('telefono')->name('telefonos.destroy')->middleware('permission:telefonos.eliminar');
     Route::post('/telefonos/{telefono}/vincular-persona', [TelefonoController::class, 'vincularPersona'])->whereNumber('telefono')->name('telefonos.vincular-persona')->middleware('permission:telefonos.editar');
     Route::get('/telefonos-imeis-search', [TelefonoController::class, 'searchTelefonos'])->name('imeis.telefonos-search')->middleware('permission:imeis.listar|imeis.crear|imeis.editar');
+
+    // EREBOR › Casos (D-037)
+    Route::get('/casos', [CasoController::class, 'index'])->name('casos.index')->middleware('permission:casos.listar');
+    Route::post('/casos', [CasoController::class, 'store'])->name('casos.store')->middleware('permission:casos.crear');
+    Route::get('/casos/{caso}', [CasoController::class, 'show'])->whereNumber('caso')->name('casos.show')->middleware('permission:casos.ver');
+    Route::match(['put', 'patch'], '/casos/{caso}', [CasoController::class, 'update'])->whereNumber('caso')->name('casos.update')->middleware('permission:casos.editar');
+    Route::delete('/casos/{caso}', [CasoController::class, 'destroy'])->whereNumber('caso')->name('casos.destroy')->middleware('permission:casos.eliminar');
 
     // EREBOR › IMEIs
     Route::get('/imeis', [ImeiController::class, 'index'])->name('imeis.index')->middleware('permission:imeis.listar');

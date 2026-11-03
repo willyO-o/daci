@@ -549,3 +549,22 @@ se lleva en ZIP y se instala a mano.
    es el mismo de FELCC. **FELCC no puede volver a encenderse** sobre la base migrada (salvo revirtiendo).
 4. `DESPLIEGUE.md` reescrita para instalación manual con ZIP, con el resultado del ensayo, la vuelta atrás y lo que
    DACI escribe en la base durante el uso normal.
+
+## D-037 · Casos: tabla `caso` y columna `id_caso`, en 4 fases (2026-11-01)
+
+**Pedido:** llevar el caso/CUD (texto libre en 5 tablas) a una tabla `caso` con un `id_caso` en cada tabla, migrar los
+datos con un seeder sin perder nada y, cuando todo esté bien, eliminar las columnas de texto.
+
+**Excepción a «el esquema no se toca» autorizada por el usuario:** se agrega `id_caso` (nula, al final, con clave
+foránea a `caso`) a `telefono`, `registro_criminal`, `falta_contravencion`, `vehiculo` y `vehiculo_caso`. Fase 1:
+migración (comprueba antes y se detiene sin cambios); fase 2: `CasosSeeder` / `casos:migrar` por tabla (sólo escribe
+`id_caso` nulo, huella del resto, simulación); fase 3: código por `id_caso` con doble escritura del texto; fase 4:
+migración aparte (`casos-fase-4`, no la corre `migrate`) que respalda cada valor en `caso_texto_respaldo` y borra las
+columnas, con `down()` que las repone. Permisos `casos.*` sólo para el administrador; registrar el CUD no pide permiso.
+
+**Descartado:** tablas pivote sin tocar las tablas existentes (versión del 2026-10-31, revertida por el usuario: más
+compleja). **Descartado:** borrar las columnas en la misma migración que agrega `id_caso` (sin período de verificación
+ni vuelta atrás). **No incluido:** `ficha_*.caso_cud` (texto de una ficha impresa).
+
+Detalle, riesgos y ensayo: `PROPUESTA-CASOS.md`. Pruebas: `tests/Feature/Casos/` (13).
+

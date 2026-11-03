@@ -18,6 +18,7 @@ class VehiculoCaso extends Model implements AuditableContract
         'registro_criminal_id',
         'tipo',
         'numero_informacion',
+        'id_caso',
     ];
 
     /**
@@ -42,5 +43,13 @@ class VehiculoCaso extends Model implements AuditableContract
     public function registroCriminal()
     {
         return $this->belongsTo(RegistroCriminal::class, 'registro_criminal_id');
+    }
+
+    /**
+     * Caso o CUD (`id_caso`, D-037). Nulo si la fila no tiene caso. No se llama `caso()` porque `telefono` ya tiene esa columna.
+     */
+    public function casoVinculado()
+    {
+        return $this->belongsTo(Caso::class, 'id_caso');
     }
 }

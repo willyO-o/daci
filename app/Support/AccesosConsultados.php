@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\Caso;
 use App\Models\Imei;
 use App\Models\Mandamiento;
 use App\Models\Persona;
@@ -74,6 +75,7 @@ class AccesosConsultados
             $registro instanceof Telefono => ['Teléfono '.$registro->numero_celular, null],
             $registro instanceof Imei => ['IMEI '.$registro->imei, null],
             $registro instanceof Vehiculo => ['Vehículo placa '.$registro->placa, null],
+            $registro instanceof Caso => ['Caso '.$registro->codigo, route('casos.show', $registro->getKey())],
             default => [class_basename($registro).' #'.$registro->getKey(), null],
         };
     }

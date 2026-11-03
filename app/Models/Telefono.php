@@ -25,6 +25,7 @@ class Telefono extends Model implements AuditableContract
         'callapp',
         'truecall',
         'uninet',
+        'id_caso',
     ];
 
     /**
@@ -41,6 +42,14 @@ class Telefono extends Model implements AuditableContract
     public function imeis()
     {
         return $this->belongsToMany(Imei::class, 'imei_telefono', 'telefono_id', 'imei_id');
+    }
+
+    /**
+     * Caso o CUD (`id_caso`, D-037). Nulo si la fila no tiene caso. No se llama `caso()` porque `telefono` ya tiene esa columna.
+     */
+    public function casoVinculado()
+    {
+        return $this->belongsTo(Caso::class, 'id_caso');
     }
 
     public static function idTelefonoNumero($numero)

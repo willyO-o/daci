@@ -23,6 +23,9 @@ class MigracionAntecedentesTest extends TestCase
 
     private Migration $migracion;
 
+    /** La fase 1 de casos (D-037) agrega `id_caso` a `falta_contravencion`: se quita antes y se repone al final. */
+    private Migration $migracionCasos;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -30,6 +33,8 @@ class MigracionAntecedentesTest extends TestCase
         // Crea y borra tablas (en MariaDB eso confirma cualquier transacción): se reconstruye la base de pruebas.
         $this->artisan('migrate:fresh', ['--force' => true]);
         $this->migracion = require database_path('migrations/2026_10_26_210000_crear_tablas_faltas_y_contravenciones.php');
+        $this->migracionCasos = require database_path('migrations/2026_11_01_100000_crear_tabla_caso_y_agregar_id_caso.php');
+        $this->migracionCasos->down();
         $this->migracion->down();
     }
 
@@ -97,6 +102,9 @@ class MigracionAntecedentesTest extends TestCase
         // Dejar el esquema migrado para el resto de la suite.
         if (! Schema::hasTable('falta_contravencion')) {
             $this->migracion->up();
+        }
+        if (! Schema::hasTable('caso')) {
+            $this->migracionCasos->up();
         }
 
         parent::tearDown();

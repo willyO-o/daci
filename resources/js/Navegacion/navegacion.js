@@ -140,6 +140,13 @@ export const navegacion = [
                 ruta: 'vehiculos.create',
                 permiso: (puede) => puede('vehiculos.crear') && !puede('vehiculos.listar'),
             },
+            {
+                etiqueta: 'Casos',
+                icono: 'mdi mdi-folder-search-outline',
+                ruta: 'casos.index',
+                activo: ['casos.index', 'casos.show'],
+                permiso: 'casos.listar',
+            },
         ],
     },
     {

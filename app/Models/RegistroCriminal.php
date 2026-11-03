@@ -35,6 +35,7 @@ class RegistroCriminal extends Model implements AuditableContract
         'estatura',
         'peso',
         'cud',
+        'id_caso',
         'caracteristicas_particulares',
         'hijos',
     ];
@@ -64,6 +65,14 @@ class RegistroCriminal extends Model implements AuditableContract
     public function fotos()
     {
         return $this->hasMany(FotosRegistro::class, 'id_registro_criminal');
+    }
+
+    /**
+     * Caso o CUD (`id_caso`, D-037). Nulo si la fila no tiene caso. No se llama `caso()` porque `telefono` ya tiene esa columna.
+     */
+    public function casoVinculado()
+    {
+        return $this->belongsTo(Caso::class, 'id_caso');
     }
 
     public function getFotoFrenteAttribute()

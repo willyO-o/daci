@@ -1,6 +1,6 @@
 # Estado actual
 
-> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-10-27 16:20 (Bolivia).
+> Foto del presente. Se reescribe al cerrar cada ronda. Última actualización: 2026-11-01 (Bolivia).
 
 ## Resumen
 
@@ -34,6 +34,9 @@ Faltas y Contravenciones (D-029).
 2026-10-27: sin «¿Olvidó su contraseña?»: la restablece el administrador (D-035). 177 pruebas.
 2026-10-27: revisión final y ensayo del despliegue sobre una copia en estado de producción: sólo cambian roles y
 permisos y se agregan las tablas de Faltas y Contravenciones; la vuelta atrás deja la base idéntica (D-036).
+2026-11-01: **casos** (D-037, `PROPUESTA-CASOS.md`): tabla `caso` + `id_caso` en 5 tablas (fase 1), `casos:migrar`
+(fase 2) y eliminación posterior de las columnas de texto con respaldo (fase 4, aparte). Ensayado en una copia de
+`felcc1`; **no aplicado en ninguna base**.
 
 > **Producción es otra base** (más información que la local). No se borra nada; sólo se tocan roles, permisos y sus
 > controles. Su estado de migraciones se verifica allí antes de desplegar.
@@ -70,6 +73,8 @@ permisos y se agregan las tablas de Faltas y Contravenciones; la vuelta atrás d
 7. ~~Páginas de error propias~~ — hechas el 2026-10-24 (D-019).
 8. ¿Layouts horizontal y de dos columnas en «Personalizar tema»? (D-019).
 9. Login «propuesta 5»: confirmar el nombre de la sigla DACI («Dirección de Análisis de Información Criminal» en la propuesta vs. «Departamento de Análisis Criminal e Inteligencia» en la ficha).
+10. **Casos (D-037):** responder `PROPUESTA-CASOS.md` § 8; desplegar fases 1–2 (`DESPLIEGUE.md` § E); programar la
+    fase 3; la fase 4 sólo semanas después.
 
 ## Pruebas
 

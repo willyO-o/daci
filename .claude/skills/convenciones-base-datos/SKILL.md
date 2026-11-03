@@ -27,6 +27,10 @@ description: Convenciones OBLIGATORIAS de base de datos, persistencia y consulta
    nombres de `registro_criminal` y sus tablas (por eso usan `id_persona`, `id_usuario`, `id_division`), excepto el
    tipo de la foto, que es `string` y no `enum`. Toda migración que cree tablas: se detiene sin cambios si alguna ya
    existe, deshace lo creado si falla y su `down()` borra sólo lo suyo.
+   **Excepción autorizada por el usuario (D-037, 2026-11-01):** `2026_11_01_100000_crear_tabla_caso_y_agregar_id_caso`
+   crea `caso` y agrega `id_caso` (nula, FK) a `telefono`, `registro_criminal`, `falta_contravencion`, `vehiculo` y
+   `vehiculo_caso`; la llena `casos:migrar`. La eliminación de las columnas de texto (`casos-fase-4`) está fuera de
+   `database/migrations` y se corre a mano. Relación `casoVinculado()` (no `caso()`: choca con `telefono.caso`).
 2. **Las 36 migraciones del sistema anterior** están copiadas en `database/migrations` sólo como registro. **No se
    editan.** Una base puede no tenerlas todas ejecutadas (la copia local `felcc` tenía 34: le faltaban
    `remove_unique_from_ci_in_persona_table` y `create_audits_table`); `migrate` las correría junto con la de roles.

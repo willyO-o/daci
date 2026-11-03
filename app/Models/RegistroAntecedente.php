@@ -39,6 +39,7 @@ abstract class RegistroAntecedente extends Model implements AuditableContract
         'estatura',
         'peso',
         'cud',
+        'id_caso',
         'caracteristicas_particulares',
         'hijos',
     ];
@@ -59,6 +60,14 @@ abstract class RegistroAntecedente extends Model implements AuditableContract
             $registro->id_usuario = auth()->id();
             $registro->nro_registro = ((int) static::withTrashed()->max('nro_registro')) + 1;
         });
+    }
+
+    /**
+     * Caso o CUD (`id_caso`, D-037). Nulo si la fila no tiene caso. No se llama `caso()` porque `telefono` ya tiene esa columna.
+     */
+    public function casoVinculado(): BelongsTo
+    {
+        return $this->belongsTo(Caso::class, 'id_caso');
     }
 
     public function persona(): BelongsTo

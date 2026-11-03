@@ -125,6 +125,18 @@ final class CatalogoPermisos
                     'vehiculos.vincular' => 'Vincular y desvincular personas',
                 ],
             ],
+            // Módulo Casos (listado y detalle de lo vinculado a un caso). Escribir el CUD/caso al registrar un teléfono,
+            // vehículo o registro no pide permiso de casos: lo hace quien registra, y si el caso no existe se crea (D-037).
+            'casos' => [
+                'etiqueta' => 'Casos',
+                'permisos' => [
+                    'casos.listar' => 'Ver el listado',
+                    'casos.ver' => 'Ver el detalle (teléfonos, vehículos y registros del caso)',
+                    'casos.crear' => 'Registrar',
+                    'casos.editar' => 'Editar',
+                    'casos.eliminar' => 'Eliminar',
+                ],
+            ],
             'importar' => [
                 'etiqueta' => 'Importación',
                 'permisos' => [
@@ -208,6 +220,10 @@ final class CatalogoPermisos
             // 2026-10-27: Faltas y Contravenciones es sólo de los administradores (y del rol `conciliacion_ciudadana`,
             // que recibe sus permisos al crearse con `RolesSeeder`). El superadmin tiene todo.
             ...array_fill_keys(self::permisosDe('faltas_contravenciones'), [self::ROL_ADMINISTRADOR]),
+
+            // 2026-11-01: Casos (D-037), por ahora sólo el administrador (el superadmin tiene todo). A otros roles se les
+            // da desde Seguridad › Roles y permisos.
+            ...array_fill_keys(self::permisosDe('casos'), [self::ROL_ADMINISTRADOR]),
         ];
     }
 
